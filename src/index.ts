@@ -18,6 +18,8 @@ if (cluster.isPrimary) {
     })
 
 } else {
+
   const newWorker = new Worker(process)
   newWorker.init()
+
 }

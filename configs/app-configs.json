@@ -29,7 +29,7 @@
     "database_username": "imsuperuser",
     "database_password": "imsuperpass",
 
-    "database_spy": "im-spy",
+    "database_spy": "TESTANDO",
     "collection_spy_dates": "test_dates",
     "collection_spy_stores": "test_stores",
     "collection_spy_products": "test_products"

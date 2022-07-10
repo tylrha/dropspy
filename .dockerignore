@@ -1,0 +1,11 @@
+#FOLDERS ====================
+.git/
+_local/
+node_modules/
+src/
+tests/
+
+#FILES ======================
+.env.example
+jest.config.tests
+readme.MD

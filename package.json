@@ -29,18 +29,19 @@
     "node": "16.x"
   },
   "scripts": {
-    "start_old": "ts-node src/index.ts",
-    "heroku:web": "node dist/src/index.js",
-    "start": "npm run start_old",
-    "clean_dist": "node scripts/remove-old-dist-folder.js",
-    "copy_files_to_dist": "node scripts/copy-files-to-dist.js",
-    "copy_extensions_to_dist": "node scripts/copy-entensions-to-dist-folder.js",
+    "dev": "ts-node-dev --transpile-only --respawn --ignore-watch node_modules src/index.ts",
+    "test": "jest",
+    "commit": "git-cz",
+    "docker": "docker build . -t dropspy",
+    "start_dev": "ts-node src/index.ts",
+    "start_prod": "node dist/src/index.js",
+    "start": "npm run start_dev",
     "prebuild": "npm run clean_dist",
     "build": "node ./node_modules/typescript/bin/tsc",
     "postbuild": "npm run copy_files_to_dist && npm run copy_extensions_to_dist",
-    "dev": "ts-node-dev --transpile-only --respawn --ignore-watch node_modules src/index.ts",
-    "test": "jest",
-    "commit": "git-cz"
+    "clean_dist": "node scripts/remove-old-dist-folder.js",
+    "copy_files_to_dist": "node scripts/copy-files-to-dist.js",
+    "copy_extensions_to_dist": "node scripts/copy-entensions-to-dist-folder.js"
   },
   "dependencies": {
     "axios": "^0.27.2",
