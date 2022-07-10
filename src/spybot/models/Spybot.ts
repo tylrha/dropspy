@@ -12,6 +12,7 @@ import {
   SERVER_BASE
 } from "../../../configs/configs"
 
+
 import puppeteer from 'puppeteer-extra'
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 import { runJsOnPage, waitTillHTMLRendered } from "../../../utils/libraries/puppeteer"
@@ -21,6 +22,7 @@ import IAlihunterSale from '../interfaces/IAlihunterSale'
 import IStoreSheets from '../interfaces/IStoreSheets'
 import fetchJsonUrl from "../../../utils/functions/fetch-json-url"
 import addNewSaleToDatabase from "../database/add-new-sales-to-database"
+import { Browser, Page } from "puppeteer"
 
 export default class Spybot {
 
@@ -28,7 +30,7 @@ export default class Spybot {
   public isBotActive: boolean
   public isLoggedInGoogle: boolean
   public isLoggedInAlihunter: boolean
-  public botBrowser: any
+  public botBrowser: Browser
   public spyedStoresArr: Array<IStoreSheets>
   public initialSpyDate: string
   public spyCheckedTime: Number
@@ -38,7 +40,7 @@ export default class Spybot {
     this.isBotActive = false
     this.isLoggedInGoogle = false
     this.isLoggedInAlihunter = false
-    this.botBrowser = {}
+    // this.botBrowser = {}
     // this.spyedStoresArr = []
     // this.initialSpyDate = ""
     this.spyCheckedTime = 0
@@ -95,7 +97,7 @@ export default class Spybot {
     try {
       return await puppeteer.launch(pupOptions)
     } catch (e) {
-      return false
+      console.log(e.message)
     }
 
   }
@@ -277,6 +279,7 @@ export default class Spybot {
     if (typeof tmpSpyedStores === "string") {
       LOGGER(`Bot ${this.botIndex} - ${tmpSpyedStores}`, { from: "SPYBOT", pid: true })
     } else {
+      LOGGER(`Bot ${this.botIndex} - Foram encontradas ${tmpSpyedStores.length} lojas a seram espionadas`, { from: "SPYBOT", pid: true })
       this.spyedStoresArr = tmpSpyedStores
     }
   }
@@ -286,6 +289,19 @@ export default class Spybot {
     const currentSpyedStoresArr = this.spyedStoresArr
     if (currentSpyedStoresArr.length === 0) { return }
 
+    for (let x = 0; x < currentSpyedStoresArr.length; x++) {
+      const curStore: IStoreSheets = currentSpyedStoresArr[x]
+
+      let page = (await this.botBrowser.pages())[0];
+      if (x > 0) { page = await this.botBrowser.newPage() }
+
+      await this.openAndSetupSpyedStorePage(curStore.storeLink, page)
+    }
+
+  }
+
+  private async openAndSetupSpyedStorePage(storeLink: string, page: any): Promise<void>{
+
     const {
       getAlihunterVariables,
       clickOnLiveSalesButton,
@@ -293,24 +309,16 @@ export default class Spybot {
       getUpperSalesNumber
     } = await import('../assets/aliHunterScripts')
 
-    for (let x = 0; x < currentSpyedStoresArr.length; x++) {
+    await page.setDefaultNavigationTimeout(0);
 
-      const curStore: IStoreSheets = currentSpyedStoresArr[x]
+    LOGGER(`Bot ${this.botIndex} - abrindo loja: ${storeLink}`, { from: "SPYBOT", pid: true })
+    await page.goto(storeLink);
+    await DELAY(4000)
 
-      let page = (await this.botBrowser.pages())[0];
-      if (x > 0) { page = await this.botBrowser.newPage() }
-      await page.setDefaultNavigationTimeout(0);
-
-      LOGGER(`Bot ${this.botIndex} - abrindo loja: ${curStore.storeLink}`, { from: "SPYBOT", pid: true })
-      await page.goto(curStore.storeLink);
-      await DELAY(4000)
-
-      await page.addScriptTag({ content: `\n${getAlihunterVariables}\n` });
-      await page.addScriptTag({ content: `\n${clickOnLiveSalesButton}\n` });
-      await page.addScriptTag({ content: `\n${getUpperSalesNumber}\n` });
-      await page.addScriptTag({ content: `\n${getSoldProductsList}\n` });
-
-    }
+    await page.addScriptTag({ content: `\n${getAlihunterVariables}\n` });
+    await page.addScriptTag({ content: `\n${clickOnLiveSalesButton}\n` });
+    await page.addScriptTag({ content: `\n${getUpperSalesNumber}\n` });
+    await page.addScriptTag({ content: `\n${getSoldProductsList}\n` });
 
   }
 
@@ -378,8 +386,8 @@ export default class Spybot {
       await DELAY(1000)
     }
 
-    LOGGER(`Foram adicionadas um total de ${currentCheckSaleCount} vendas ao BD\n`, { from: 'SPYBOT', pid: true })
-    if (currentCheckSaleCount > 0) { await updateBotInfo(ENUM_UPDATE_BOT_INFO.LAST_SALE_TIME) }
+    LOGGER(`Foram adicionadas um total de ${currentCheckSaleCount} vendas ao BD`, { from: 'SPYBOT', pid: true })
+    if (currentCheckSaleCount > 0) { await updateBotInfo(ENUM_UPDATE_BOT_INFO.LAST_SALE_TIME); console.log("")}
 
   }
 
@@ -389,4 +397,31 @@ export default class Spybot {
     await runJsOnPage(page, "clickOnLiveSalesButton()");
     return recentSoldProductsArr;
   }
+
+  async handleSpyListChanges(){
+
+    LOGGER(`Bot ${this.botIndex} - lidando com mudanças na lista de espionagem`, { from: 'SPYBOT', pid: true })
+    await this.closeAllPagesAndLetBlankPage()
+    await this.openSpyStores()
+
+  }
+
+  async closeAllPagesAndLetBlankPage(){
+
+    const browserPages = await this.botBrowser.pages()
+
+    for (let x = 0; x < browserPages.length; x++) {
+      const curPage = browserPages[x];
+
+      if (x === 0){
+        await curPage.goto("about:blank")
+      } else {
+        LOGGER(`Bot ${this.botIndex} - fechando aba ${curPage.url()}`, { from: 'SPYBOT', pid: true })
+        await curPage.close()
+      }
+
+    }
+
+  }
+
 }

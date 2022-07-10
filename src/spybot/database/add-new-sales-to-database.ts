@@ -53,6 +53,7 @@ export default async function addNewSaleToDatabase(alihunterSalesArr: IAlihunter
   for (let x = 0; x < alihunterSalesArr.length; x++) {
 
     const curSoldProduct: IAlihunterSale = alihunterSalesArr[x]
+    const saleIndex = Number(x + 1) + " / " + alihunterSalesArr.length
 
     const {
       productLink,
@@ -74,19 +75,12 @@ export default async function addNewSaleToDatabase(alihunterSalesArr: IAlihunter
     }
 
     console.log("")
-    await addNewSaleToDatabases(saleObject)
+    LOGGER(`${saleIndex} - Adicionando o produto: ${saleObject.productName} aos bancos de dados`, { from: "SPYBOT", pid: true })
+
+    await addSaleToProductsDatabase(saleObject)
+    await addSaleToStoresDatabase(saleObject)
+    await addSaleToDatesDatabase(saleObject)
   }
-
-}
-
-
-async function addNewSaleToDatabases(newSaleObject: ISaleProduct): Promise<void> {
-
-  LOGGER(`Adicionando o produto: ${newSaleObject.productName} aos bancos de dados`, { from: "SPYBOT", pid: true })
-
-  await addSaleToProductsDatabase(newSaleObject)
-  await addSaleToStoresDatabase(newSaleObject)
-  await addSaleToDatesDatabase(newSaleObject)
 
 }
 

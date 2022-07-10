@@ -12,14 +12,10 @@ export default async function initSpyLooping(spybot: Spybot, initialDate?: strin
   spybot.spyCheckedTime = Number(spybot.spyCheckedTime) + 1;
   LOGGER(`Bot ${spybot.botIndex} - checagem de número [${spybot.spyCheckedTime}]`, {from: "SPYBOT", pid: true})
 
-  const isFirstInit = initialDate ? true : false
+  const isFirstInit = spybot.spyCheckedTime === 1 ? true : false
   const currentDate = isFirstInit ? initialDate : CURRENT_DATETIME('date')
   const hasChangedSpyDate = isFirstInit ? false : spybot.initialSpyDate !== currentDate
   let hasChangedStoreList = false
-  if (!isFirstInit){
-    await spybot.updateBotSpyedStores()
-    hasChangedStoreList = await spybot.hasChangeInSpyedStoresList()
-  }
   if (isFirstInit){spybot.initialSpyDate = initialDate}
 
   try{
@@ -29,23 +25,31 @@ export default async function initSpyLooping(spybot: Spybot, initialDate?: strin
 
     if (!isFirstInit){
       const isBotAllowedToSpy = await checkIfBotIsAllowedToSpy(spybot.botIndex)
-      if (isBotAllowedToSpy !== true){throw new Error(`Erro nas condições de espionagem: ${isBotAllowedToSpy}`)}
+      if (isBotAllowedToSpy !== true){
+        LOGGER(`Bot ${spybot.botIndex} - bot não pode espionar [${isBotAllowedToSpy}]`, {from: 'SPYBOT', pid: true})
+        await spybot.closeAllPagesAndLetBlankPage()
+        loopAgainAfterTime(spybot)
+        return
+      }
       LOGGER(`Bot ${spybot.botIndex} - pode espionar`, {from: 'SPYBOT', pid: true})
+    }
+
+    await spybot.updateBotSpyedStores()
+
+    if (!isFirstInit){
+      hasChangedStoreList = await spybot.hasChangeInSpyedStoresList()
+      if (hasChangedStoreList){await spybot.handleSpyListChanges()}
     }
 
     const databaseConnectionResult = await mongoose.connect(MONGOOSE_URL)
     if (!databaseConnectionResult){throw new Error(`Erro ao abrir conexão com banco de dados`)}
     LOGGER(`Bot ${spybot.botIndex} - conexão estabelecida com banco de dados`, {from: 'SPYBOT', pid: true})
 
-    await spybot.updateBotSpyedStores()
-
     if (isFirstInit || hasChangedSpyDate || hasChangedStoreList){
       await updateDatabasePreSpy(spybot.spyedStoresArr, currentDate)
     }
 
-    if (isFirstInit){
-      await spybot.openSpyStores()
-    }
+    if (isFirstInit){await spybot.openSpyStores()}
 
     await spybot.detectNewSalesInAllStores()
 
@@ -56,6 +60,7 @@ export default async function initSpyLooping(spybot: Spybot, initialDate?: strin
     loopAgainAfterTime(spybot)
 
   } catch(e){
+    console.log("ERRO")
     LOGGER(`${e.message}`, {from: "SPYBOT", pid: true, isError: true})
   }
 
