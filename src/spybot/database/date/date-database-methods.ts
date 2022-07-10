@@ -4,19 +4,21 @@ import {
   CURRENT_DATETIME
 } from "../../../../configs/configs";
 
-import { getIsoDateFromString } from "../../../../utils/libraries/dates";
-import {IDate, IDateProduct} from './IDate'
+import { getDateFromString, getIsoDateFromString, getStringDateFromDate } from "../../../../utils/libraries/dates";
+import {IDate, IDateMongo, IDateProduct} from './IDate'
 import Date from "./Date";
+import ISaleProduct from '../../interfaces/ISaleProduct'
 
 export {
   generateNewDate,
   getDateInDatabase,
   saveDateInDatabase,
 
-  addProductToDate,
+  addProductToDateObject,
+  addSaleToDateobject
 }
 
-async function getDateInDatabase(date: string){
+async function getDateInDatabase(date: string): Promise<IDateMongo>{
 
   if (!date){return}
   LOGGER(`Obtendo informação do banco de dados: data [${date}]`, {from: "SPYBOT", pid: true})
@@ -26,12 +28,12 @@ async function getDateInDatabase(date: string){
 
 }
 
-async function saveDateInDatabase(dateObj: IDate){
+async function saveDateInDatabase(dateObj: IDateMongo): Promise<IDateMongo>{
   LOGGER(`Salvando data [${dateObj.date}] ao banco de dados`, {from: "SPYBOT", pid: true})
   return dateObj.save()
 }
 
-async function generateNewDate(dateToAdd){
+async function generateNewDate(dateToAdd: string): Promise<IDateMongo>{
 
   LOGGER(`Gerando objeto de data [${dateToAdd}]`, {from: "SPYBOT", pid: true})
 
@@ -54,13 +56,14 @@ async function generateNewDate(dateToAdd){
   return dateObj
 }
 
-async function addProductToDate(dateObj: IDate, productToAdd: any){
+async function addProductToDateObject(dateObj: IDateMongo, productToAdd: ISaleProduct): Promise<IDateMongo>{
 
   const {
     storeLink,
     storeName,
     productName,
     productLink,
+    productImage,
     productPrice
   } = productToAdd
 
@@ -71,8 +74,10 @@ async function addProductToDate(dateObj: IDate, productToAdd: any){
     storeName,
     productName,
     productLink,
-    sales: 1,
-    revenue: productPrice
+    productImage,
+    productPrice,
+    sales: 0,
+    revenue: 0
   }
 
   const newProductsArr = [
@@ -84,4 +89,29 @@ async function addProductToDate(dateObj: IDate, productToAdd: any){
   dateObj.totalProducts = newProductsArr.length
 
   return dateObj
+}
+
+async function addSaleToDateobject(dateObj: IDateMongo, saleObj: ISaleProduct): Promise<IDateMongo>{
+
+  let newDateObj = dateObj
+  const saleDate = getStringDateFromDate(getDateFromString(saleObj.lastSale), 'date')
+  const saleCount = Number(dateObj.totalSales) + 1
+
+  LOGGER(`Adicionando venda [${saleCount}] à data [${saleDate}]`, {from: "SPYBOT", pid: true})
+
+  const oldProductsArr = [...dateObj.products]
+  const productIndex = oldProductsArr.findIndex(product => product.productLink === saleObj.productLink)
+  const saleProductObj = oldProductsArr[productIndex]
+  saleProductObj.sales = Number(saleProductObj.sales + 1)
+  saleProductObj.revenue = Number((saleProductObj.revenue + saleProductObj.productPrice).toFixed(2))
+  newDateObj.products[productIndex] = saleProductObj
+
+  newDateObj.lastSale = saleObj.lastSale
+  newDateObj.lastSaleIso = saleObj.lastSaleIso
+
+  newDateObj.totalProducts = newDateObj.products.length
+  newDateObj.totalSales = Number(dateObj.totalSales + 1)
+  newDateObj.totalRevenue = Number((dateObj.totalRevenue + saleProductObj.productPrice).toFixed(2))
+
+  return newDateObj
 }

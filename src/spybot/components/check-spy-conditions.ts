@@ -3,11 +3,10 @@ import {
 } from "../../../configs/configs";
 import { getAllBotsArr, getBotsOption } from "./spy-sheets-api";
 
-
 export {
-  checkIfBotIsAllowedToSpy,
   getBotIndex,
   checkIfBotIsInList,
+  checkIfBotIsAllowedToSpy,
   checkIfCurrentBotIsActive
 }
 

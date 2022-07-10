@@ -1,8 +1,8 @@
 import { LOGGER, CURRENT_DATETIME, SPYBOT_LOOP_INTERVAL, DATABASE_LOGIN_URL } from "../../../configs/configs";
-import Spybot from "../models/Spybot";
 import { checkIfBotIsAllowedToSpy } from "./check-spy-conditions";
 import { updateBotInfo, ENUM_UPDATE_BOT_INFO } from "./spy-sheets-api";
-import updateDatabasePreSpy from './update-database-pre-spy'
+import updateDatabasePreSpy from '../database/update-database-pre-spy'
+import Spybot from "../models/Spybot";
 
 const MONGOOSE_URL = `${DATABASE_LOGIN_URL}/TESTANDO`
 import mongoose from 'mongoose'

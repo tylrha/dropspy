@@ -20,7 +20,7 @@ import IAlihunterSale from '../interfaces/IAlihunterSale'
 
 import IStoreSheets from '../interfaces/IStoreSheets'
 import fetchJsonUrl from "../../../utils/functions/fetch-json-url"
-import addNewSaleToDatabase from "../components/add-new-sales-to-database"
+import addNewSaleToDatabase from "../database/add-new-sales-to-database"
 
 export default class Spybot {
 
@@ -378,7 +378,7 @@ export default class Spybot {
       await DELAY(1000)
     }
 
-    LOGGER(`Foram adicionadas um total de ${currentCheckSaleCount} vendas ao BD`, { from: 'SPYBOT', pid: true })
+    LOGGER(`Foram adicionadas um total de ${currentCheckSaleCount} vendas ao BD\n`, { from: 'SPYBOT', pid: true })
     if (currentCheckSaleCount > 0) { await updateBotInfo(ENUM_UPDATE_BOT_INFO.LAST_SALE_TIME) }
 
   }

@@ -7,6 +7,8 @@ interface IDateProduct {
   storeName: string,
   productName: string,
   productLink: string,
+  productImage: string,
+  productPrice: number,
   sales: number,
   revenue: number,
 }
@@ -17,6 +19,8 @@ const dateProductSchema: Schema = new Schema(
     storeName: String,
     productName: String,
     productLink: String,
+    productImage: String,
+    productPrice: Number,
     sales: Number,
     revenue: Number,
   },
@@ -28,7 +32,7 @@ const dateProductSchema: Schema = new Schema(
 
 /* ########################################################################## */
 
-interface IDate extends Document {
+interface IDateMongo extends Document {
   date: string,
   isoDate: string,
   month: Number,
@@ -42,6 +46,10 @@ interface IDate extends Document {
 
   products: IDateProduct[]
 }
+
+type IDate = Omit<IDateMongo, '_id' | '__v'>
+
+type IDateUnion = IDate | IDateMongo
 
 const dateSchema: Schema = new Schema(
   {
@@ -69,5 +77,7 @@ export {
   IDateProduct,
   dateProductSchema,
   IDate,
+  IDateMongo,
+  IDateUnion,
   dateSchema
 }

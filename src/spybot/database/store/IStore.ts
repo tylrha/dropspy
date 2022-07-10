@@ -27,6 +27,8 @@ const storeDateSchema: Schema = new Schema(
 interface IStoreProduct {
   productName: string,
   productLink: string,
+  productImage: string,
+  productPrice: number,
   sales: number,
   revenue: number
 }
@@ -35,8 +37,10 @@ const storeProductSchema: Schema = new Schema(
   {
     productName: String,
     productLink: String,
+    productImage: String,
+    productPrice: Number,
     sales: Number,
-    revenue: Number
+    revenue: Number,
   },
   {
     _id: false,
@@ -46,7 +50,7 @@ const storeProductSchema: Schema = new Schema(
 
 /* ########################################################################## */
 
-interface IStore extends Document {
+interface IStoreMongo extends Document {
   storeName: string,
   storeLink: string,
   storeCategory: string,
@@ -63,6 +67,10 @@ interface IStore extends Document {
   products: IStoreProduct[],
   dates: IStoreDate[]
 }
+
+type IStore = Omit<IStoreMongo, '_id' | '__v'>
+
+type IStoreUnion = IStore | IStoreMongo
 
 const storeSchema: Schema = new Schema(
   {
@@ -92,8 +100,12 @@ const storeSchema: Schema = new Schema(
 export {
   IStoreDate,
   storeDateSchema,
+
   IStoreProduct,
   storeProductSchema,
+
   IStore,
+  IStoreMongo,
+  IStoreUnion,
   storeSchema
 }

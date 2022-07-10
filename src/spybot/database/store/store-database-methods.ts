@@ -4,20 +4,23 @@ import {
   CURRENT_DATETIME
 } from "../../../../configs/configs";
 
-import { getIsoDateFromString } from "../../../../utils/libraries/dates";
-import {IStore, IStoreDate, IStoreProduct} from './IStore'
+import { getDateFromString, getIsoDateFromString, getStringDateFromDate } from "../../../../utils/libraries/dates";
+import {IStore, IStoreDate, IStoreProduct, IStoreMongo, IStoreUnion} from './IStore'
 import Store from "./Store";
+import IStoreSheets from '../../interfaces/IStoreSheets'
+import ISaleProduct from '../../interfaces/ISaleProduct'
 
 export {
   generateNewStore,
   getStoreInDatabase,
   saveStoreInDatabase,
 
-  addDateToStore,
-  addProductToStore,
+  addDateToStoreObject,
+  addProductToStoreObject,
+  addSaleToStoreObject
 }
 
-async function getStoreInDatabase(storeLink: string){
+async function getStoreInDatabase(storeLink: string): Promise<IStoreMongo>{
 
   if (!storeLink){return}
   LOGGER(`Obtendo informação do banco de dados: loja [${storeLink}]`, {from: "SPYBOT", pid: true})
@@ -27,13 +30,12 @@ async function getStoreInDatabase(storeLink: string){
 
 }
 
-async function saveStoreInDatabase(storeObj: IStore){
+async function saveStoreInDatabase(storeObj: IStore): Promise<IStoreMongo>{
   LOGGER(`Salvando loja [${storeObj.storeName}] ao banco de dados`, {from: "SPYBOT", pid: true})
   return storeObj.save()
 }
 
-async function generateNewStore(sheetStoreObj, currentDate){
-
+async function generateNewStore(sheetStoreObj: IStoreSheets, currentDate: string): Promise<IStoreMongo>{
 
   const {
     storeName,
@@ -62,7 +64,7 @@ async function generateNewStore(sheetStoreObj, currentDate){
   return storeObj
 }
 
-async function addDateToStore(storeObj: IStore, dateToAdd: string){
+async function addDateToStoreObject(storeObj: IStoreMongo, dateToAdd: string): Promise<IStoreMongo>{
 
   LOGGER(`Adicionando data [${dateToAdd}] à loja [${storeObj.storeName}]`, {from: "SPYBOT", pid: true})
 
@@ -85,12 +87,13 @@ async function addDateToStore(storeObj: IStore, dateToAdd: string){
 }
 
 
-async function addProductToStore(storeObj: IStore, productToAdd: any){
+async function addProductToStoreObject(storeObj: IStoreMongo, productToAdd: ISaleProduct): Promise<IStoreMongo>{
 
   const {
     productName,
     productLink,
-    productPrice
+    productPrice,
+    productImage
   } = productToAdd
 
   LOGGER(`Adicionando produto [${productName}] à loja [${storeObj.storeName}]`, {from: "SPYBOT", pid: true})
@@ -98,8 +101,10 @@ async function addProductToStore(storeObj: IStore, productToAdd: any){
   const productToAddObj: IStoreProduct = {
     productName,
     productLink,
-    sales: 1,
-    revenue: productPrice
+    productPrice,
+    productImage,
+    sales: 0,
+    revenue: 0
   }
 
   const newProductsArr = [
@@ -111,4 +116,39 @@ async function addProductToStore(storeObj: IStore, productToAdd: any){
   storeObj.totalProducts = newProductsArr.length
 
   return storeObj
+}
+
+async function addSaleToStoreObject(storeObj: IStoreMongo, saleObj: ISaleProduct): Promise<IStoreMongo>{
+
+  let newStoreObj = storeObj
+
+  const saleDate = getStringDateFromDate(getDateFromString(saleObj.lastSale), 'date')
+  const saleCount = Number(storeObj.totalSales) + 1
+  const salePrice = storeObj.products.find(product => product.productLink === saleObj.productLink).productPrice
+
+  LOGGER(`Adicionando venda [${saleCount}] à loja [${storeObj.storeName}]`, {from: "SPYBOT", pid: true})
+
+  const oldDatesArr = [...storeObj.dates]
+  const dateIndex = oldDatesArr.findIndex(date => date.date === saleDate)
+  const saleDateObj = oldDatesArr[dateIndex]
+  saleDateObj.sales = Number(saleDateObj.sales + 1)
+  saleDateObj.revenue = Number((saleDateObj.revenue + salePrice).toFixed(2))
+  newStoreObj.dates[dateIndex] = saleDateObj
+
+  const oldProductsArr = [...storeObj.products]
+  const productIndex = oldProductsArr.findIndex(product => product.productLink === saleObj.productLink)
+  const saleProductObj = oldProductsArr[productIndex]
+  saleProductObj.sales = Number(saleProductObj.sales + 1)
+  saleProductObj.revenue = Number((saleProductObj.revenue + salePrice).toFixed(2))
+  newStoreObj.products[productIndex] = saleProductObj
+
+  newStoreObj.lastSale = saleObj.lastSale
+  newStoreObj.lastSaleIso = saleObj.lastSaleIso
+
+  newStoreObj.totalProducts = newStoreObj.products.length
+  newStoreObj.totalDates = newStoreObj.dates.length
+  newStoreObj.totalSales = Number(storeObj.totalSales + 1)
+  newStoreObj.totalRevenue = Number((storeObj.totalRevenue + salePrice).toFixed(2))
+
+  return newStoreObj
 }

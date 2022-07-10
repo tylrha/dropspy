@@ -1,8 +1,8 @@
 import { LOGGER } from "../../../configs/configs";
 
 import IStoreSheets from '../interfaces/IStoreSheets'
-import {getDateInDatabase, generateNewDate, saveDateInDatabase} from '../database/date/date-database-methods'
-import {getStoreInDatabase, generateNewStore, saveStoreInDatabase, addDateToStore} from '../database/store/store-database-methods'
+import {getDateInDatabase, generateNewDate, saveDateInDatabase} from './date/date-database-methods'
+import {getStoreInDatabase, generateNewStore, saveStoreInDatabase, addDateToStoreObject} from './store/store-database-methods'
 
 export default async function checkIfDatabaseIsUpdated(spyedStoresArr: Array<IStoreSheets>, dateToCheck: string){
 
@@ -29,7 +29,7 @@ export default async function checkIfDatabaseIsUpdated(spyedStoresArr: Array<ISt
 
     const dateIndex = Array.from(storeObjectInDatabase.dates).findIndex(date => date.date === dateToCheck)
     if (dateIndex === -1) {
-      const updatedStoreObject = await addDateToStore(storeObjectInDatabase, dateToCheck)
+      const updatedStoreObject = await addDateToStoreObject(storeObjectInDatabase, dateToCheck)
       await saveStoreInDatabase(updatedStoreObject)
     }
 
