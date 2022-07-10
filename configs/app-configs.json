@@ -1,0 +1,53 @@
+{
+
+  "alihunter_configs": {
+    "gmail_username": "instigaremidia.spybot7@gmail.com",
+    "gmail_password": "Insti1010!"
+  },
+
+  "server_configs": {
+    "job_wait_seconds": 30,
+    "default_port": 3000
+  },
+
+  "worker_configs": {
+    "max_instances": 1,
+    "restart_interval": 60
+  },
+
+  "browser_configs": {
+    "headless_mode": false,
+    "browser_width": 1366,
+    "browser_height": 768,
+    "browser_extensions": [
+      "/extensions/alihunter"
+    ]
+  },
+
+  "database_configs": {
+    "database_baseurl": "cluster0.tc8lz.mongodb.net",
+    "database_username": "imsuperuser",
+    "database_password": "imsuperpass",
+
+    "database_spy": "im-spy",
+    "collection_spy_dates": "test_dates",
+    "collection_spy_stores": "test_stores",
+    "collection_spy_products": "test_products"
+  },
+
+  "google_sheets_configs": {
+
+    "im_geral_id": "",
+    "im_geral_wpp_status_cell": "DADOS!B2",
+
+    "im_spy_id": "1W6kfw_waYgW3BZ_d908jWul7j-MWgdJNz33YovQpEG4",
+    "im_spy_stores_sheet_name": "SPY_LOJAS",
+    "im_spy_stores_quantity": 316,
+    "im_spy_bots_sheet_name": "SPY_BOTS",
+    "im_spy_bots_bots_controll_cell": "B2",
+    "im_spy_bots_quantity": 203,
+    "im_spy_dashboard_sheet_name": "DASHBOARD",
+    "im_spy_dashboard_current_server_cell": "B2",
+    "im_spy_api_url": "https://script.google.com/macros/s/AKfycbzk7RfDk6Y1NQ1654TnYuYODKdI_6dtDKuvmKDlj7TMauRpSSrZkH27QNy85Iy2GB9Zcg/exec"
+  }
+}

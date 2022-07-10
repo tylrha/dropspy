@@ -1,0 +1,39 @@
+{
+  "ts-node": {
+    // "require": ["tsconfig-paths/register"],
+    // "esm": true
+  },
+  "compilerOptions": {
+    "target": "ES2017",
+    "module": "CommonJS",
+    "rootDir": ".",
+    "outDir": "./dist",
+    "typeRoots": [
+      "./node_modules/@types/",
+      "./src/@types/"
+    ],
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "allowJs": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": false,
+    "skipLibCheck": true
+    // "baseUrl": ".",
+    // "paths": {
+    //   "@comp/*": ["./src/server/components/*"],
+    // },
+  },
+  "exclude": [
+    "node_modules",
+    "tests",
+    "local",
+    "extensions",
+    "jest.config.ts"
+  ],
+  "include": [
+    "configs/*.json",
+    "configs",
+    "src",
+    "utils",
+  ]
+}
