@@ -11,7 +11,6 @@ import { updateBotInfo, ENUM_UPDATE_BOT_INFO } from "./components/spy-sheets-api
 import updateDatabasePreSpy from './database/update-database-pre-spy'
 import Spybot from "./models/Spybot";
 
-const MONGOOSE_URL = `${DATABASE_LOGIN_URL}/${DATABASE_DATABASE_SPY}`
 import mongoose from 'mongoose'
 
 export default async function initSpyLooping(spybot: Spybot, initialDate?: string){
@@ -51,7 +50,7 @@ export default async function initSpyLooping(spybot: Spybot, initialDate?: strin
       if (hasChangedStoreList){await spybot.handleSpyListChanges()}
     }
 
-    const databaseConnectionResult = await mongoose.connect(MONGOOSE_URL)
+    const databaseConnectionResult = await mongoose.connect(`${DATABASE_LOGIN_URL}/${DATABASE_DATABASE_SPY}`)
     if (!databaseConnectionResult){throw new Error(`Erro ao abrir conexão com banco de dados`)}
     LOGGER(`Bot ${spybot.botIndex} - conexão estabelecida com banco de dados`, {from: 'SPYBOT', pid: true})
 

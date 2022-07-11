@@ -23,10 +23,10 @@ const ALIHUNTER_GMAIL_PASSWORD = APP_CONFIGS['alihunter_configs'].gmail_password
 
 /* DATABASE ================================================================= */
 
-const DATABASE_BASEURL = APP_CONFIGS['database_configs'].database_baseurl
-const DATABASE_USERNAME = APP_CONFIGS['database_configs'].database_username
-const DATABASE_PASSWORD = APP_CONFIGS['database_configs'].database_password
-const DATABASE_LOGIN_URL = `mongodb+srv://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@${DATABASE_BASEURL}`
+const _DATABASE_BASEURL = APP_CONFIGS['database_configs'].database_baseurl
+const _DATABASE_USERNAME = APP_CONFIGS['database_configs'].database_username
+const _DATABASE_PASSWORD = APP_CONFIGS['database_configs'].database_password
+const DATABASE_LOGIN_URL = `mongodb+srv://${_DATABASE_USERNAME}:${_DATABASE_PASSWORD}@${_DATABASE_BASEURL}`
 
 const DATABASE_DATABASE_SPY = APP_CONFIGS['database_configs'].database_spy
 const DATABASE_COLLECTION_DATES = APP_CONFIGS['database_configs'].collection_spy_dates
@@ -35,13 +35,6 @@ const DATABASE_COLLECTION_PRODUCTS = APP_CONFIGS['database_configs'].collection_
 
 /* GOOGLE SHEET ============================================================= */
 
-const GSHEET_IM_SPY_ID = APP_CONFIGS['google_sheets_configs'].im_spy_id
-const GSHEET_IM_SPY_STORES_SHEET_NAME = APP_CONFIGS['google_sheets_configs'].im_spy_stores_sheet_name
-const GSHEET_IM_SPY_BOTS_SHEET_NAME = APP_CONFIGS['google_sheets_configs'].im_spy_bots_sheet_name
-const GSHEET_IM_SPY_DASHBOARD_SHEET_NAME = APP_CONFIGS['google_sheets_configs'].im_spy_dashboard_sheet_name
-
-const GSHEET_IM_SPY_BOTS_CONTROLL_CELL = APP_CONFIGS['google_sheets_configs'].im_spy_bots_bots_controll_cell
-const GSHEET_IM_SPY_CURRENT_SERVER_CELL = APP_CONFIGS['google_sheets_configs'].im_spy_dashboard_current_server_cell
 const GSHEET_IM_SPY_API_URL = APP_CONFIGS['google_sheets_configs'].im_spy_api_url
 
 /* SPY ====================================================================== */
@@ -99,22 +92,12 @@ export {
   ALIHUNTER_GMAIL_USERNAME,
   ALIHUNTER_GMAIL_PASSWORD,
 
-  DATABASE_USERNAME,
-  DATABASE_PASSWORD,
-  DATABASE_BASEURL,
   DATABASE_LOGIN_URL,
-
   DATABASE_DATABASE_SPY,
   DATABASE_COLLECTION_DATES,
   DATABASE_COLLECTION_STORES,
   DATABASE_COLLECTION_PRODUCTS,
 
-  GSHEET_IM_SPY_ID,
-  GSHEET_IM_SPY_STORES_SHEET_NAME,
-  GSHEET_IM_SPY_BOTS_SHEET_NAME,
-  GSHEET_IM_SPY_DASHBOARD_SHEET_NAME,
-  GSHEET_IM_SPY_BOTS_CONTROLL_CELL,
-  GSHEET_IM_SPY_CURRENT_SERVER_CELL,
   GSHEET_IM_SPY_API_URL,
 
   SPYBOT_LOOP_INTERVAL,
@@ -137,36 +120,3 @@ export {
   SERVER_BASE,
 
 }
-
-/*
-
-// const DATABASE_DATABASE_WPP = APP_CONFIGS['database_configs'].database_wpp
-// const DATABASE_DATABASE_GENERAL = APP_CONFIGS['database_configs'].database_general
-// const DATABASE_COLLECTION_VARIABLES = APP_CONFIGS['database_configs'].collection_variables
-
-// const DATABASE_DATABASE_SPY = APP_CONFIGS['database_configs'].database_spy
-// const DATABASE_COLLECTION_SPY_PRODUCTS = APP_CONFIGS['database_configs'].collection_spy_products
-// const DATABASE_COLLECTION_SPY_STORES = APP_CONFIGS['database_configs'].collection_spy_stores
-// const DATABASE_COLLECTION_SPY_DATES = APP_CONFIGS['database_configs'].collection_spy_dates
-
-// const GSHEET_IM_GERAL_ID = APP_CONFIGS['google_sheets_configs'].im_geral_id
-// const GSHEET_IM_GERAL_WPP_STATUS_CELL = APP_CONFIGS['google_sheets_configs'].im_geral_wpp_status_cell
-
-// const GSHEET_IM_SPY_ID = APP_CONFIGS['google_sheets_configs'].im_spy_id
-// const GSHEET_IM_SPY_STORES_SHEET_NAME = APP_CONFIGS['google_sheets_configs'].im_spy_stores_sheet_name
-// const GSHEET_IM_SPY_STORES_QUANTITY = APP_CONFIGS['google_sheets_configs'].im_spy_stores_quantity
-
-// const GSHEET_IM_SPY_BOTS_SHEET_NAME = APP_CONFIGS['google_sheets_configs'].im_spy_bots_sheet_name
-// const GSHEET_IM_SPY_BOTS_QUANTITY = APP_CONFIGS['google_sheets_configs'].im_spy_bots_quantity
-
-WPP_IM_GROUP_CHATID=559185174224-1617326973@g.us
-
-TEL_IM_GROUP_CHATID=-628533591
-TEL_BOT_TOKEN=5188998877:AAGFJ2CILN3diZU__jdT1jbsnC8mEsEKVYI
-NTBA_FIX_319=1
-
-DATABASE_USERNAME=imsuperuser
-DATABASE_PASSWORD=imsuperpass
-DATABASE_BASEURL=cluster0.tc8lz.mongodb.net
-
-*/
