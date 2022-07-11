@@ -1,5 +1,10 @@
 {
 
+  "project_configs": {
+    "source_folder": "./src",
+    "dist_folder": "./dist"
+  },
+
   "alihunter_configs": {
     "gmail_username": "instigaremidia.spybot7@gmail.com",
     "gmail_password": "Insti1010!"
@@ -19,6 +24,8 @@
     "headless_mode": false,
     "browser_width": 1366,
     "browser_height": 768,
+    "browser_extensions_zip_folder": "./src/spybot/assets",
+    "browser_extensions_unziped_folder": "./extensions_unziped",
     "browser_extensions": [
       "/extensions/alihunter"
     ]
