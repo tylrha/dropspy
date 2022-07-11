@@ -36,7 +36,7 @@ import mongoose from 'mongoose'
     const spybot = new Spybot()
     await spybot.updateBotSpyedStores()
 
-    const storeToAdd = spybot.spyedStoresArr[0]
+    const storeToAdd = spybot.botSpyedStoresArr[0]
     const currentDate = CURRENT_DATETIME('date')
 
     const productToAdd = {

@@ -16,14 +16,17 @@ import mongoose from 'mongoose'
 
 export default async function initSpyLooping(spybot: Spybot, initialDate?: string){
 
-  spybot.spyCheckedTime = Number(spybot.spyCheckedTime) + 1;
-  LOGGER(`Bot ${spybot.botIndex} - checagem de número [${spybot.spyCheckedTime}]`, {from: "SPYBOT", pid: true})
+  global.WORKER.workerInformation.lastCheckedTime = CURRENT_DATETIME()
+  global.WORKER.workerInformation.checkedTimes += 1
+  spybot.botCheckedTimes += 1;
 
-  const isFirstInit = spybot.spyCheckedTime === 1 ? true : false
+  LOGGER(`Bot ${spybot.botIndex} - checagem de número [${spybot.botCheckedTimes}]`, {from: "SPYBOT", pid: true})
+
+  const isFirstInit = spybot.botCheckedTimes === 1 ? true : false
   const currentDate = isFirstInit ? initialDate : CURRENT_DATETIME('date')
-  const hasChangedSpyDate = isFirstInit ? false : spybot.initialSpyDate !== currentDate
+  const hasChangedSpyDate = isFirstInit ? false : spybot.botInitialSpyDate !== currentDate
   let hasChangedStoreList = false
-  if (isFirstInit){spybot.initialSpyDate = initialDate}
+  if (isFirstInit){spybot.botInitialSpyDate = initialDate}
 
   try{
     await spybot.pingBotServer()
@@ -53,7 +56,7 @@ export default async function initSpyLooping(spybot: Spybot, initialDate?: strin
     LOGGER(`Bot ${spybot.botIndex} - conexão estabelecida com banco de dados`, {from: 'SPYBOT', pid: true})
 
     if (isFirstInit || hasChangedSpyDate || hasChangedStoreList){
-      await updateDatabasePreSpy(spybot.spyedStoresArr, currentDate)
+      await updateDatabasePreSpy(spybot.botSpyedStoresArr, currentDate)
     }
 
     if (isFirstInit){await spybot.openSpyStores()}
@@ -67,6 +70,7 @@ export default async function initSpyLooping(spybot: Spybot, initialDate?: strin
     loopAgainAfterTime(spybot)
 
   } catch(e){
+    global.WORKER.workerInformation.isSpybotActive = false
     console.log("ERRO")
     LOGGER(`${e.message}`, {from: "SPYBOT", pid: true, isError: true})
   }

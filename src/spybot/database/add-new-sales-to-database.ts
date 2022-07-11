@@ -21,7 +21,6 @@ import {
   addSaleToProductObject
 } from "./product/product-database-methods";
 
-
 import {
   addDateToStoreObject,
   addProductToStoreObject,
@@ -38,7 +37,7 @@ import {
   saveDateInDatabase
 } from "./date/date-database-methods";
 
-export default async function addNewSaleToDatabase(alihunterSalesArr: IAlihunterSale[], currentStoreObj: IStoreSheets) {
+export default async function addNewSaleToDatabase(alihunterSalesArr: IAlihunterSale[], currentStoreObj: IStoreSheets): Promise<void> {
 
   if (!alihunterSalesArr) { return }
 
@@ -49,6 +48,9 @@ export default async function addNewSaleToDatabase(alihunterSalesArr: IAlihunter
 
   const currentDateTime = CURRENT_DATETIME()
   const currentIsoDateTime = getIsoDateFromString(currentDateTime)
+
+  let currentTrackedSales = 2
+  let currentTrackedRevenue = 0
 
   for (let x = 0; x < alihunterSalesArr.length; x++) {
 
@@ -62,6 +64,9 @@ export default async function addNewSaleToDatabase(alihunterSalesArr: IAlihunter
       productTime,
       productImage
     } = curSoldProduct
+
+    currentTrackedSales += 1
+    currentTrackedRevenue += productPrice
 
     const saleObject: ISaleProduct = {
       storeName,
@@ -80,7 +85,11 @@ export default async function addNewSaleToDatabase(alihunterSalesArr: IAlihunter
     await addSaleToProductsDatabase(saleObject)
     await addSaleToStoresDatabase(saleObject)
     await addSaleToDatesDatabase(saleObject)
+
+    global.WORKER.workerInformation.trackedSales = currentTrackedSales
+    global.WORKER.workerInformation.trackedRevenue = Number(currentTrackedRevenue.toFixed(2))
   }
+
 
 }
 

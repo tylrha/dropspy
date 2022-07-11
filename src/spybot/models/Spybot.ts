@@ -28,52 +28,26 @@ import IStoreSheets from '../interfaces/IStoreSheets'
 export default class Spybot {
 
   public botIndex: string
-  public isBotActive: boolean
-  public isLoggedInGoogle: boolean | string
-  public isLoggedInAlihunter: boolean | string
+  public botCheckedTimes: number
   public botBrowser: Browser
-  public spyedStoresArr: Array<IStoreSheets>
-  public initialSpyDate: string
-  public spyCheckedTime: Number
+  public botSpyedStoresArr: Array<IStoreSheets>
+  public botInitialSpyDate: string
 
   constructor(index?: string) {
     this.botIndex = index ? index : SPYBOT_APP_USER
-    this.isBotActive = false
-    this.isLoggedInGoogle = false
-    this.isLoggedInAlihunter = false
-    // this.botBrowser = {}
-    // this.spyedStoresArr = []
-    // this.initialSpyDate = ""
-    this.spyCheckedTime = 0
+    this.botCheckedTimes = 0
+    // this.botBrowser
+    // this.botSpyedStoresArr
+    // this.botInitialSpyDate
   }
 
-  async init_browser() {
+  // ==== INIT METHODS =========================================================
+
+  async init_browser(): Promise<void> {
     try {
       this.botBrowser = await this.getBrowserInstance()
       if (!this.botBrowser) { throw new Error("Browser não foi iniciado corretamente") }
       this.setBrowserEvents()
-    } catch (e) {
-      return e.message
-    }
-  }
-
-  async setup_spybot(): Promise<true | string> {
-    try {
-      const googlePage = await this.setupGooglePage()
-      await this.loginAtGoogle(googlePage)
-      this.isLoggedInGoogle = await this.checkGoogleLogin(googlePage)
-      if (this.isLoggedInGoogle === false) { throw new Error("Erro ao logar no google") }
-
-      const [width, height] = await this.getPageScreenResolution(googlePage)
-      LOGGER(`Bot ${this.botIndex} - resolução atual: ${width} x ${height}`, { from: 'SPYBOT', pid: true })
-
-      const alihunterPage = await this.setupAlihunterPage()
-      await this.loginAtAlihunterWithGoogle(alihunterPage, height)
-      this.isLoggedInAlihunter = await this.checkAlihunterLogin(alihunterPage)
-      if (!this.isLoggedInAlihunter) { throw new Error("Erro ao logar no alihunter") }
-
-      await googlePage.close()
-      return true
     } catch (e) {
       return e.message
     }
@@ -103,10 +77,34 @@ export default class Spybot {
 
   }
 
-  private setBrowserEvents() {
+  private setBrowserEvents(): void {
     this.botBrowser.on('disconnected', async () => {
       LOGGER(`Bot ${this.botIndex} - o browser fechado`, { from: 'SPYBOT', pid: true })
     });
+  }
+
+  // ==== SETUP SPY METHODS ====================================================
+
+  async setup_spybot(): Promise<true | string> {
+    try {
+      const googlePage = await this.setupGooglePage()
+      await this.loginAtGoogle(googlePage)
+      const isLoggedInGoogle = await this.checkGoogleLogin(googlePage)
+      if (isLoggedInGoogle === false) { throw new Error("Erro ao logar no google") }
+
+      const [width, height] = await this.getPageScreenResolution(googlePage)
+      LOGGER(`Bot ${this.botIndex} - resolução atual: ${width} x ${height}`, { from: 'SPYBOT', pid: true })
+
+      const alihunterPage = await this.setupAlihunterPage()
+      await this.loginAtAlihunterWithGoogle(alihunterPage, height)
+      const isLoggedInAlihunter = await this.checkAlihunterLogin(alihunterPage)
+      if (!isLoggedInAlihunter) { throw new Error("Erro ao logar no alihunter") }
+
+      await googlePage.close()
+      return true
+    } catch (e) {
+      return e.message
+    }
   }
 
   private async setupGooglePage(): Promise<Page> {
@@ -272,6 +270,8 @@ export default class Spybot {
     return loginResult
   }
 
+  // ==== GET UPDATE SPYED STORES ==============================================
+
   async updateBotSpyedStores(): Promise<void> {
 
     LOGGER(`Bot ${this.botIndex} - Atualizando lista de lojas espionadas`, { from: "SPYBOT", pid: true })
@@ -279,15 +279,35 @@ export default class Spybot {
 
     if (typeof tmpSpyedStores === "string") {
       LOGGER(`Bot ${this.botIndex} - ${tmpSpyedStores}`, { from: "SPYBOT", pid: true })
+      global.WORKER.workerInformation.spyedStores = []
     } else {
       LOGGER(`Bot ${this.botIndex} - Foram encontradas ${tmpSpyedStores.length} lojas a seram espionadas`, { from: "SPYBOT", pid: true })
-      this.spyedStoresArr = tmpSpyedStores
+      this.botSpyedStoresArr = tmpSpyedStores
+      global.WORKER.workerInformation.spyedStores = tmpSpyedStores
     }
   }
 
+  async hasChangeInSpyedStoresList(): Promise<boolean> {
+
+    LOGGER(`Bot ${this.botIndex} - verifica se houve mudança nas lojas espionadas`, { from: 'SPYBOT', pid: true })
+
+    const pagesArr = await this.botBrowser.pages()
+    const sortArray = (arr) => { return arr.slice().sort() }
+    const pageLinkArr = sortArray(pagesArr.map(pg => pg.url()))
+    const storesLinksArr = sortArray(this.botSpyedStoresArr.map(pg => pg.storeLink))
+
+    const lengthCheck = pageLinkArr.length === storesLinksArr.length
+    const valuesCheck = pageLinkArr.every((value, index) => value.toString().search(storesLinksArr[index]) > -1)
+    const hasChanged = !lengthCheck || !valuesCheck
+
+    return hasChanged
+  }
+
+  // ==== STORE PAGES METHODS ==================================================
+
   async openSpyStores(): Promise<void> {
 
-    const currentSpyedStoresArr = this.spyedStoresArr
+    const currentSpyedStoresArr = this.botSpyedStoresArr
     if (currentSpyedStoresArr.length === 0) { return }
 
     for (let x = 0; x < currentSpyedStoresArr.length; x++) {
@@ -323,82 +343,6 @@ export default class Spybot {
 
   }
 
-  async hasChangeInSpyedStoresList(): Promise<boolean> {
-
-    LOGGER(`Bot ${this.botIndex} - verifica se houve mudança nas lojas espionadas`, { from: 'SPYBOT', pid: true })
-
-    const pagesArr = await this.botBrowser.pages()
-    const sortArray = (arr) => { return arr.slice().sort() }
-    const pageLinkArr = sortArray(pagesArr.map(pg => pg.url()))
-    const storesLinksArr = sortArray(this.spyedStoresArr.map(pg => pg.storeLink))
-
-    const lengthCheck = pageLinkArr.length === storesLinksArr.length
-    const valuesCheck = pageLinkArr.every((value, index) => value.toString().search(storesLinksArr[index]) > -1)
-    const hasChanged = !lengthCheck || !valuesCheck
-
-    return hasChanged
-  }
-
-  async pingBotServer(): Promise<void> {
-
-    LOGGER(`Bot ${this.botIndex} - pingando servidor para evitar idle`, { from: 'SPYBOT', pid: true })
-    await fetchJsonUrl(SERVER_BASE)
-
-  }
-
-  async detectNewSalesInAllStores(): Promise<void> {
-
-    const initialPages = 0
-    const browserPages = (await this.botBrowser.pages()).length
-    let currentCheckSaleCount = 0
-
-    for (let x = initialPages; x < browserPages; x++) {
-
-      let page = (await this.botBrowser.pages())[x];
-      const pageLink = page.url()
-      const storeIndex = this.spyedStoresArr.findIndex(store => pageLink.search(store.storeLink) > -1)
-
-      if (storeIndex === -1) {
-        LOGGER(`Bot ${this.botIndex} - erro ao encontrar loja! | ${pageLink}`, { from: 'SPYBOT', pid: true })
-        continue;
-      }
-
-      const currentStoreObj = this.spyedStoresArr[storeIndex]
-      const storeName = currentStoreObj.storeName
-      await page.bringToFront();
-
-      const getUpperSalesNumber = await runJsOnPage(page, "getUpperSalesNumber()");
-
-      if (getUpperSalesNumber === -4) {
-        LOGGER(`Bot ${this.botIndex} - A loja ${storeName} está com aliblock!`, { from: 'SPYBOT', pid: true })
-        continue
-      }
-
-      if (getUpperSalesNumber > 0) {
-        const recentSalesArr = await this.getStoreRecentSalesArray(page)
-        const newSalesArr = recentSalesArr.slice(0, getUpperSalesNumber);
-        currentCheckSaleCount += Number(getUpperSalesNumber)
-        LOGGER(`Bot ${this.botIndex} - A loja ${storeName} teve ${getUpperSalesNumber} novas vendas!`, { from: 'SPYBOT', pid: true })
-        await addNewSaleToDatabase(newSalesArr, this.spyedStoresArr[storeIndex])
-      } else {
-        LOGGER(`Bot ${this.botIndex} - A loja ${storeName} não teve novas vendas!`, { from: 'SPYBOT', pid: true })
-      }
-
-      await DELAY(1000)
-    }
-
-    LOGGER(`Foram adicionadas um total de ${currentCheckSaleCount} vendas ao BD`, { from: 'SPYBOT', pid: true })
-    if (currentCheckSaleCount > 0) { await updateBotInfo(ENUM_UPDATE_BOT_INFO.LAST_SALE_TIME); console.log("")}
-
-  }
-
-  private async getStoreRecentSalesArray(page: Page): Promise<IAlihunterSale[]>  {
-    await runJsOnPage(page, "clickOnLiveSalesButton()");
-    const recentSoldProductsArr = await runJsOnPage(page, "getSoldProductsList()");
-    await runJsOnPage(page, "clickOnLiveSalesButton()");
-    return recentSoldProductsArr;
-  }
-
   async handleSpyListChanges(): Promise<void>{
 
     LOGGER(`Bot ${this.botIndex} - lidando com mudanças na lista de espionagem`, { from: 'SPYBOT', pid: true })
@@ -425,6 +369,70 @@ export default class Spybot {
 
   }
 
+  // ===== DETECT SALES METHODS ================================================
+
+  async detectNewSalesInAllStores(): Promise<void> {
+
+    const initialPages = 0
+    const browserPages = (await this.botBrowser.pages()).length
+    let currentCheckSaleCount = 0
+
+    for (let x = initialPages; x < browserPages; x++) {
+
+      let page = (await this.botBrowser.pages())[x];
+      const pageLink = page.url()
+      const storeIndex = this.botSpyedStoresArr.findIndex(store => pageLink.search(store.storeLink) > -1)
+
+      if (storeIndex === -1) {
+        LOGGER(`Bot ${this.botIndex} - erro ao encontrar loja! | ${pageLink}`, { from: 'SPYBOT', pid: true })
+        continue;
+      }
+
+      const currentStoreObj = this.botSpyedStoresArr[storeIndex]
+      const storeName = currentStoreObj.storeName
+      await page.bringToFront();
+
+      const getUpperSalesNumber = await runJsOnPage(page, "getUpperSalesNumber()");
+
+      if (getUpperSalesNumber === -4) {
+        LOGGER(`Bot ${this.botIndex} - A loja ${storeName} está com aliblock!`, { from: 'SPYBOT', pid: true })
+        continue
+      }
+
+      if (getUpperSalesNumber > 0) {
+        const recentSalesArr = await this.getStoreRecentSalesArray(page)
+        const newSalesArr = recentSalesArr.slice(0, getUpperSalesNumber);
+        currentCheckSaleCount += Number(getUpperSalesNumber)
+        LOGGER(`Bot ${this.botIndex} - A loja ${storeName} teve ${getUpperSalesNumber} novas vendas!`, { from: 'SPYBOT', pid: true })
+        await addNewSaleToDatabase(newSalesArr, this.botSpyedStoresArr[storeIndex])
+      } else {
+        LOGGER(`Bot ${this.botIndex} - A loja ${storeName} não teve novas vendas!`, { from: 'SPYBOT', pid: true })
+      }
+
+      await DELAY(1000)
+    }
+
+    LOGGER(`Foram adicionadas um total de ${currentCheckSaleCount} vendas ao BD`, { from: 'SPYBOT', pid: true })
+    if (currentCheckSaleCount > 0) { await updateBotInfo(ENUM_UPDATE_BOT_INFO.LAST_SALE_TIME); console.log("")}
+
+  }
+
+  private async getStoreRecentSalesArray(page: Page): Promise<IAlihunterSale[]>  {
+    await runJsOnPage(page, "clickOnLiveSalesButton()");
+    const recentSoldProductsArr = await runJsOnPage(page, "getSoldProductsList()");
+    await runJsOnPage(page, "clickOnLiveSalesButton()");
+    return recentSoldProductsArr;
+  }
+
+  // ===== UTILS METHODS =======================================================
+
+  async pingBotServer(): Promise<void> {
+
+    LOGGER(`Bot ${this.botIndex} - pingando servidor para evitar idle`, { from: 'SPYBOT', pid: true })
+    await fetchJsonUrl(SERVER_BASE)
+
+  }
+
   async close(): Promise<void>{
     LOGGER(`Bot ${this.botIndex} - fechando bot`, { from: 'SPYBOT', pid: true })
 
@@ -439,6 +447,5 @@ export default class Spybot {
     }
 
   }
-
 
 }

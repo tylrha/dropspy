@@ -17,6 +17,8 @@ enum ENUM_UPDATE_BOT_INFO {
   LAST_SALE_TIME
 }
 
+import IStoreSheets from '../interfaces/IStoreSheets'
+
 export {
   getAllBotsArr,
   getCurrentServer,
@@ -26,7 +28,7 @@ export {
   ENUM_UPDATE_BOT_INFO
 }
 
-async function getAllBotsArr() {
+async function getAllBotsArr(): Promise<[] | false> {
   const finalUrl = `${GSHEET_IM_SPY_API_URL}?method=getbots`
   const response = await fetchJsonUrl(finalUrl)
 
@@ -37,7 +39,7 @@ async function getAllBotsArr() {
   }
 }
 
-async function getCurrentServer() {
+async function getCurrentServer(): Promise<string | false> {
   const finalUrl = `${GSHEET_IM_SPY_API_URL}?method=getcurrentserver`
   const response = await fetchJsonUrl(finalUrl)
 
@@ -48,7 +50,7 @@ async function getCurrentServer() {
   }
 }
 
-async function getBotsOption() {
+async function getBotsOption(): Promise<true | string> {
 
   const finalUrl = `${GSHEET_IM_SPY_API_URL}?method=getbotsoption`
   const response = await fetchJsonUrl(finalUrl)
@@ -70,7 +72,7 @@ async function getBotsOption() {
 }
 
 
-async function getSpyedStores(botName) {
+async function getSpyedStores(botName: string): Promise<string | IStoreSheets[]> {
 
   const finalUrl = `${GSHEET_IM_SPY_API_URL}?method=getstores`
   const response = await fetchJsonUrl(finalUrl)
@@ -86,6 +88,7 @@ async function getSpyedStores(botName) {
 
     const storeStatus = row[0]
     const spyUser = row[1]
+
     const storeName = row[2]
     const storeLink = row[3]
     const storeCategory = row[4]
@@ -107,7 +110,7 @@ async function getSpyedStores(botName) {
 }
 
 
-async function updateBotInfo(infoToUpdate: ENUM_UPDATE_BOT_INFO){
+async function updateBotInfo(infoToUpdate: ENUM_UPDATE_BOT_INFO): Promise<void>{
 
   let queryFinal;
 

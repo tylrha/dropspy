@@ -1,4 +1,4 @@
-import { WORKER_MAX_INSTANCES, LOGGER } from '../configs/configs'
+import { WORKER_MAX_INSTANCES, LOGGER, CURRENT_DATETIME, SPYBOT_LOOP_INTERVAL } from '../configs/configs'
 
 import cluster from 'cluster'
 import initServer from './server/server';
@@ -29,8 +29,7 @@ declare global {
       masterInstance.sendCommandToAllWorkers(EMasterCommandsToWorkers.START_SPY)
 
       global.MASTER = {
-        masterProcess: process,
-        masterCluster: masterInstance
+        masterCluster: masterInstance,
       }
 
     })
@@ -41,8 +40,22 @@ declare global {
     newWorker.init()
 
     global.WORKER = {
-      workerProcess: process,
-      workerCluster: newWorker
+      workerCluster: newWorker,
+      workerInformation: {
+        loopInterval: SPYBOT_LOOP_INTERVAL/60,
+        startedTime: CURRENT_DATETIME(),
+        lastRestartedTime: '-',
+        lastCheckedTime: '-',
+
+        restartedTimes: 0,
+        checkedTimes: 0,
+
+        trackedSales: 0,
+        trackedRevenue: 0,
+
+        isSpybotActive: false,
+        spyedStores: []
+      }
     }
 
   }

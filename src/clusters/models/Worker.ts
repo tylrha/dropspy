@@ -1,4 +1,4 @@
-import { LOGGER } from '../../../configs/configs'
+import { CURRENT_DATETIME, LOGGER } from '../../../configs/configs'
 import initSpyBot from '../../spybot/init-spy-bot'
 import Spybot from '../../spybot/models/Spybot'
 
@@ -100,12 +100,16 @@ export default class Worker {
 
   private async restartSpybot(): Promise<void> {
     LOGGER(`Reinicia spybot`, { from: 'WORKER', pid: true })
+    global.WORKER.workerInformation.restartedTimes += 1
+    global.WORKER.workerInformation.lastRestartedTime = CURRENT_DATETIME()
   }
+
+  // ===========================================================================
 
   private async getWorkerInfo(): Promise<void> {
     LOGGER(`Obtem informações de espionagem`, { from: 'WORKER', pid: true })
-    const exampleObj = { minha: 'vez', age: 32 }
-    this.sendCommandToMaster(EWorkerCommandsToMaster.UPDATE_WORKER_INFO, exampleObj)
+    const objToSend = global.WORKER.workerInformation
+    this.sendCommandToMaster(EWorkerCommandsToMaster.UPDATE_WORKER_INFO, objToSend)
   }
 
   private async quitWorker(): Promise<void> {
