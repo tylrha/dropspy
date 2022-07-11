@@ -4,8 +4,6 @@ dotenv.config()
 /* FILES ==================================================================== */
 
 import {readJson} from '../utils/libraries/utils'
-const GOOGLE_CREDENTIALS_PATH = './configs/google-credentials.json'
-const GOOGLE_CREDENTIALS = readJson(GOOGLE_CREDENTIALS_PATH)
 const APP_CONFIGS = readJson('/configs/app-configs.json')
 
 /* FUNCTIONS ================================================================ */
@@ -78,8 +76,6 @@ const SERVER_BASE = NODE_ENV === "production" ? `https://dropspy-${SPYBOT_APP_US
 
 export {
 
-  GOOGLE_CREDENTIALS_PATH,
-  GOOGLE_CREDENTIALS,
   APP_CONFIGS,
 
   LOGGER,

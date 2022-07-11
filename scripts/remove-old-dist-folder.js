@@ -1,3 +1,5 @@
+// PUPOSE: REMOVE OLD DIST FOLDER
+
 const { join, extname, basename, dirname } = require('path')
 const { existsSync, rmSync } = require('fs')
 
@@ -8,5 +10,3 @@ if (doesFolderExist){
   console.log(`PASTA APAGADO: ${distFolder}`)
   rmSync(distFolder, {recursive: true});
 }
-
-// rd /s /q dist >nul 2>&1|echo.>nul

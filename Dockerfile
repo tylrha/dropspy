@@ -1,3 +1,5 @@
+#DOCKER FILE CONFIGS ACORDING TO: https://docs.docker.com/engine/reference/builder/
+
 FROM node:latest
 
 RUN apt-get update &&\
@@ -17,10 +19,8 @@ RUN dpkg --install libindicator7_0.5.0-4_amd64.deb
 RUN curl -p --insecure "http://ftp.br.debian.org/debian/pool/main/liba/libappindicator/libappindicator1_0.4.92-7_amd64.deb" --output libappindicator1_0.4.92-7_amd64.deb
 RUN dpkg --install libappindicator1_0.4.92-7_amd64.deb
 
-# Create app directory
 WORKDIR /app/
 
-# Install app dependencies
 COPY package*.json ./
 
 ARG NODE_ENV
@@ -30,11 +30,9 @@ RUN if [ "$NODE_ENV" = "development" ]; \
       else npm install --only=production; \
     fi
 
-# Bundle app source
 COPY . .
 
 ENV NODE_ENV production
 ENV DISPLAY :99
 
-#CMD bash cleanTMP.sh
 CMD bash "./scripts/clean-xbfb-files.sh" & Xvfb :99 -screen 0 1024x768x16 -nolisten unix & npm run start_prod

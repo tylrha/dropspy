@@ -1,4 +1,6 @@
-const { join, extname, basename, dirname } = require('path')
+// PUPOSE: COPY NON-JAVASCRIPT TO DIST FOLDER SINCE TYPESCRIPT TSC WON'T
+
+const { join, extname, dirname } = require('path')
 const { statSync, readdirSync, copyFileSync, existsSync, mkdirSync } = require('fs')
 
 const ignoredExt = ['.ts', '.js', '.json']
@@ -47,7 +49,7 @@ function recFindByExt(base, ext, files, result) {
     } else {
       const curExt = extname(file)
       const extensionIndex = ignoredExt.findIndex(igExt => igExt === curExt)
-      if (extensionIndex === -1) {newResult.push(newbase)}
+      if (extensionIndex === -1) { newResult.push(newbase) }
     }
 
   })

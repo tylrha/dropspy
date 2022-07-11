@@ -1,3 +1,5 @@
+#DOCKER IGNORE FILES ACORDING TO: https://docs.docker.com/engine/reference/builder/#dockerignore-file
+
 #FOLDERS ====================
 .git/
 _local/

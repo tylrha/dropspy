@@ -28,8 +28,6 @@ async function importFromRootPath(globalPath: string): Promise<any>{
     const importedFile = await import(relativePath)
     return importedFile.default
   } catch(e){
-    // console.log(e)
-    // console.log(relativePath)
     console.log(`Couldnt find file: ${globalPath}\n`)
     return false
   }

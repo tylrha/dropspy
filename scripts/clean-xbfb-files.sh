@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#PURPOSE: CLEAN XVFB FILES BETWEEN EXECUTIONS
+
 echo $'CLEAR FILES INIT ===================='
 
 deleteFiles() {

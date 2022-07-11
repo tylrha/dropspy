@@ -1,7 +1,7 @@
 {
   "name": "dropspy",
   "version": "1.0.0",
-  "description": "cloud based shopify store spy system",
+  "description": "cloud based shopify stores spy system",
   "repository": {
     "type": "git",
     "url": "https://github.com/instigaremidia/dropspy-typescript.git"
@@ -50,7 +50,6 @@
     "dotenv": "^16.0.1",
     "ejs": "^3.1.8",
     "express": "^4.18.1",
-    "googleapis": "^105.0.0",
     "mongodb": "^4.7.0",
     "mongoose": "^6.4.3",
     "node-os-utils": "^1.3.7",
@@ -66,18 +65,13 @@
     "@types/jest": "^28.1.4",
     "@types/mongodb": "^4.0.7",
     "@types/mongoose": "^5.11.97",
-    "@types/pino": "^7.0.5",
-    "@types/pino-pretty": "^4.7.5",
     "@types/puppeteer": "^5.4.6",
     "commitizen": "^4.2.4",
     "husky": "^8.0.1",
     "jest": "^28.1.2",
-    "pino-pretty": "^8.1.0",
     "ts-jest": "^28.0.5",
     "ts-node": "^10.8.2",
     "ts-node-dev": "^2.0.0",
-    "tsconfig-paths": "^4.0.0",
-    "tscpaths": "^0.0.9",
     "typescript": "^4.7.4"
   }
 }

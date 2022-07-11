@@ -1,3 +1,5 @@
+// PUPOSE: COPY FOLDER TO ANOTHER PLACE SINCE TYPESCRIPT TSC WON'T
+
 const { join, basename } = require('path')
 const { existsSync, mkdirSync, readdirSync, lstatSync, copyFileSync } = require('fs')
 
