@@ -1,7 +1,7 @@
 import { WORKER_MAX_INSTANCES, CURRENT_DATETIME, SPYBOT_APP_USER, LOGGER } from "../../configs/configs"
 import { checkIfBotIsAllowedToSpy } from './components/check-spy-conditions'
 import { updateBotInfo, ENUM_UPDATE_BOT_INFO } from './components/spy-sheets-api'
-import initSpyLooping from "./components/init-spy-looping"
+import initSpyLooping from "./init-spy-looping"
 import Spybot from './models/Spybot'
 
 export default async function initSpyBot(){
@@ -34,6 +34,7 @@ export default async function initSpyBot(){
     LOGGER(`Erro: ${e.message}`, {from: 'SPYBOT', pid: true, isError: true})
   } finally{
     LOGGER(`Bot ${spybot.botIndex} - terminou de inciar\n`, {from: 'SPYBOT', pid: true})
+    return spybot
   }
 
 }

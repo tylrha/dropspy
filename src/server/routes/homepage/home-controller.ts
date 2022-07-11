@@ -3,11 +3,11 @@ import {
   LOGGER,
   VERSION,
 } from '../../../../configs/configs'
-import Master from '../../../models/Master'
+import Master from '../../../clusters/models/Master'
 
-export default async function(req, res){
+import {Request, Response} from 'express'
 
-  const MASTER: Master = global.MASTER
-
-  return res.send(`DROPSPY IS RUNNING AT VERSION ${VERSION} - ${MASTER.numberOfWorkers}\n`)
+export default async function(req: Request, res: Response){
+  const masterCluster: Master = global['MASTER'].masterCluster
+  return res.send(`DROPSPY IS RUNNING AT VERSION ${VERSION} - ${masterCluster.numberOfReadyWorkers}\n`)
 }

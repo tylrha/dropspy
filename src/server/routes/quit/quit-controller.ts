@@ -3,19 +3,18 @@ import {
   LOGGER,
   NODE_ENV
 } from '../../../../configs/configs'
-import Master from '../../../models/Master'
+import Master from '../../../clusters/models/Master'
 
-export default async function quiteRoute(req, res) {
+import {Request, Response} from 'express'
 
-  const MASTER: Master = global.MASTER
+export default async function quiteRoute(req: Request, res: Response){
 
+  const masterCluster: Master = global['MASTER'].masterCluster
   const exit = req.query.exit
 
   res.send('WORKER WAS QUITED\n')
-  MASTER.sendMessageToAllWorkers('quitSpy')
+  masterCluster.sendMessageToAllWorkers('quitSpy')
 
-  if (exit === 'true'){
-    process.exit()
-  }
+  if (exit === 'true'){process.exit()}
 
 }

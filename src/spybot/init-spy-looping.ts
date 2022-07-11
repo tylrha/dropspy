@@ -4,12 +4,12 @@ import {
   SPYBOT_LOOP_INTERVAL,
   DATABASE_DATABASE_SPY,
   DATABASE_LOGIN_URL
-} from "../../../configs/configs";
+} from "../../configs/configs";
 
-import { checkIfBotIsAllowedToSpy } from "./check-spy-conditions";
-import { updateBotInfo, ENUM_UPDATE_BOT_INFO } from "./spy-sheets-api";
-import updateDatabasePreSpy from '../database/update-database-pre-spy'
-import Spybot from "../models/Spybot";
+import { checkIfBotIsAllowedToSpy } from "./components/check-spy-conditions";
+import { updateBotInfo, ENUM_UPDATE_BOT_INFO } from "./components/spy-sheets-api";
+import updateDatabasePreSpy from './database/update-database-pre-spy'
+import Spybot from "./models/Spybot";
 
 const MONGOOSE_URL = `${DATABASE_LOGIN_URL}/${DATABASE_DATABASE_SPY}`
 import mongoose from 'mongoose'

@@ -3,7 +3,6 @@ import {
   CURRENT_DATETIME,
   IMPORT_MODULE,
   VERSION,
-  SERVER_BASE,
   LOGGER
 } from '../../configs/configs'
 

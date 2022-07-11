@@ -4,25 +4,25 @@ import {
   LOGGER
 } from '../../../../configs/configs'
 
-import Master from '../../../models/Master'
+import Master from '../../../clusters/models/Master'
+import {Request, Response} from 'express'
 
-export default async function restartWorkerRoute(req, res) {
+export default async function restartWorkerRoute(req: Request, res: Response) {
 
-  const MASTER: Master = global.MASTER
+  const masterCluster: Master = global['MASTER'].masterCluster
 
-  LOGGER(`Número de workers: ${MASTER.numberOfWorkers}`, {from: 'SERVER', pid: true})
+  LOGGER(`Reiniciando workers: ${masterCluster.numberOfReadyWorkers}`, {from: 'SERVER', pid: true})
   res.send('WORKER RESTARTED')
 
-  if (MASTER.numberOfWorkers > 0){MASTER.sendMessageToAllWorkers('quitSpy')}
+  if (masterCluster.numberOfReadyWorkers > 0){masterCluster.sendMessageToAllWorkers('quitSpy')}
 
-  LOGGER("CRIANDO NOVA INSTÂNCIA EM 10s")
+  LOGGER("CRIANDO NOVA INSTÂNCIA EM 10s", {from: 'SERVER', pid: true})
   setTimeout(() => {
-    MASTER.createWorkerInstances(1)
+    masterCluster.createWorkerInstances(1)
 
-    MASTER.runWhenWorkersAreReady()
-    .then((RES) => {
+    masterCluster.runWhenWorkersAreReady().then((RES) => {
       LOGGER('Todos os worker foram iniciados', {from: 'SERVER', pid: true})
-      MASTER.sendMessageToAllWorkers("startSpy")
+      masterCluster.sendMessageToAllWorkers("startSpy")
     })
   }, 10000)
 

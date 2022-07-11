@@ -12,24 +12,25 @@ import {
   SERVER_BASE
 } from "../../../configs/configs"
 
-
-import puppeteer from 'puppeteer-extra'
-import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 import { runJsOnPage, waitTillHTMLRendered } from "../../../utils/libraries/puppeteer"
 import { getSpyedStores, updateBotInfo, ENUM_UPDATE_BOT_INFO } from "../components/spy-sheets-api"
-import IAlihunterSale from '../interfaces/IAlihunterSale'
 
-import IStoreSheets from '../interfaces/IStoreSheets'
+import mongoose from 'mongoose'
+import puppeteer from 'puppeteer-extra'
+import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 import fetchJsonUrl from "../../../utils/functions/fetch-json-url"
 import addNewSaleToDatabase from "../database/add-new-sales-to-database"
+
 import { Browser, Page } from "puppeteer"
+import IAlihunterSale from '../interfaces/IAlihunterSale'
+import IStoreSheets from '../interfaces/IStoreSheets'
 
 export default class Spybot {
 
   public botIndex: string
   public isBotActive: boolean
-  public isLoggedInGoogle: boolean
-  public isLoggedInAlihunter: boolean
+  public isLoggedInGoogle: boolean | string
+  public isLoggedInAlihunter: boolean | string
   public botBrowser: Browser
   public spyedStoresArr: Array<IStoreSheets>
   public initialSpyDate: string
@@ -56,12 +57,12 @@ export default class Spybot {
     }
   }
 
-  async setup_spybot() {
+  async setup_spybot(): Promise<true | string> {
     try {
       const googlePage = await this.setupGooglePage()
       await this.loginAtGoogle(googlePage)
       this.isLoggedInGoogle = await this.checkGoogleLogin(googlePage)
-      if (!this.isLoggedInGoogle) { throw new Error("Erro ao logar no google") }
+      if (this.isLoggedInGoogle === false) { throw new Error("Erro ao logar no google") }
 
       const [width, height] = await this.getPageScreenResolution(googlePage)
       LOGGER(`Bot ${this.botIndex} - resolução atual: ${width} x ${height}`, { from: 'SPYBOT', pid: true })
@@ -78,7 +79,7 @@ export default class Spybot {
     }
   }
 
-  private async getBrowserInstance() {
+  private async getBrowserInstance(): Promise<Browser> {
 
     puppeteer.use(StealthPlugin())
 
@@ -108,14 +109,14 @@ export default class Spybot {
     });
   }
 
-  private async setupGooglePage() {
-    const googlePage = (await this.botBrowser.pages())[0];
+  private async setupGooglePage(): Promise<Page> {
+    const googlePage: Page = (await this.botBrowser.pages())[0];
     await googlePage.setViewport({ width: BROWSER_WIDTH, height: BROWSER_HEIGHT });
-    await googlePage.setDefaultNavigationTimeout(0);
+    googlePage.setDefaultNavigationTimeout(0);
     return googlePage
   }
 
-  private async loginAtGoogle(googlePage) {
+  private async loginAtGoogle(googlePage: Page): Promise<void> {
 
     try {
 
@@ -147,7 +148,7 @@ export default class Spybot {
 
   }
 
-  private async checkGoogleLogin(googlePage) {
+  private async checkGoogleLogin(googlePage: Page): Promise<false | string> {
 
     LOGGER(`Bot ${this.botIndex} - verifica login no Google`, { from: 'SPYBOT', pid: true })
 
@@ -180,7 +181,7 @@ export default class Spybot {
 
   }
 
-  private async getPageScreenResolution(page) {
+  private async getPageScreenResolution(page: Page): Promise<number[]> {
     const result = await page.evaluate(() => {
       const width = window.screen.width
       const height = window.screen.height
@@ -191,13 +192,13 @@ export default class Spybot {
   }
 
   private async setupAlihunterPage() {
-    const aliHunterPage = await this.botBrowser.newPage();
+    const aliHunterPage: Page = await this.botBrowser.newPage();
     await aliHunterPage.setViewport({ width: BROWSER_WIDTH, height: BROWSER_HEIGHT });
-    await aliHunterPage.setDefaultNavigationTimeout(0);
+    aliHunterPage.setDefaultNavigationTimeout(0);
     return aliHunterPage
   }
 
-  private async loginAtAlihunterWithGoogle(alihunterPage, height) {
+  private async loginAtAlihunterWithGoogle(alihunterPage: Page, height: number): Promise<void> {
 
     try {
 
@@ -252,12 +253,12 @@ export default class Spybot {
     }
   }
 
-  private async checkAlihunterLogin(alihunter) {
+  private async checkAlihunterLogin(alihunterPage: Page): Promise<false | string> {
 
     LOGGER(`Bot ${this.botIndex} - verifica login no Alihunter`, { from: 'SPYBOT', pid: true })
-    await waitTillHTMLRendered(alihunter)
+    await waitTillHTMLRendered(alihunterPage)
 
-    const loginResult = await alihunter.evaluate(async () => {
+    const loginResult = await alihunterPage.evaluate(async () => {
       const el: HTMLElement = document.querySelector('span.msui-text-truncate')
       return el ? el.innerText : false
     })
@@ -271,7 +272,7 @@ export default class Spybot {
     return loginResult
   }
 
-  async updateBotSpyedStores() {
+  async updateBotSpyedStores(): Promise<void> {
 
     LOGGER(`Bot ${this.botIndex} - Atualizando lista de lojas espionadas`, { from: "SPYBOT", pid: true })
     const tmpSpyedStores = await getSpyedStores(this.botIndex)
@@ -284,7 +285,7 @@ export default class Spybot {
     }
   }
 
-  async openSpyStores() {
+  async openSpyStores(): Promise<void> {
 
     const currentSpyedStoresArr = this.spyedStoresArr
     if (currentSpyedStoresArr.length === 0) { return }
@@ -300,7 +301,7 @@ export default class Spybot {
 
   }
 
-  private async openAndSetupSpyedStorePage(storeLink: string, page: any): Promise<void>{
+  private async openAndSetupSpyedStorePage(storeLink: string, page: Page): Promise<void>{
 
     const {
       getAlihunterVariables,
@@ -322,7 +323,7 @@ export default class Spybot {
 
   }
 
-  async hasChangeInSpyedStoresList() {
+  async hasChangeInSpyedStoresList(): Promise<boolean> {
 
     LOGGER(`Bot ${this.botIndex} - verifica se houve mudança nas lojas espionadas`, { from: 'SPYBOT', pid: true })
 
@@ -338,14 +339,14 @@ export default class Spybot {
     return hasChanged
   }
 
-  async pingBotServer() {
+  async pingBotServer(): Promise<void> {
 
     LOGGER(`Bot ${this.botIndex} - pingando servidor para evitar idle`, { from: 'SPYBOT', pid: true })
     await fetchJsonUrl(SERVER_BASE)
 
   }
 
-  async detectNewSalesInAllStores() {
+  async detectNewSalesInAllStores(): Promise<void> {
 
     const initialPages = 0
     const browserPages = (await this.botBrowser.pages()).length
@@ -391,14 +392,14 @@ export default class Spybot {
 
   }
 
-  private async getStoreRecentSalesArray(page): Promise<IAlihunterSale[]>  {
+  private async getStoreRecentSalesArray(page: Page): Promise<IAlihunterSale[]>  {
     await runJsOnPage(page, "clickOnLiveSalesButton()");
     const recentSoldProductsArr = await runJsOnPage(page, "getSoldProductsList()");
     await runJsOnPage(page, "clickOnLiveSalesButton()");
     return recentSoldProductsArr;
   }
 
-  async handleSpyListChanges(){
+  async handleSpyListChanges(): Promise<void>{
 
     LOGGER(`Bot ${this.botIndex} - lidando com mudanças na lista de espionagem`, { from: 'SPYBOT', pid: true })
     await this.closeAllPagesAndLetBlankPage()
@@ -406,7 +407,7 @@ export default class Spybot {
 
   }
 
-  async closeAllPagesAndLetBlankPage(){
+  async closeAllPagesAndLetBlankPage(): Promise<void>{
 
     const browserPages = await this.botBrowser.pages()
 
@@ -423,5 +424,21 @@ export default class Spybot {
     }
 
   }
+
+  async close(): Promise<void>{
+    LOGGER(`Bot ${this.botIndex} - fechando bot`, { from: 'SPYBOT', pid: true })
+
+    if (this.botBrowser){
+      await this.botBrowser.close()
+      LOGGER(`Bot ${this.botIndex} - fechando browser`, { from: 'SPYBOT', pid: true })
+    }
+
+    if (mongoose.STATES[mongoose.connection.readyState] === "connected"){
+      mongoose.connection.close()
+      LOGGER(`Bot ${this.botIndex} - fechando conexão com banco de dados`, { from: 'SPYBOT', pid: true })
+    }
+
+  }
+
 
 }
