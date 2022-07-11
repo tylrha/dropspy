@@ -63,7 +63,10 @@ export default class Worker {
       }
 
       if(command){
+
         const commandIndex = EMasterCommandsToWorkers[command]
+        const commandStr = EMasterCommandsToWorkers[commandIndex]
+        LOGGER(`Comando recebido do master: [${commandStr}]`, { from: 'WORKER', pid: true })
 
         if (commandIndex === EMasterCommandsToWorkers.START_SPY) { await this.initSpybot() }
         if (commandIndex === EMasterCommandsToWorkers.QUIT_SPY) { await this.closeSpybot() }

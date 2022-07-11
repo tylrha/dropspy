@@ -5,16 +5,23 @@ import {
 } from '../../../../configs/configs'
 import Master from '../../../clusters/models/Master'
 
-import {Request, Response} from 'express'
+import { Request, Response } from 'express'
 
-export default async function quiteRoute(req: Request, res: Response){
+export default async function quiteRoute(req: Request, res: Response) {
 
-  const masterCluster: Master = global['MASTER'].masterCluster
   const exit = req.query.exit
 
-  res.send('WORKER WAS QUITED\n')
-  masterCluster.sendMessageToAllWorkers('quitSpy')
+  try {
+    const masterCluster: Master = global['MASTER']?.masterCluster
+    if (!masterCluster) { throw new Error("Objeto MASTER ainda não foi definido") }
 
-  if (exit === 'true'){process.exit()}
+    res.send('WORKER WAS QUITED\n')
+    masterCluster.sendMessageToAllWorkers('quitSpy')
+
+    if (exit === 'true') { process.exit() }
+
+  } catch (e) {
+    res.json({ error: e.message })
+  }
 
 }

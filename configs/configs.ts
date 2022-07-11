@@ -1,6 +1,9 @@
 import dotenv from 'dotenv'
 dotenv.config()
 
+import {join} from 'path'
+import {readdirSync, statSync, existsSync} from 'fs'
+
 /* FILES ==================================================================== */
 
 import {readJson} from '../utils/libraries/utils'
@@ -55,10 +58,19 @@ const WORKER_MAX_INSTANCES = APP_CONFIGS['worker_configs'].max_instances
 
 /* BROWSER ================================================================== */
 
+const _getBrowserExtensionsString = () => {
+  const _unzipedExtensionsFolder = APP_CONFIGS['browser_configs'].browser_extensions_unziped_folder
+  const _doesFolderExist = existsSync(_unzipedExtensionsFolder)
+  if (!_doesFolderExist){return ""}
+
+  const _folderContentArr = readdirSync(_unzipedExtensionsFolder)
+  return _folderContentArr.filter(item => statSync(join(_unzipedExtensionsFolder, item)).isDirectory()).map(extFolder =>  ROOT_PATH(join(_unzipedExtensionsFolder, extFolder))).join()
+}
+
+const BROWSER_EXTENSIONS = _getBrowserExtensionsString()
 const BROWSER_HEADLESS_MODE = APP_CONFIGS['browser_configs'].headless_mode
 const BROWSER_WIDTH = APP_CONFIGS['browser_configs'].browser_width
 const BROWSER_HEIGHT = APP_CONFIGS['browser_configs'].browser_height
-const BROWSER_EXTENSIONS = APP_CONFIGS['browser_configs'].browser_extensions.map(ext => ROOT_PATH(ext)).join()
 
 /* GENERAL ================================================================== */
 

@@ -3,24 +3,19 @@
 const { join, extname, dirname } = require('path')
 const { statSync, readdirSync, copyFileSync, existsSync, mkdirSync, readFileSync } = require('fs')
 
-const JSON_CONFIGS_FILE = './configs/app-configs.json'
-const IGNORED_EXTENSIONS = ['.ts', '.js']
+const createFoldersRecursively = require('./createFoldersRecursively')
 
-if (existsSync(JSON_CONFIGS_FILE)) {
-  const CONFIGS_OBJECT = readFileSync(JSON_CONFIGS_FILE);
-  const SOURCE_FOLDER = JSON.parse(CONFIGS_OBJECT).project_configs.source_folder
-  const DIST_FOLDER = JSON.parse(CONFIGS_OBJECT).project_configs.dist_folder
-  copyNonJsSourceFilesToDist(SOURCE_FOLDER, DIST_FOLDER)
-}
+/* ########################################################################## */
 
-function copyNonJsSourceFilesToDist(sourceFolder, distFolder) {
+module.exports = function copyTypescriptIgnoredFilesToDist(sourceFolder, distFolder, ignoredExtensionsArr) {
 
-  console.log(`Copiando arquivos de ${sourceFolder} para ${distFolder} exceto esses: [${IGNORED_EXTENSIONS.join(";")}]\n`)
+  console.log(`-> Copiando arquivos ignorados pelo typescript de ${sourceFolder} para ${distFolder} exceto esses: [${ignoredExtensionsArr.join(";")}]`)
 
-  const nonJsFilesFromSourceArr = getOnlyAllowedFiles(sourceFolder, IGNORED_EXTENSIONS)
+  const nonJsFilesFromSourceArr = getOnlyAllowedFiles(sourceFolder, ignoredExtensionsArr)
   const copiedFiles = copyFilesToNewFolder(nonJsFilesFromSourceArr, sourceFolder, distFolder)
 
-  console.log(`\nForam copiados ${copiedFiles} de ${nonJsFilesFromSourceArr.length} arquivos!`)
+  console.log(`Foram copiados ${copiedFiles} de ${nonJsFilesFromSourceArr.length} arquivos!`)
+  console.log("")
 }
 
 /* ########################################################################## */
@@ -52,9 +47,9 @@ function getOnlyAllowedFiles(baseFolderPath, extensionsToIgnoreArr, oldFolderCon
 
 function copyFilesToNewFolder(filesToCopyArr, sourceFolderpath, outputBasePath) {
 
-  if (!filesToCopyArr || !sourceFolderpath || !outputBasePath) { return }
-  if (filesToCopyArr.length === 0) { return }
-  if (!existsSync(sourceFolderpath)) {return}
+  if (!filesToCopyArr || !sourceFolderpath || !outputBasePath) { return 0}
+  if (filesToCopyArr.length === 0) { return 0}
+  if (!existsSync(sourceFolderpath)) {return 0}
 
   let copiedFiles = 0
 
@@ -81,30 +76,6 @@ function copyFilesToNewFolder(filesToCopyArr, sourceFolderpath, outputBasePath) 
   }
 
   return copiedFiles
-}
-
-function createFoldersRecursively(newFolderPath){
-
-  if (!newFolderPath){return}
-
-  const foldersArr = newFolderPath.split('\\')
-  if (!foldersArr.length === 0){return}
-
-  let oldFolder = ""
-
-  for(const folder of foldersArr){
-
-    const newbase = join("./", oldFolder, folder)
-    const doesFolderExist = existsSync(newbase)
-
-    if (!doesFolderExist) {  
-      mkdirSync(newbase)
-    }
-
-    oldFolder = newbase
-
-  }
-
 }
 
 /* ########################################################################## */

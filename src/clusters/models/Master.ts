@@ -1,5 +1,5 @@
 import { LOGGER } from '../../../configs/configs'
-import cluster, {Worker} from 'cluster'
+import cluster, { Worker } from 'cluster'
 import { EMasterCommandsToWorkers } from '../interfaces/EMasterCommandsToWorkers'
 import { EWorkerCommandsToMaster } from '../interfaces/EWorkerCommandsToMaster'
 import { IMessageBetweenClusters } from '../interfaces/IMessageBetweenClusters'
@@ -12,7 +12,7 @@ export default class Master {
   public dataFromWorker: object
 
   constructor() {
-    LOGGER(`Master foi iniciado com sucesso`, {from: 'MASTER', pid: true})
+    LOGGER(`Master foi iniciado com sucesso`, { from: 'MASTER', pid: true })
 
     this.numberOfReadyWorkers = 0
     this.workersToCreate = 0
@@ -29,7 +29,7 @@ export default class Master {
       const currentWorker: Worker = cluster.fork()
 
       const currentWorkerPid = currentWorker.process.pid
-      LOGGER(`Worker [${x + 1}] criado com PID = ${currentWorkerPid}`, {from: 'MASTER', pid: true})
+      LOGGER(`Worker [${x + 1}] criado com PID = ${currentWorkerPid}`, { from: 'MASTER', pid: true })
       this.workersProcessesArr.push(currentWorkerPid)
       this.setupMasterEvents(currentWorker)
     }
@@ -54,7 +54,7 @@ export default class Master {
 
   }
 
-  async getDataFromWorker(): Promise<object>{
+  async getDataFromWorker(): Promise<object> {
 
     this.dataFromWorker = undefined
     await this.sendCommandToAllWorkers(EMasterCommandsToWorkers.GET_WORKER_INFO)
@@ -79,7 +79,7 @@ export default class Master {
 
   async sendMessageToAllWorkers(message: string) {
 
-    LOGGER(`Manda mensagem para todos os workers [${message}]`, {from: 'MASTER', pid: true})
+    LOGGER(`Manda mensagem para todos os workers [${message}]`, { from: 'MASTER', pid: true })
 
     const messageBetweenClusters: IMessageBetweenClusters = {
       message
@@ -90,10 +90,10 @@ export default class Master {
     }
   }
 
-  async sendCommandToAllWorkers(cmd: EMasterCommandsToWorkers, data?: object): Promise<void>{
+  async sendCommandToAllWorkers(cmd: EMasterCommandsToWorkers, data?: object): Promise<void> {
 
     const commandStr = EMasterCommandsToWorkers[cmd]
-    LOGGER(`Manda comando para todos os workers: [${commandStr}]`, {from: 'MASTER', pid: true})
+    LOGGER(`Manda comando para todos os workers: [${commandStr}]`, { from: 'MASTER', pid: true })
 
     let messageBetweenClusters: IMessageBetweenClusters = {
       command: commandStr
@@ -110,41 +110,47 @@ export default class Master {
 
     worker.on('message', (msgObj: IMessageBetweenClusters) => {
 
-      const {command, data, message} = msgObj
+      const { command, data, message } = msgObj
 
-      if (command){
+      if (message) {
+        LOGGER(`Msg do worker ${worker.process.pid} pro master: ${message}`, { from: 'MASTER', pid: true })
+        return
+      }
+
+      if (command) {
+
         const commandIndex = EWorkerCommandsToMaster[command]
-        if (commandIndex === EWorkerCommandsToMaster.WORKER_IS_READY){this.handleReadyWorkerCommand()}
-        if (commandIndex === EWorkerCommandsToMaster.UPDATE_WORKER_INFO){this.handleUpdateWorkerinfoCommand(data)}
+        const commandStr = EWorkerCommandsToMaster[commandIndex]
+        LOGGER(`Comando recebido do worker: [${commandStr}]`, { from: 'MASTER', pid: true })
+
+        if (commandIndex === EWorkerCommandsToMaster.WORKER_IS_READY) { this.handleReadyWorkerCommand() }
+        if (commandIndex === EWorkerCommandsToMaster.UPDATE_WORKER_INFO) { this.handleUpdateWorkerinfoCommand(data) }
       }
 
-      if (message){
-        LOGGER(`Msg do worker ${worker.process.pid} pro master: ${message}`, {from: 'MASTER', pid: true})
-      }
 
     });
 
     worker.on('exit', () => {
       const currentWorkerPid = worker.process.pid
-      LOGGER(`Fechou o worker ${currentWorkerPid}`, {from: 'MASTER', pid: true})
+      LOGGER(`Fechou o worker ${currentWorkerPid}`, { from: 'MASTER', pid: true })
       this.numberOfReadyWorkers -= 1
 
       const curWorkerIndex = this.workersProcessesArr.findIndex(el => el === currentWorkerPid)
-      if (curWorkerIndex > -1){
+      if (curWorkerIndex > -1) {
         this.workersProcessesArr.splice(curWorkerIndex, 1)
       }
     });
 
-    LOGGER(`Master events foi definido pro worker com PID = ${worker.process.pid}`, {from: 'MASTER', pid: true})
+    LOGGER(`Master events foi definido pro worker com PID = ${worker.process.pid}`, { from: 'MASTER', pid: true })
   }
 
   // ===========================================================================
 
-  private handleReadyWorkerCommand(): void{
+  private handleReadyWorkerCommand(): void {
     this.numberOfReadyWorkers += 1
   }
 
-  private handleUpdateWorkerinfoCommand(newDataObject): void{
+  private handleUpdateWorkerinfoCommand(newDataObject): void {
     this.dataFromWorker = newDataObject
   }
 
