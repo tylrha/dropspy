@@ -1,9 +1,7 @@
 'use strict' // PUPOSE: COPY NON-JAVASCRIPT TO DIST FOLDER SINCE TYPESCRIPT TSC WON'T
 
 const { join, extname, dirname } = require('path')
-const { statSync, readdirSync, copyFileSync, existsSync, mkdirSync, readFileSync } = require('fs')
-
-const createFoldersRecursively = require('./createFoldersRecursively')
+const { statSync, readdirSync, copyFileSync, existsSync, mkdirSync } = require('fs')
 
 /* ########################################################################## */
 
@@ -16,6 +14,7 @@ module.exports = function copyTypescriptIgnoredFilesToDist(sourceFolder, distFol
 
   console.log(`Foram copiados ${copiedFiles} de ${nonJsFilesFromSourceArr.length} arquivos!`)
   console.log("")
+
 }
 
 /* ########################################################################## */
@@ -79,3 +78,31 @@ function copyFilesToNewFolder(filesToCopyArr, sourceFolderpath, outputBasePath) 
 }
 
 /* ########################################################################## */
+
+
+function createFoldersRecursively(newFolderPath) {
+
+  if (!newFolderPath) { return }
+
+  console.log(`Criando pastas recursivas -> ${newFolderPath}`)
+
+  const foldersArr = newFolderPath.split('\\')
+  if (!foldersArr.length === 0) { return }
+
+  let oldFolder = ""
+
+  for (const folder of foldersArr) {
+
+    const newbase = join("./", oldFolder, folder)
+    const doesFolderExist = existsSync(newbase)
+
+    if (!doesFolderExist) {
+      mkdirSync(newbase)
+    }
+
+    oldFolder = newbase
+
+  }
+
+}
+

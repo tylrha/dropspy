@@ -1,7 +1,7 @@
+'use strict' // PUPOSE: COPY FOLDERS AND ITS CONTENT TO ANOTHER PLACE
+
 const { mkdirSync, readdirSync, lstatSync, copyFileSync, existsSync, rmSync } = require('fs')
 const { join } = require('path')
-
-const createFoldersRecursively = require('./createFoldersRecursively')
 
 module.exports = function copyFolderSync(sourceFolder, outputFolder) {
 
@@ -15,7 +15,7 @@ module.exports = function copyFolderSync(sourceFolder, outputFolder) {
   }
 
   const [copiedFolders, copiedFiles] = copyFolderRecursively(sourceFolder, outputFolder)
-  console.log(`Pasta foi copiada com ${copiedFolders.length - 1} subpastas e ${copiedFiles.length} arquivos`)
+  console.log(`Pasta foi copiada com ${copiedFolders.length} subpastas e ${copiedFiles.length} arquivos`)
   console.log("")
 }
 

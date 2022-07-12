@@ -7,7 +7,6 @@ import {
   SPYBOT_APP_USER,
   NODE_ENV,
   RUNING_TYPE,
-  BROWSER_EXTENSIONS
 } from '../configs/configs'
 
 import initServer from './server/server';
@@ -32,10 +31,10 @@ declare global {
 
 })()
 
+
 async function initMasterCluster(){
 
   LOGGER(`Executando DROPSPY em ambiente [${NODE_ENV}] e [${RUNING_TYPE}]`, { from: 'MASTER', pid: true })
-  LOGGER(`Extensões: ${BROWSER_EXTENSIONS}`, { from: 'MASTER', pid: true })
 
   await initServer()
 

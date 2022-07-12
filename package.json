@@ -30,11 +30,10 @@
     "dev": "ts-node-dev --transpile-only --respawn --ignore-watch node_modules src/index.ts",
     "test": "jest",
     "commit": "git-cz",
-    "server": "ts-node src/server/server.ts",
 
-    "prebuild": "node ./scripts/pre-build.js",
+    "prebuild": "node ./scripts/build/pre-build.js",
     "build": "node ./node_modules/typescript/bin/tsc",
-    "postbuild": "node ./scripts/post-build.js",
+    "postbuild": "node ./scripts/build/post-build.js",
 
     "docker_build": "docker build -t dropspy . ",
     "docker_pre_run": "bash ./dist/scripts/clean-xbfb-files.sh",
@@ -52,7 +51,6 @@
     "express": "^4.18.1",
     "mongoose": "^6.4.3",
     "node-os-utils": "^1.3.7",
-    "node-unrar-js": "^2.0.0",
     "puppeteer-extra": "^3.3.4",
     "puppeteer-extra-plugin-stealth": "^2.11.0",
     "unzipper": "^0.10.11"

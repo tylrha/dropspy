@@ -1,22 +1,27 @@
-'use strict' // PUPOSE: EXTRACT BROWSER EXTENSION FILES
-
 const { join, extname, basename, dirname } = require('path')
-const { statSync, createReadStream, createWriteStream, existsSync, readFileSync, mkdirSync, readdirSync, lstatSync, rmSync } = require("fs");
-const { Parse, Extract } = require('unzipper');
-const createFoldersRecursively = require('./createFoldersRecursively');
+const { Parse } = require('unzipper');
+const { createReadStream, createWriteStream, existsSync, mkdirSync, readdirSync, lstatSync, rmSync } = require("fs");
 
-module.exports = async function extractBrowserExtensionsFiles(extensionsFolder, unzipedExtensionsFolder) {
-  console.log(`-> Extraindo extensões do browser: ${extensionsFolder} -> ${unzipedExtensionsFolder}`)
-  const [allExtractedFolders, allExtractedFiles] = await unzipAllFilesFromFolder(extensionsFolder, unzipedExtensionsFolder)
-  console.log(`Foram extraídos ao total ${allExtractedFolders} e ${allExtractedFiles} arquivos`)
+import {
+  LOGGER,
+  BROWSER_EXTENSIONS_PATH,
+  BROWSER_EXTENSIONS_UNZIPED_PATH
+} from "../../../configs/configs";
+
+export default async function extractBrowserExtensions(){
+
+  LOGGER(`-> Extraindo extensões do browser: ${BROWSER_EXTENSIONS_PATH} -> ${BROWSER_EXTENSIONS_UNZIPED_PATH}`, {from: "SPYBOT", pid: true})
+  const [allExtractedFolders, allExtractedFiles] = await unzipAllFilesFromFolder(BROWSER_EXTENSIONS_PATH, BROWSER_EXTENSIONS_UNZIPED_PATH)
+  LOGGER(`Foram extraídos ao total ${allExtractedFolders} e ${allExtractedFiles} arquivos`, {from: "SPYBOT", pid: true})
   console.log("")
+
 }
 
 /* ########################################################################## */
 
 async function unzipAllFilesFromFolder(folderToUnzip, outputPath) {
 
-  console.log(`Descomprimindo extensões da pasta: ${folderToUnzip} para ${outputPath}`)
+  LOGGER(`Descomprimindo extensões da pasta: ${folderToUnzip} para ${outputPath}`, {from: "SPYBOT", pid: true})
 
   if (!folderToUnzip || !outputPath) { return [0, 0]}
   if (existsSync(!folderToUnzip)) { return [0, 0]}
@@ -25,7 +30,7 @@ async function unzipAllFilesFromFolder(folderToUnzip, outputPath) {
   let resultPromisesArr = []
   let allExtractedFolders = 0
   let allExtractedFiles = 0
-  
+
   for (const file of folderContent) {
 
     const curSource = join(folderToUnzip, file);
@@ -40,11 +45,11 @@ async function unzipAllFilesFromFolder(folderToUnzip, outputPath) {
       const outputFolder = join(outputPath, fileName)
 
       if (existsSync(outputFolder)) {
-        console.log(`Apagando pasta antiga da extensão: ${file}`)
+        LOGGER(`Apagando pasta antiga da extensão: ${file}`, {from: "SPYBOT", pid: true})
         rmSync(outputFolder, { recursive: true })
       }
 
-      console.log(`Descomprimindo o arquivo ${file} - ${outputFolder}`)
+      LOGGER(`Descomprimindo o arquivo ${file} - ${outputFolder}`, {from: "SPYBOT", pid: true})
 
       if (!existsSync(outputPath)) { mkdirSync(outputPath) }
 
@@ -82,7 +87,7 @@ async function unzipFile(fileToUnzip, outputFolder) {
           const finalPath = join(outputFolder, entry.path)
           const fileDirname = dirname(finalPath)
           if (!existsSync(fileDirname)){createFoldersRecursively(fileDirname)}
-          
+
           if (entry.type === "File"){
             extractedFiles += 1
             const writeStream = createWriteStream(finalPath);
@@ -96,26 +101,42 @@ async function unzipFile(fileToUnzip, outputFolder) {
         stream.on('error', (error) => reject(false));
 
       } catch (e) {
-        console.log(`Erro ao extrair arquivo: ${e.message}`)
+        LOGGER(`Erro ao extrair arquivo: ${e.message}`, {from: "SPYBOT", pid: true, isError: true})
         reject(false)
       }
     });
 
   } catch (e) {
-    console.log(`Erro ao descomprimir arquivo: ${e.message}`)
+    LOGGER(`Erro ao extrair arquivo: ${e.message}`, {from: "SPYBOT", pid: true, isError: true})
     return false
   }
 
 }
 
-/*
-
-
-      createReadStream(fileToUnzip)
-        .pipe(Extract({ path: outputFolder }))
-        .on('end', () => resolve(`Arquivo descompresso: ${fileToUnzip}`))
-        .on('error', () => reject(`Erro ao descomprimir o arquivo: ${fileToUnzip}`))
-
-*/
-
 /* ########################################################################## */
+
+function createFoldersRecursively(newFolderPath) {
+
+  if (!newFolderPath) { return }
+
+  // console.log(`Criando pastas recursivas -> ${newFolderPath}`)
+
+  const foldersArr = newFolderPath.split('\\')
+  if (foldersArr.length === 0) { return }
+
+  let oldFolder = ""
+
+  for (const folder of foldersArr) {
+
+    const newbase = join("./", oldFolder, folder)
+    const doesFolderExist = existsSync(newbase)
+
+    if (!doesFolderExist) {
+      mkdirSync(newbase)
+    }
+
+    oldFolder = newbase
+
+  }
+
+}

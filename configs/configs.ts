@@ -12,9 +12,8 @@ const APP_CONFIGS = readJson('/configs/app-configs.json')
 const DEFALT_NODE_ENV = "development"
 const NODE_ENV = process.env.NODE_ENV ? process.env.NODE_ENV : DEFALT_NODE_ENV
 
-const _dist_folder = APP_CONFIGS['project_configs'].dist_folder?.replace("./", "")
-const _parent_dir = basename(dirname(__dirname))
-const RUNING_TYPE = _parent_dir === _dist_folder ? "production" : "development"
+const DIST_FOLDER = APP_CONFIGS['project_configs'].dist_folder?.replace("./", "")
+const RUNING_TYPE = basename(dirname(__dirname)) === DIST_FOLDER ? "production" : "development"
 
 /* FUNCTIONS ================================================================ */
 
@@ -60,18 +59,12 @@ const WORKER_RESTART_INTERVAL = APP_CONFIGS['worker_configs'].restart_interval
 const WORKER_MAX_INSTANCES = APP_CONFIGS['worker_configs'].max_instances
 
 /* BROWSER ================================================================== */
-const _getBrowserExtensionsString = () => {
-  const _unzipedExtensionsFolder = APP_CONFIGS['browser_configs'].browser_extensions_unziped_folder
-  let _finalExtensionFolder = RUNING_TYPE === DEFALT_NODE_ENV ? _unzipedExtensionsFolder : join(_dist_folder, _unzipedExtensionsFolder)
+const _browser_extensions_path = APP_CONFIGS['browser_configs'].browser_extensions_zip_folder
+const BROWSER_EXTENSIONS_PATH = RUNING_TYPE === "development" ? _browser_extensions_path : join(DIST_FOLDER, _browser_extensions_path)
 
-  const _doesFolderExist = existsSync(_finalExtensionFolder)
-  if (!_doesFolderExist){return ""}
+const _browser_extensions_extracted_path = APP_CONFIGS['browser_configs'].browser_extensions_unziped_folder
+const BROWSER_EXTENSIONS_UNZIPED_PATH = RUNING_TYPE === "development" ? _browser_extensions_extracted_path : join(DIST_FOLDER, _browser_extensions_extracted_path)
 
-  const _folderContentArr = readdirSync(_finalExtensionFolder)
-  return _folderContentArr.filter(item => statSync(join(_finalExtensionFolder, item)).isDirectory()).map(extFolder =>  ROOT_PATH(join(_unzipedExtensionsFolder, extFolder))).join()
-}
-
-const BROWSER_EXTENSIONS = _getBrowserExtensionsString()
 const BROWSER_HEADLESS_MODE = APP_CONFIGS['browser_configs'].headless_mode
 const BROWSER_WIDTH = APP_CONFIGS['browser_configs'].browser_width
 const BROWSER_HEIGHT = APP_CONFIGS['browser_configs'].browser_height
@@ -95,6 +88,7 @@ export {
 
   DEFALT_NODE_ENV,
   NODE_ENV,
+  DIST_FOLDER,
   RUNING_TYPE,
 
   LOGGER,
@@ -120,10 +114,12 @@ export {
   WORKER_RESTART_INTERVAL,
   WORKER_MAX_INSTANCES,
 
+  BROWSER_EXTENSIONS_PATH,
+  BROWSER_EXTENSIONS_UNZIPED_PATH,
+
   BROWSER_HEADLESS_MODE,
   BROWSER_WIDTH,
   BROWSER_HEIGHT,
-  BROWSER_EXTENSIONS,
 
   VERSION,
   REDIS_URL,

@@ -1,29 +1,29 @@
 const dotenv = require('dotenv')
 dotenv.config()
 
-const { existsSync, rmSync, readFileSync } = require('fs')
+const { existsSync, readFileSync } = require('fs')
 const JSON_CONFIGS_FILE = process.env.npm_package_config_configfile || '-'
+const deleteOldDistFolder = require('./delete-old-dist-folder')
 
 /* ########################################################################## */
 
-async function prebuild(){
+async function prebuild() {
 
   console.log("#### PRE-BUILD SCRIPTS #################")
 
-  if (existsSync(JSON_CONFIGS_FILE)) {
-  
+  try {
+
+    if (!existsSync(JSON_CONFIGS_FILE)) {throw new Error("Erro ao ler arquivo de configurações!")}
+
     const CONFIGS_OBJECT = JSON.parse(readFileSync(JSON_CONFIGS_FILE));
     const DIST_FOLDER = CONFIGS_OBJECT?.project_configs?.dist_folder
-  
-    if (DIST_FOLDER && existsSync(DIST_FOLDER)) {
-      rmSync(DIST_FOLDER, { recursive: true });
-      console.log(`PASTA APAGADA: ${DIST_FOLDER}`)
-    } else {
-      console.log(`PASTA NÃO EXISTE: ${DIST_FOLDER}`)
-    }
-  
+
+    deleteOldDistFolder(DIST_FOLDER)
+
+  } catch (e) {
+    console.log(`Erro no pré-building: ${e.message}`)
   }
-  
+
   console.log("########################################")
 
 }

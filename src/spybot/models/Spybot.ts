@@ -1,5 +1,11 @@
+import {readdirSync, statSync, existsSync} from 'fs'
+import {join} from 'path'
+import mongoose from 'mongoose'
+import puppeteer from 'puppeteer-extra'
+import StealthPlugin from 'puppeteer-extra-plugin-stealth'
+import { Browser, Page } from "puppeteer"
+
 import {
-  BROWSER_EXTENSIONS,
   BROWSER_WIDTH,
   BROWSER_HEIGHT,
   BROWSER_HEADLESS_MODE,
@@ -9,21 +15,22 @@ import {
   NODE_ENV,
   LOGGER,
   SERVER_BASE,
-  DEFALT_NODE_ENV
+  DEFALT_NODE_ENV,
+  BROWSER_EXTENSIONS_PATH,
+  BROWSER_EXTENSIONS_UNZIPED_PATH,
+  ROOT_PATH,
+  DIST_FOLDER
 } from "../../../configs/configs"
 
 import { runJsOnPage, waitTillHTMLRendered } from "../../../utils/libraries/puppeteer"
 import { getSpyedStores, updateBotInfo, ENUM_UPDATE_BOT_INFO } from "../components/spy-sheets-api"
 
-import mongoose from 'mongoose'
-import puppeteer from 'puppeteer-extra'
-import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 import fetchJsonUrl from "../../../utils/functions/fetch-json-url"
 import addNewSaleToDatabase from "../database/add-new-sales-to-database"
 
-import { Browser, Page } from "puppeteer"
 import IAlihunterSale from '../interfaces/IAlihunterSale'
 import IStoreSheets from '../interfaces/IStoreSheets'
+import extractBrowserExtensions from "../components/extract-browser-extensions"
 
 export default class Spybot {
 
@@ -57,12 +64,32 @@ export default class Spybot {
 
     try {
 
+      if (!existsSync(BROWSER_EXTENSIONS_UNZIPED_PATH)) {
+        if (!existsSync(BROWSER_EXTENSIONS_PATH)){throw new Error("Nãh há extensões para extrair")}
+        LOGGER(`Bot ${this.botIndex} - extraindo extensões do bot`, { from: 'SPYBOT', pid: true })
+        await extractBrowserExtensions()
+      } else {
+        LOGGER(`Bot ${this.botIndex} - extensões já estavam extraídas`, { from: 'SPYBOT', pid: true })
+      }
+
       puppeteer.use(StealthPlugin())
+
+      const _getBrowserExtensionsString = () => {
+        const _unzipedExtensionsContentArr = readdirSync(BROWSER_EXTENSIONS_UNZIPED_PATH)
+        const _unzipedExtensionsFoldersArr = _unzipedExtensionsContentArr.filter(item => statSync(join(BROWSER_EXTENSIONS_UNZIPED_PATH, item)).isDirectory())
+        const _unzipedExtensionsFoldersWithCompletePathArr = _unzipedExtensionsFoldersArr.map(extFolder => ROOT_PATH(join(BROWSER_EXTENSIONS_UNZIPED_PATH.replace(DIST_FOLDER, ""), extFolder)))
+        const _allFoldersString = _unzipedExtensionsFoldersWithCompletePathArr.join()
+        return _allFoldersString
+      }
+
+      const allExtensionsPathString = _getBrowserExtensionsString()
+
+      if (allExtensionsPathString === ""){throw new Error("Nãh há extensões para o browser")}
 
       const customArgs = [
         '--no-sandbox',
-        `--disable-extensions-except=${BROWSER_EXTENSIONS}`,
-        `--load-extension=${BROWSER_EXTENSIONS}`,
+        `--disable-extensions-except=${allExtensionsPathString}`,
+        `--load-extension=${allExtensionsPathString}`,
         `--window-size=${BROWSER_WIDTH},${BROWSER_HEIGHT}`,
       ];
 
@@ -77,7 +104,7 @@ export default class Spybot {
       return browserObject
 
     } catch (e) {
-      console.log(e.message)
+      LOGGER(`Bot ${this.botIndex} - erro ao criar o browser: ${e.message}`, { from: 'SPYBOT', pid: true, isError: true })
     }
 
   }
@@ -212,7 +239,7 @@ export default class Spybot {
       await alihunterPage.goto(URL_ALIHUNTER_LOGIN)
       await waitTillHTMLRendered(alihunterPage)
 
-      const googleClickButton = await alihunterPage.evaluate(async () => {
+      await alihunterPage.evaluate(async () => {
 
         const googleLoginQuery = ".LoginPage_btnGoogle__UQryr"
         const elGoogleLogin: HTMLElement = document.querySelector(googleLoginQuery)
@@ -221,12 +248,9 @@ export default class Spybot {
 
         if (elGoogleLogin){
           elGoogleLogin.click()
-          return elGoogleLogin.innerText
         }
 
       })
-
-      console.log(googleClickButton)
 
       await waitTillHTMLRendered(alihunterPage)
       await DELAY(10000)
