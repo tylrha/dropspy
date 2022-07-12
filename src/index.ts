@@ -1,6 +1,12 @@
-import { WORKER_MAX_INSTANCES, LOGGER, CURRENT_DATETIME, SPYBOT_LOOP_INTERVAL } from '../configs/configs'
-
 import cluster from 'cluster'
+
+import { 
+  LOGGER, 
+  CURRENT_DATETIME, 
+  SPYBOT_LOOP_INTERVAL,
+  SPYBOT_APP_USER
+} from '../configs/configs'
+
 import initServer from './server/server';
 import Master from './clusters/models/Master'
 import Worker from './clusters/models/Worker'
@@ -21,23 +27,23 @@ declare global {
     await initServer()
 
     const masterInstance = new Master()
-    masterInstance.createWorkerInstances(WORKER_MAX_INSTANCES)
+    masterInstance.createWorkerInstance(SPYBOT_APP_USER)
 
     masterInstance.runWhenWorkersAreReady().then(async (RES) => {
       LOGGER('Todos os worker foram iniciados', { from: 'MASTER', pid: true })
 
-      masterInstance.sendCommandToAllWorkers(EMasterCommandsToWorkers.START_SPY)
-
       global.MASTER = {
         masterCluster: masterInstance,
       }
+
+      // masterInstance.sendCommandToAllWorkers(EMasterCommandsToWorkers.START_SPY)
 
     })
 
   } else if (cluster.isWorker) {
 
     const newWorker = new Worker(process)
-    newWorker.init()
+    await newWorker.init()
 
     global.WORKER = {
       workerCluster: newWorker,

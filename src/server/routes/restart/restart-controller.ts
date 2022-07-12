@@ -19,7 +19,7 @@ export default async function restartWorkerRoute(req: Request, res: Response) {
     LOGGER(`/RESTART`, {from: 'SERVER', pid: true})
     
     if (masterCluster.numberOfReadyWorkers > 0){
-      masterCluster.sendCommandToAllWorkers(EMasterCommandsToWorkers.QUIT_SPY)
+      masterCluster.sendCommandToAllWorkers(EMasterCommandsToWorkers.CLOSE_WORKER)
       res.send(`WORKER WILL RESTART IN ${WORKER_RESTART_INTERVAL}s`)
     } else {
       res.send(`WORKER WILL BE CREATED IN ${WORKER_RESTART_INTERVAL}s`)
@@ -27,7 +27,7 @@ export default async function restartWorkerRoute(req: Request, res: Response) {
   
     LOGGER(`CRIANDO NOVA INSTÂNCIA EM ${WORKER_RESTART_INTERVAL}s`, {from: 'SERVER', pid: true})
     setTimeout(() => {
-      masterCluster.createWorkerInstances(1)
+      masterCluster.createWorkerInstance()
   
       masterCluster.runWhenWorkersAreReady().then((RES) => {
         LOGGER('Todos os worker foram iniciados', {from: 'SERVER', pid: true})

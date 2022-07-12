@@ -16,7 +16,7 @@
   },
 
   "worker_configs": {
-    "max_instances": 1,
+    "max_instances": 2,
     "restart_interval": 20
   },
 
@@ -25,10 +25,7 @@
     "browser_width": 1366,
     "browser_height": 768,
     "browser_extensions_zip_folder": "./src/spybot/assets",
-    "browser_extensions_unziped_folder": "./extensions_unziped",
-    "browser_extensions": [
-      "/extensions/alihunter"
-    ]
+    "browser_extensions_unziped_folder": "./extensions_unziped"
   },
 
   "database_configs": {

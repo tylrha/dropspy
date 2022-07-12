@@ -1,6 +1,7 @@
 import {
-  SPYBOT_APP_USER
+  LOGGER
 } from "../../../configs/configs";
+
 import { getAllBotsArr, getBotsOption } from "./spy-sheets-api";
 
 export {
@@ -10,7 +11,7 @@ export {
   checkIfCurrentBotIsActive
 }
 
-async function checkIfBotIsAllowedToSpy(botname){
+async function checkIfBotIsAllowedToSpy(botname: string){
   const allBotsArr = await getAllBotsArr()
   if (!allBotsArr){return "Erro na lista de bots"}
 
@@ -27,11 +28,11 @@ async function checkIfBotIsAllowedToSpy(botname){
 
 }
 
-function getBotIndex(botsArr, botname){
+function getBotIndex(botsArr, botname: string){
   return botsArr.findIndex(bot => bot[1] === botname)
 }
 
-function checkIfBotIsInList(botsArr, botname) {
+function checkIfBotIsInList(botsArr, botname: string) {
 
   const botIndex = getBotIndex(botsArr, botname)
 
@@ -43,7 +44,7 @@ function checkIfBotIsInList(botsArr, botname) {
 
 }
 
-function checkIfCurrentBotIsActive(botsArr, botname) {
+function checkIfCurrentBotIsActive(botsArr, botname: string) {
 
   const botIndex = getBotIndex(botsArr, botname)
   const shouldCurrentBotRun = botsArr[botIndex][0] === "Ativo"

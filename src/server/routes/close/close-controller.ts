@@ -20,7 +20,7 @@ export default async function quiteRoute(req: Request, res: Response) {
     if (!masterCluster) { throw new Error("Objeto MASTER ainda não foi definido") }
 
     if (masterCluster.numberOfReadyWorkers > 0) {
-      masterCluster.sendCommandToAllWorkers(EMasterCommandsToWorkers.QUIT_SPY)
+      masterCluster.sendCommandToAllWorkers(EMasterCommandsToWorkers.CLOSE_WORKER)
       if (exit === 'true') { process.exit() }
       res.send('WORKER WAS CLOSE\n')
     } else {

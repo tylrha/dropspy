@@ -1,6 +1,5 @@
 import {
   GSHEET_IM_SPY_API_URL,
-  SPYBOT_APP_USER,
   VERSION,
   CURRENT_DATETIME,
   SPYBOT_LOOP_INTERVAL,
@@ -110,11 +109,11 @@ async function getSpyedStores(botName: string): Promise<string | IStoreSheets[]>
 }
 
 
-async function updateBotInfo(infoToUpdate: ENUM_UPDATE_BOT_INFO): Promise<void>{
+async function updateBotInfo(infoToUpdate: ENUM_UPDATE_BOT_INFO, botIndex: string): Promise<void>{
 
   let queryFinal;
 
-  const infoToUpdateStr = ENUM_UPDATE_BOT_INFO[ENUM_UPDATE_BOT_INFO[infoToUpdate]]
+  const infoToUpdateStr = ENUM_UPDATE_BOT_INFO[infoToUpdate]
 
   if (infoToUpdate === ENUM_UPDATE_BOT_INFO.INITIAL_INFO){
     queryFinal = `botVersion=${VERSION}&botLoopInterval=${Number(SPYBOT_LOOP_INTERVAL)/60}`
@@ -131,7 +130,7 @@ async function updateBotInfo(infoToUpdate: ENUM_UPDATE_BOT_INFO): Promise<void>{
 
   LOGGER(`Atualizando informações do bot na planilha - ${infoToUpdateStr}`, {from: "SPYBOT", pid: true})
 
-  const finalUrl = `${GSHEET_IM_SPY_API_URL}?method=updatebot&bot=${SPYBOT_APP_USER}&${queryFinal}`
+  const finalUrl = `${GSHEET_IM_SPY_API_URL}?method=updatebot&bot=${botIndex}&${queryFinal}`
   const response = await fetchJsonUrl(finalUrl)
 
 }

@@ -1,5 +1,4 @@
 import {
-  SPYBOT_APP_USER,
   LOGGER,
   CURRENT_DATETIME
 } from "../../../../configs/configs";

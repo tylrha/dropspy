@@ -3,7 +3,8 @@ import {
   NODE_ENV,
   LOGGER,
   WORKER_RESTART_INTERVAL,
-  WORKER_MAX_INSTANCES
+  WORKER_MAX_INSTANCES,
+  SPYBOT_APP_USER
 } from '../../../../configs/configs'
 
 import Master from '../../../clusters/models/Master'
@@ -12,7 +13,7 @@ import { EMasterCommandsToWorkers } from '../../../clusters/interfaces/EMasterCo
 
 export default async function createWorkerRoute(req: Request, res: Response) {
 
-  const index = req.query.index
+  const index = req?.query?.index as string 
 
   try {
     const masterCluster: Master = global['MASTER']?.masterCluster
@@ -25,17 +26,19 @@ export default async function createWorkerRoute(req: Request, res: Response) {
       return
     }
 
+    let finalIndex = index ? index : SPYBOT_APP_USER
+    const isWorkerAlreadyRuning = masterCluster.workersProcessesArr.find(worker => worker.botIndex === finalIndex)
+
+    if (isWorkerAlreadyRuning){
+      res.send(`WORKER ${finalIndex} IS ALREADY RUNNING, CHOOSE A DIFERENT BOTINDEX!`)
+      return
+    }
+
     res.send(`WORKER WILL BE CREATED IN ${WORKER_RESTART_INTERVAL}s`)
+
     LOGGER(`CRIANDO NOVA INSTÂNCIA EM ${WORKER_RESTART_INTERVAL}s`, { from: 'SERVER', pid: true })
     setTimeout(() => {
-
-      // index
-      masterCluster.createWorkerInstances(1)
-      masterCluster.runWhenWorkersAreReady().then((RES) => {
-        LOGGER('Todos os worker foram iniciados', { from: 'SERVER', pid: true })
-        masterCluster.sendCommandToAllWorkers(EMasterCommandsToWorkers.START_SPY)
-      })
-
+      masterCluster.createWorkerInstance(index)
     }, Number(WORKER_RESTART_INTERVAL) * 1000)
 
   } catch (e) {

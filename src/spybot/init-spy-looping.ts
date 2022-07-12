@@ -30,7 +30,7 @@ export default async function initSpyLooping(spybot: Spybot, initialDate?: strin
   try{
     await spybot.pingBotServer()
 
-    await updateBotInfo(ENUM_UPDATE_BOT_INFO.CHECKED_INFO)
+    await updateBotInfo(ENUM_UPDATE_BOT_INFO.CHECKED_INFO, spybot.botIndex)
 
     if (!isFirstInit){
       const isBotAllowedToSpy = await checkIfBotIsAllowedToSpy(spybot.botIndex)

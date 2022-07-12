@@ -1,5 +1,4 @@
 import {
-  SPYBOT_APP_USER,
   BROWSER_EXTENSIONS,
   BROWSER_WIDTH,
   BROWSER_HEIGHT,
@@ -33,8 +32,8 @@ export default class Spybot {
   public botSpyedStoresArr: Array<IStoreSheets>
   public botInitialSpyDate: string
 
-  constructor(index?: string) {
-    this.botIndex = index ? index : SPYBOT_APP_USER
+  constructor(index: string) {
+    this.botIndex = index
     this.botCheckedTimes = 0
     // this.botBrowser
     // this.botSpyedStoresArr
@@ -418,7 +417,7 @@ export default class Spybot {
     }
 
     LOGGER(`Foram adicionadas um total de ${currentCheckSaleCount} vendas ao BD`, { from: 'SPYBOT', pid: true })
-    if (currentCheckSaleCount > 0) { await updateBotInfo(ENUM_UPDATE_BOT_INFO.LAST_SALE_TIME); console.log("")}
+    if (currentCheckSaleCount > 0) { await updateBotInfo(ENUM_UPDATE_BOT_INFO.LAST_SALE_TIME, this.botIndex); console.log("")}
 
   }
 
