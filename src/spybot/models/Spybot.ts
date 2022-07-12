@@ -283,11 +283,11 @@ export default class Spybot {
 
     if (typeof tmpSpyedStores === "string") {
       LOGGER(`Bot ${this.botIndex} - ${tmpSpyedStores}`, { from: "SPYBOT", pid: true })
-      global.WORKER.workerInformation.spyedStores = []
+      global.WORKER.workerInformation.workerInfo.spyedStores = []
     } else {
       LOGGER(`Bot ${this.botIndex} - Foram encontradas ${tmpSpyedStores.length} lojas a seram espionadas`, { from: "SPYBOT", pid: true })
       this.botSpyedStoresArr = tmpSpyedStores
-      global.WORKER.workerInformation.spyedStores = tmpSpyedStores
+      global.WORKER.workerInformation.workerInfo.spyedStores = tmpSpyedStores
     }
   }
 

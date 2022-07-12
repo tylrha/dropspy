@@ -12,7 +12,7 @@
 
   "server_configs": {
     "job_wait_seconds": 30,
-    "default_port": 3000
+    "default_port": 3333
   },
 
   "worker_configs": {

@@ -79,7 +79,7 @@ export default class Worker {
   private async handleRequestForWorkerInformation(): Promise<void> {
 
     LOGGER(`Obtem informações de espionagem`, { from: 'WORKER', pid: true })
-    const objToSend = global.WORKER.workerInformation
+    const objToSend = global.WORKER?.workerInformation || {}
     this.sendCommandToMaster(EWorkerCommandsToMaster.SEND_WORKER_INFO_TO_MASTER, objToSend)
 
   }

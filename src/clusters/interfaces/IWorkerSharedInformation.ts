@@ -1,6 +1,6 @@
 import IStoreSheets from '../../spybot/interfaces/IStoreSheets'
 
-interface IWorkerSharedInformation {
+interface IWorkerShortedInformation {
   loopInterval?: number,
 
   startedTime?: string,
@@ -17,4 +17,11 @@ interface IWorkerSharedInformation {
   isSpybotActive?: boolean
 }
 
-export {IWorkerSharedInformation}
+interface IWorkerSharedInformation {
+
+  workerProcessPId: number,
+  workerInfo?: IWorkerShortedInformation
+
+}
+
+export {IWorkerSharedInformation, IWorkerShortedInformation}

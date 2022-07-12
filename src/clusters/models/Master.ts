@@ -1,14 +1,16 @@
-import { CURRENT_DATETIME, LOGGER, WORKER_MAX_INSTANCES } from '../../../configs/configs'
+import { CURRENT_DATETIME, DELAY, LOGGER, WORKER_MAX_INSTANCES } from '../../../configs/configs'
 import cluster, { Worker } from 'cluster'
 import { EMasterCommandsToWorkers } from '../interfaces/EMasterCommandsToWorkers'
 import { EWorkerCommandsToMaster } from '../interfaces/EWorkerCommandsToMaster'
 import { IMessageBetweenClusters } from '../interfaces/IMessageBetweenClusters'
-import { IWorkerSharedInformation } from '../interfaces/IWorkerSharedInformation'
+import { IWorkerSharedInformation, IWorkerShortedInformation } from '../interfaces/IWorkerSharedInformation'
 import { IMasterSharedInformation } from '../interfaces/IMasterSharedInformation'
 
 interface ImasterWorkersArr {
   processPid: number,
-  botIndex: string
+  id: number,
+  botIndex: string,
+  dataFromWorker?: IWorkerShortedInformation
 }
 
 export default class Master {
@@ -17,7 +19,6 @@ export default class Master {
   public numberOfReadyWorkers: number
   public workersToCreate: number
   public workersProcessesArr: ImasterWorkersArr[]
-  public dataFromWorker: IWorkerSharedInformation
 
   constructor() {
     LOGGER(`Master foi iniciado com sucesso`, { from: 'MASTER', pid: true })
@@ -26,7 +27,6 @@ export default class Master {
     this.numberOfReadyWorkers = 0
     this.workersToCreate = 0
     this.workersProcessesArr = []
-    // this.dataFromWorker
   }
 
   // ===========================================================================
@@ -42,11 +42,14 @@ export default class Master {
   
       const currentWorker: Worker = cluster.fork()
       const currentWorkerPid = currentWorker.process.pid
-      LOGGER(`Worker [${currentWorkerNumber}] criado com PID = ${currentWorkerPid}`, { from: 'MASTER', pid: true })
+      const currentWorkerId = currentWorker.id
+
+      LOGGER(`Worker [${currentWorkerNumber}] criado com PID = ${currentWorkerPid} e ID = [${currentWorkerId}]`, { from: 'MASTER', pid: true })
 
       const workersObj = {
         processPid: currentWorkerPid,
-        botIndex
+        id: currentWorkerId,
+        botIndex,
       }
 
       this.workersProcessesArr.push(workersObj)
@@ -101,14 +104,28 @@ export default class Master {
   // ===========================================================================
 
   private handleUpdateOnWorkerReadyState(): void {
+
+    LOGGER(`Worker disse que está pronto!`, { from: 'MASTER', pid: true })
+
     this.numberOfReadyWorkers += 1
-    this.workersToCreate -= 1
+
   }
 
   private handleUpdateOnWorkerInformation(newDataObject: IWorkerSharedInformation): void {
 
     LOGGER(`Recebi informações do worker`, { from: 'MASTER', pid: true })
-    this.dataFromWorker = newDataObject
+
+    const workerInfo = newDataObject.workerInfo
+    const workerProcessPId = newDataObject.workerProcessPId
+
+    const workerIndex = this.workersProcessesArr.findIndex(worker => worker.processPid === workerProcessPId)
+
+    if (workerIndex > -1){
+      this.workersProcessesArr[workerIndex].dataFromWorker = {
+        ...workerInfo
+      }
+    }
+
   }
 
   private handleRequestForMasterInformation(requesterWorker: any){
@@ -116,18 +133,19 @@ export default class Master {
     LOGGER(`Manda master info para o bot worker com pid = [${requesterWorker.worker}]`, { from: 'MASTER', pid: true })
 
     const requesterWorkerObj = this.workersProcessesArr.find(workers => workers.processPid === requesterWorker.worker)
+
     const objToSend: IMasterSharedInformation = {
       startedTime: this.startedTime,
       spybotIndex: requesterWorkerObj.botIndex
     }
 
-    this.sendCommandToAllWorkers(EMasterCommandsToWorkers.SEND_MASTER_INFO_TO_WORKER, objToSend)
+    this.sendCommandToWorkers(EMasterCommandsToWorkers.SEND_MASTER_INFO_TO_WORKER, objToSend, requesterWorkerObj.id)
 
   }
 
   // ===========================================================================
 
-  sendMessageToAllWorkers(message: string): void {
+  sendMessageToWorkers(message: string, specificWorkerId?: number): void {
 
     LOGGER(`Manda mensagem para todos os workers [${message}]`, { from: 'MASTER', pid: true })
 
@@ -140,7 +158,7 @@ export default class Master {
     }
   }
 
-  sendCommandToAllWorkers(cmd: EMasterCommandsToWorkers, data?: object): void {
+  sendCommandToWorkers(cmd: EMasterCommandsToWorkers, data: object, specificWorkerId?: number): void {
 
     const commandStr = EMasterCommandsToWorkers[cmd]
     LOGGER(`Manda comando para todos os workers: [${commandStr}]`, { from: 'MASTER', pid: true })
@@ -153,6 +171,8 @@ export default class Master {
 
     for (const id in cluster.workers) {
       cluster.workers[id].send(messageBetweenClusters)
+
+      cluster.workers
     }
   }
 
@@ -163,7 +183,9 @@ export default class Master {
     return new Promise((resolve, reject) => {
 
       const checkPromiseConditions = () => {
+
         if (this.numberOfReadyWorkers === this.workersToCreate) {
+          this.workersToCreate -= 1
           resolve(true)
         } else {
           setTimeout(checkPromiseConditions, 1000)
@@ -176,16 +198,36 @@ export default class Master {
 
   }
 
-  async getDataFromWorker(): Promise<object> {
+  async getDataFromWorker(): Promise<ImasterWorkersArr[]> {
 
-    this.dataFromWorker = undefined
-    this.sendCommandToAllWorkers(EMasterCommandsToWorkers.GET_WORKER_INFO)
+    for(let x = 0; x < this.workersProcessesArr.length; x++){
+
+      const curWorker = this.workersProcessesArr[x]
+      const curWorkerPid = curWorker.processPid
+      const curWorkerIndex = this.workersProcessesArr.findIndex(worker => worker.processPid === curWorkerPid)
+
+      LOGGER(`${x} - Obtendo dados do worker com pid = [${curWorkerPid}] e index = ${curWorkerIndex}`, { from: 'SERVER', pid: true })
+      
+      this.workersProcessesArr[curWorkerIndex].dataFromWorker = {}
+      this.sendCommandToWorkers(EMasterCommandsToWorkers.GET_WORKER_INFO, {}, curWorkerPid)
+
+      await this.waitForGetWorkerInfo(curWorkerIndex)
+    }
+    
+    return this.workersProcessesArr
+  }
+
+  private async waitForGetWorkerInfo(workerIndex: number): Promise<void>{
 
     return new Promise((resolve, reject) => {
-
+  
       const checkPromiseConditions = () => {
-        if (this.dataFromWorker !== undefined) {
-          resolve(this.dataFromWorker)
+
+        const currentWorkerInfoObj = this.workersProcessesArr[workerIndex].dataFromWorker
+        const hasUpdatedWOrkerInfo = currentWorkerInfoObj.hasOwnProperty('loopInterval')
+        
+        if (hasUpdatedWOrkerInfo) {
+          resolve()
         } else {
           setTimeout(checkPromiseConditions, 1000)
         }
@@ -194,7 +236,6 @@ export default class Master {
       checkPromiseConditions()
 
     })
-
   }
 
   // ===========================================================================

@@ -33,6 +33,7 @@
     "dev": "ts-node-dev --transpile-only --respawn --ignore-watch node_modules src/index.ts",
     "test": "jest",
     "commit": "git-cz",
+    "server": "ts-node src/server/server.ts",
     "docker_build": "docker build -t dropspy . ",
     "docker_run": "echo run",
     "start_dev": "ts-node src/index.ts",

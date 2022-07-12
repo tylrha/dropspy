@@ -86,8 +86,8 @@ export default async function addNewSaleToDatabase(alihunterSalesArr: IAlihunter
     await addSaleToStoresDatabase(saleObject)
     await addSaleToDatesDatabase(saleObject)
 
-    global.WORKER.workerInformation.trackedSales = currentTrackedSales
-    global.WORKER.workerInformation.trackedRevenue = Number(currentTrackedRevenue.toFixed(2))
+    global.WORKER.workerInformation.workerInfo.trackedSales = currentTrackedSales
+    global.WORKER.workerInformation.workerInfo.trackedRevenue = Number(currentTrackedRevenue.toFixed(2))
   }
 
 

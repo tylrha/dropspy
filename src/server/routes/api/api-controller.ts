@@ -17,29 +17,24 @@ export default async function apieRoute(req: Request, res: Response) {
   try{
     const masterCluster: Master = global['MASTER']?.masterCluster
     if (!masterCluster){throw new Error("Objeto MASTER ainda não foi definido")}
-
+    
     const {
       numberOfReadyWorkers,
       workersToCreate,
       workersProcessesArr
-    } = masterCluster
+    } = global['MASTER']?.masterCluster
 
     let responseObj = {
       numberOfReadyWorkers,
       workersToCreate,
-      workersProcessesArr,
+      workersProcessesArr
     }
 
-    if (numberOfReadyWorkers > 0){
-
-      const dataFromWorker = await masterCluster.getDataFromWorker()
-      responseObj = {
-        ...responseObj,
-        ...dataFromWorker
-      }
-
+    if (masterCluster.numberOfReadyWorkers > 0){
+      LOGGER(`GOT DATA FROM WORKERS!`, {from: "SERVER", pid: true})
+      masterCluster.workersProcessesArr = await masterCluster.getDataFromWorker()
     }
-  
+
     res.json({ ...responseObj });
 
   }catch(e){

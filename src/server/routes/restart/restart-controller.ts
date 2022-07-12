@@ -11,7 +11,6 @@ import { EMasterCommandsToWorkers } from '../../../clusters/interfaces/EMasterCo
 
 export default async function restartWorkerRoute(req: Request, res: Response) {
 
-
   try {
     const masterCluster: Master = global['MASTER']?.masterCluster
     if (!masterCluster) { throw new Error("Objeto MASTER ainda não foi definido") }
@@ -19,7 +18,7 @@ export default async function restartWorkerRoute(req: Request, res: Response) {
     LOGGER(`/RESTART`, {from: 'SERVER', pid: true})
     
     if (masterCluster.numberOfReadyWorkers > 0){
-      masterCluster.sendCommandToAllWorkers(EMasterCommandsToWorkers.CLOSE_WORKER)
+      masterCluster.sendCommandToWorkers(EMasterCommandsToWorkers.CLOSE_WORKER, {})
       res.send(`WORKER WILL RESTART IN ${WORKER_RESTART_INTERVAL}s`)
     } else {
       res.send(`WORKER WILL BE CREATED IN ${WORKER_RESTART_INTERVAL}s`)
@@ -31,7 +30,6 @@ export default async function restartWorkerRoute(req: Request, res: Response) {
   
       masterCluster.runWhenWorkersAreReady().then((RES) => {
         LOGGER('Todos os worker foram iniciados', {from: 'SERVER', pid: true})
-        masterCluster.sendCommandToAllWorkers(EMasterCommandsToWorkers.START_SPY)
       })
     }, Number(WORKER_RESTART_INTERVAL) * 1000)
 

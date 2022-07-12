@@ -15,8 +15,8 @@ import mongoose from 'mongoose'
 
 export default async function initSpyLooping(spybot: Spybot, initialDate?: string){
 
-  global.WORKER.workerInformation.lastCheckedTime = CURRENT_DATETIME()
-  global.WORKER.workerInformation.checkedTimes += 1
+  global.WORKER.workerInformation.workerInfo.lastCheckedTime = CURRENT_DATETIME()
+  global.WORKER.workerInformation.workerInfo.checkedTimes += 1
   spybot.botCheckedTimes += 1;
 
   LOGGER(`Bot ${spybot.botIndex} - checagem de número [${spybot.botCheckedTimes}]`, {from: "SPYBOT", pid: true})
@@ -69,7 +69,7 @@ export default async function initSpyLooping(spybot: Spybot, initialDate?: strin
     loopAgainAfterTime(spybot)
 
   } catch(e){
-    global.WORKER.workerInformation.isSpybotActive = false
+    global.WORKER.workerInformation.workerInfo.isSpybotActive = false
     console.log("ERRO")
     LOGGER(`${e.message}`, {from: "SPYBOT", pid: true, isError: true})
   }

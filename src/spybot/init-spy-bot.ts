@@ -26,7 +26,7 @@ export default async function initSpyBot(spybot: Spybot) {
     const initialDate = CURRENT_DATETIME('date')
     console.log("")
     LOGGER(`Bot ${spybot.botIndex} - iniciando espionagem - ${initialDate}\n`, { from: "SPYBOT", pid: true })
-    global.WORKER.workerInformation.isSpybotActive = true
+    global.WORKER.workerInformation.workerInfo.isSpybotActive = true
     await initSpyLooping(spybot, initialDate)
 
   } catch (e) {

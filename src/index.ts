@@ -13,7 +13,6 @@ import Worker from './clusters/models/Worker'
 
 import { IWorkerGlobals } from './clusters/interfaces/IWorkerGlobals'
 import { IMasterGlobals } from './clusters/interfaces/IMasterGlobals'
-import { EMasterCommandsToWorkers } from './clusters/interfaces/EMasterCommandsToWorkers'
 
 declare global {
   var WORKER: IWorkerGlobals
@@ -23,31 +22,41 @@ declare global {
 (async () => {
 
   if (cluster.isPrimary) {
-
-    await initServer()
-
-    const masterInstance = new Master()
-    masterInstance.createWorkerInstance(SPYBOT_APP_USER)
-
-    masterInstance.runWhenWorkersAreReady().then(async (RES) => {
-      LOGGER('Todos os worker foram iniciados', { from: 'MASTER', pid: true })
-
-      global.MASTER = {
-        masterCluster: masterInstance,
-      }
-
-      // masterInstance.sendCommandToAllWorkers(EMasterCommandsToWorkers.START_SPY)
-
-    })
-
+    await initMasterCluster()
   } else if (cluster.isWorker) {
+    await initWorkerCluster()
+  }
 
-    const newWorker = new Worker(process)
-    await newWorker.init()
+})()
 
-    global.WORKER = {
-      workerCluster: newWorker,
-      workerInformation: {
+async function initMasterCluster(){
+
+  await initServer()
+
+  const masterInstance = new Master()
+  masterInstance.createWorkerInstance(SPYBOT_APP_USER)
+
+  masterInstance.runWhenWorkersAreReady().then(async (RES) => {
+    LOGGER('Todos os worker foram iniciados', { from: 'MASTER', pid: true })
+
+    global.MASTER = {
+      masterCluster: masterInstance,
+    }
+
+  })
+
+}
+
+async function initWorkerCluster(){
+
+  const newWorker = new Worker(process)
+  await newWorker.init()
+
+  global.WORKER = {
+    workerCluster: newWorker,
+    workerInformation: {
+      workerProcessPId: process.pid,
+      workerInfo: {
         loopInterval: SPYBOT_LOOP_INTERVAL/60,
         startedTime: CURRENT_DATETIME(),
         lastRestartedTime: '-',
@@ -62,8 +71,7 @@ declare global {
         isSpybotActive: false,
         spyedStores: []
       }
+
     }
-
   }
-
-})()
+}
