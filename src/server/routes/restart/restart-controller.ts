@@ -2,7 +2,8 @@ import {
   IMPORT_MODULE,
   NODE_ENV,
   LOGGER,
-  WORKER_RESTART_INTERVAL
+  WORKER_RESTART_INTERVAL,
+  SPYBOT_APP_USER
 } from '../../../../configs/configs'
 
 import Master from '../../../clusters/models/Master'
@@ -11,23 +12,27 @@ import { EMasterCommandsToWorkers } from '../../../clusters/interfaces/EMasterCo
 
 export default async function restartWorkerRoute(req: Request, res: Response) {
 
+  const index = req?.query?.index as string
+
   try {
     const masterCluster: Master = global['MASTER']?.masterCluster
     if (!masterCluster) { throw new Error("Objeto MASTER ainda não foi definido") }
 
     LOGGER(`/RESTART`, {from: 'SERVER', pid: true})
-    
+
     if (masterCluster.numberOfReadyWorkers > 0){
       masterCluster.sendCommandToWorkers(EMasterCommandsToWorkers.CLOSE_WORKER, {})
       res.send(`WORKER WILL RESTART IN ${WORKER_RESTART_INTERVAL}s`)
     } else {
       res.send(`WORKER WILL BE CREATED IN ${WORKER_RESTART_INTERVAL}s`)
     }
-  
+
+    let finalIndex = index ? index : SPYBOT_APP_USER
+
     LOGGER(`CRIANDO NOVA INSTÂNCIA EM ${WORKER_RESTART_INTERVAL}s`, {from: 'SERVER', pid: true})
     setTimeout(() => {
-      masterCluster.createWorkerInstance()
-  
+      masterCluster.createWorkerInstance(finalIndex)
+
       masterCluster.runWhenWorkersAreReady().then((RES) => {
         LOGGER('Todos os worker foram iniciados', {from: 'SERVER', pid: true})
       })

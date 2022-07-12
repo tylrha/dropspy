@@ -1,13 +1,20 @@
 import dotenv from 'dotenv'
 dotenv.config()
 
-import {join} from 'path'
+import {join, basename, dirname} from 'path'
 import {readdirSync, statSync, existsSync} from 'fs'
 
 /* FILES ==================================================================== */
-
 import {readJson} from '../utils/libraries/utils'
 const APP_CONFIGS = readJson('/configs/app-configs.json')
+
+/* ENVIRONMENT ============================================================== */
+const DEFALT_NODE_ENV = "development"
+const NODE_ENV = process.env.NODE_ENV ? process.env.NODE_ENV : DEFALT_NODE_ENV
+
+const _dist_folder = APP_CONFIGS['project_configs'].dist_folder?.replace("./", "")
+const _parent_dir = basename(dirname(__dirname))
+const RUNING_TYPE = _parent_dir === _dist_folder ? "production" : "development"
 
 /* FUNCTIONS ================================================================ */
 
@@ -23,10 +30,10 @@ const ALIHUNTER_GMAIL_PASSWORD = APP_CONFIGS['alihunter_configs'].gmail_password
 
 /* DATABASE ================================================================= */
 
-const _DATABASE_BASEURL = APP_CONFIGS['database_configs'].database_baseurl
-const _DATABASE_USERNAME = APP_CONFIGS['database_configs'].database_username
-const _DATABASE_PASSWORD = APP_CONFIGS['database_configs'].database_password
-const DATABASE_LOGIN_URL = `mongodb+srv://${_DATABASE_USERNAME}:${_DATABASE_PASSWORD}@${_DATABASE_BASEURL}`
+const _database_base_url = APP_CONFIGS['database_configs'].database_baseurl
+const _database_username = APP_CONFIGS['database_configs'].database_username
+const _database_password = APP_CONFIGS['database_configs'].database_password
+const DATABASE_LOGIN_URL = `mongodb+srv://${_database_username}:${_database_password}@${_database_base_url}`
 
 const DATABASE_DATABASE_SPY = APP_CONFIGS['database_configs'].database_spy
 const DATABASE_COLLECTION_DATES = APP_CONFIGS['database_configs'].collection_spy_dates
@@ -39,8 +46,11 @@ const GSHEET_IM_SPY_API_URL = APP_CONFIGS['google_sheets_configs'].im_spy_api_ur
 
 /* SPY ====================================================================== */
 
-const randBetweenTwoNumbers = (min, max) => Math.floor(Math.random() * (max - min + 1) + min)
-if (!global.RANDOM_NUMBER){global.RANDOM_NUMBER = randBetweenTwoNumbers(1, 2)}
+const _min_minutes = NODE_ENV === DEFALT_NODE_ENV ? 1 : 2
+const _max_minutes = NODE_ENV === DEFALT_NODE_ENV ? 4 : 9
+const _randBetweenTwoNumbers = (min, max) => Math.floor(Math.random() * (max - min + 1) + min)
+
+if (!global.RANDOM_NUMBER){global.RANDOM_NUMBER = _randBetweenTwoNumbers(_min_minutes, _max_minutes)}
 const SPYBOT_LOOP_INTERVAL = Number(global.RANDOM_NUMBER * 60)
 const SPYBOT_APP_USER = process.env.SPYBOT_APP_USER
 
@@ -50,14 +60,15 @@ const WORKER_RESTART_INTERVAL = APP_CONFIGS['worker_configs'].restart_interval
 const WORKER_MAX_INSTANCES = APP_CONFIGS['worker_configs'].max_instances
 
 /* BROWSER ================================================================== */
-
 const _getBrowserExtensionsString = () => {
   const _unzipedExtensionsFolder = APP_CONFIGS['browser_configs'].browser_extensions_unziped_folder
-  const _doesFolderExist = existsSync(_unzipedExtensionsFolder)
+  let _finalExtensionFolder = RUNING_TYPE === DEFALT_NODE_ENV ? _unzipedExtensionsFolder : join(_dist_folder, _unzipedExtensionsFolder)
+
+  const _doesFolderExist = existsSync(_finalExtensionFolder)
   if (!_doesFolderExist){return ""}
 
-  const _folderContentArr = readdirSync(_unzipedExtensionsFolder)
-  return _folderContentArr.filter(item => statSync(join(_unzipedExtensionsFolder, item)).isDirectory()).map(extFolder =>  ROOT_PATH(join(_unzipedExtensionsFolder, extFolder))).join()
+  const _folderContentArr = readdirSync(_finalExtensionFolder)
+  return _folderContentArr.filter(item => statSync(join(_finalExtensionFolder, item)).isDirectory()).map(extFolder =>  ROOT_PATH(join(_unzipedExtensionsFolder, extFolder))).join()
 }
 
 const BROWSER_EXTENSIONS = _getBrowserExtensionsString()
@@ -67,7 +78,6 @@ const BROWSER_HEIGHT = APP_CONFIGS['browser_configs'].browser_height
 
 /* GENERAL ================================================================== */
 
-const NODE_ENV = process.env.NODE_ENV ? process.env.NODE_ENV : "development"
 const VERSION = process.env.npm_package_version || "#"
 const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 
@@ -75,13 +85,17 @@ const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 
 const SERVER_PORT = process.env.PORT || APP_CONFIGS['server_configs'].default_port
 const SERVER_TOKEN = process.env.SERVER_TOKEN || ''
-const SERVER_BASE = NODE_ENV === "production" ? `https://dropspy-${SPYBOT_APP_USER.replace("p", "")}.herokuapp.com` : `http://localhost:${SERVER_PORT}`
+const SERVER_BASE = NODE_ENV === DEFALT_NODE_ENV ? `http://localhost:${SERVER_PORT}` : `https://dropspy-${SPYBOT_APP_USER.replace("p", "")}.herokuapp.com`
 
 /* EXPORT =================================================================== */
 
 export {
 
   APP_CONFIGS,
+
+  DEFALT_NODE_ENV,
+  NODE_ENV,
+  RUNING_TYPE,
 
   LOGGER,
   DELAY,
@@ -111,7 +125,6 @@ export {
   BROWSER_HEIGHT,
   BROWSER_EXTENSIONS,
 
-  NODE_ENV,
   VERSION,
   REDIS_URL,
 

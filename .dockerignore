@@ -2,12 +2,22 @@
 
 #FOLDERS ====================
 .git/
-_local/
+local/
 node_modules/
+
+#DEV ========================
 src/
 tests/
+extensions_unziped/
+configs/
+scripts/
+utils/
 
 #FILES ======================
+.editorconfig
 .env.example
-jest.config.tests
+.gitignore
+commitlint.config.js
+jest.config.ts
 readme.MD
+tsconfig.json

@@ -26,22 +26,22 @@
     "configfile": "./configs/app-configs.json"
   },
   "main": "src/index.ts",
-  "engines": {
-    "node": "16.x"
-  },
   "scripts": {
     "dev": "ts-node-dev --transpile-only --respawn --ignore-watch node_modules src/index.ts",
     "test": "jest",
     "commit": "git-cz",
     "server": "ts-node src/server/server.ts",
-    "docker_build": "docker build -t dropspy . ",
-    "docker_run": "echo run",
-    "start_dev": "ts-node src/index.ts",
-    "start_prod": "node dist/src/index.js",
-    "start": "npm run start_dev",
+
     "prebuild": "node ./scripts/pre-build.js",
     "build": "node ./node_modules/typescript/bin/tsc",
-    "postbuild": "node ./scripts/post-build.js"
+    "postbuild": "node ./scripts/post-build.js",
+
+    "docker_build": "docker build -t dropspy . ",
+    "docker_pre_run": "bash ./dist/scripts/clean-xbfb-files.sh",
+
+    "start_prod": "node dist/src/index.js",
+    "start_dev": "ts-node src/index.ts",
+    "start": "npm run start_dev"
   },
   "dependencies": {
     "axios": "^0.27.2",

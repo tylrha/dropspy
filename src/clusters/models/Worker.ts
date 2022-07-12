@@ -18,6 +18,7 @@ export default class Worker {
     this.workerProcess = proc
     this.isSpybotActive = false
     // this.spybotInstance
+    // this.dataFromMaster
   }
 
   // ===========================================================================
@@ -30,7 +31,10 @@ export default class Worker {
     const dataFromMaster = await this.getDataFromMaster()
 
     this.sendCommandToMaster(EWorkerCommandsToMaster.SET_WORKER_AS_READY);
-    this.startSpybot(dataFromMaster.spybotIndex)
+
+    setTimeout(() => {
+      this.startSpybot(dataFromMaster.spybotIndex)
+    }, 5000);
 
   }
 

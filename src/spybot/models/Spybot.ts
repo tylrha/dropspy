@@ -8,7 +8,8 @@ import {
   ALIHUNTER_GMAIL_PASSWORD,
   NODE_ENV,
   LOGGER,
-  SERVER_BASE
+  SERVER_BASE,
+  DEFALT_NODE_ENV
 } from "../../../configs/configs"
 
 import { runJsOnPage, waitTillHTMLRendered } from "../../../utils/libraries/puppeteer"
@@ -53,7 +54,7 @@ export default class Spybot {
   }
 
   private async getBrowserInstance(): Promise<Browser> {
-    
+
     try {
 
       puppeteer.use(StealthPlugin())
@@ -211,41 +212,21 @@ export default class Spybot {
       await alihunterPage.goto(URL_ALIHUNTER_LOGIN)
       await waitTillHTMLRendered(alihunterPage)
 
-      if (NODE_ENV !== "production") {
+      const googleClickButton = await alihunterPage.evaluate(async () => {
 
-        await alihunterPage.mouse.move(500, 464.4); // HEROKU -> 460.79999999999995 | 464.4
-        await alihunterPage.mouse.down();
-        await alihunterPage.mouse.up();
-        await DELAY(2000);
+        const googleLoginQuery = ".LoginPage_btnGoogle__UQryr"
+        const elGoogleLogin: HTMLElement = document.querySelector(googleLoginQuery)
 
-      } else {
+        console.error(elGoogleLogin)
 
-        const upper = height * 0.6
-        const lower = height * 0.4
-        const step = 10
-
-        LOGGER(`LOOPING FROM ${upper} TO ${lower}`, { from: 'SPYBOT', pid: true })
-
-        for (let x = upper; x > lower; x = x - step) {
-          await alihunterPage.mouse.move(500, x);
-          await alihunterPage.mouse.down();
-          await alihunterPage.mouse.up();
-          await DELAY(2000);
-
-          const pageCount = (await this.botBrowser.pages()).length
-          const lastPage = (await this.botBrowser.pages())[Number(pageCount - 1)];
-          const pageLink = lastPage.url()
-
-          if (pageCount > 2) {
-            LOGGER(x + " - " + pageCount + " - " + pageLink, { from: 'SPYBOT', pid: true })
-            LOGGER(await this.botBrowser.pages()[2], { from: 'SPYBOT', pid: true })
-            break
-          } else {
-            LOGGER(x + " - " + pageLink, { from: 'SPYBOT', pid: true })
-          }
+        if (elGoogleLogin){
+          elGoogleLogin.click()
+          return elGoogleLogin.innerText
         }
 
-      }
+      })
+
+      console.log(googleClickButton)
 
       await waitTillHTMLRendered(alihunterPage)
       await DELAY(10000)

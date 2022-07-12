@@ -22,19 +22,25 @@ async function postBuild(){
 
       const CONFIGS_OBJECT = JSON.parse(readFileSync(JSON_CONFIGS_FILE));
 
+      const CONFIGS_FOLDER = CONFIGS_OBJECT?.project_configs?.configs_folder
+      const SCRIPTS_FOLDER = CONFIGS_OBJECT?.project_configs?.scripts_folder
       const SOURCE_FOLDER = CONFIGS_OBJECT?.project_configs?.source_folder
       const DIST_FOLDER = CONFIGS_OBJECT?.project_configs?.dist_folder
       const EXTENSIONS_FOLDER = CONFIGS_OBJECT?.browser_configs?.browser_extensions_zip_folder
       const UNZIPED_EXTENSIONS_FOLDER = CONFIGS_OBJECT?.browser_configs?.browser_extensions_unziped_folder
 
       const ignoredExtensionsArr = ['.ts', '.js', '.zip']
+      copyTypescriptIgnoredFilesToDistFolder(CONFIGS_FOLDER, DIST_FOLDER, ignoredExtensionsArr)
       copyTypescriptIgnoredFilesToDistFolder(SOURCE_FOLDER, DIST_FOLDER, ignoredExtensionsArr)
-
+      
       console.log("Esperando 10s para não dar problema nas próximas funções")
       await extractBrowserExtensionsToDistFolder(EXTENSIONS_FOLDER, UNZIPED_EXTENSIONS_FOLDER) 
-
+      
       const newUnzipedExtensionsFolder = join(DIST_FOLDER, UNZIPED_EXTENSIONS_FOLDER)
       copyFolder(UNZIPED_EXTENSIONS_FOLDER, newUnzipedExtensionsFolder)
+
+      const newScriptsFolder = join(DIST_FOLDER, SCRIPTS_FOLDER)
+      copyFolder(SCRIPTS_FOLDER, newScriptsFolder)
 
     }
     

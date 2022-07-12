@@ -38,7 +38,7 @@ export default async function createWorkerRoute(req: Request, res: Response) {
 
     LOGGER(`CRIANDO NOVA INSTÂNCIA EM ${WORKER_RESTART_INTERVAL}s`, { from: 'SERVER', pid: true })
     setTimeout(() => {
-      masterCluster.createWorkerInstance(index)
+      masterCluster.createWorkerInstance(finalIndex)
 
       masterCluster.runWhenWorkersAreReady().then(async (RES) => {
         LOGGER('Bot foi criado com sucesso', { from: 'SERVER', pid: true })

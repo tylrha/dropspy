@@ -27,7 +27,6 @@
     "jest.config.ts"
   ],
   "include": [
-    "configs/*.json",
     "configs",
     "src",
     "utils",

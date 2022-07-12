@@ -35,4 +35,4 @@ COPY . .
 ENV NODE_ENV production
 ENV DISPLAY :99
 
-CMD bash "./scripts/clean-xbfb-files.sh" & Xvfb :99 -screen 0 1024x768x16 -nolisten unix & npm run start_prod
+CMD npm run docker_pre_run & Xvfb :99 -screen 0 1024x768x16 -nolisten unix & npm run start_prod

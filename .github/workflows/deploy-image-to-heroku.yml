@@ -3,7 +3,7 @@ name: deploy-app-to-heroku
 on:
   push:
     branches: [ master ]
-    
+
 env:
   IMAGE_NAME: dropspy
   HEROKU_EMAIL: contato@instigaremidia.com
@@ -22,11 +22,18 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Login at docker/heroku
-      run: docker login --username=$HEROKU_EMAIL --password=$HEROKU_API_KEY $HEROKU_CONTAINER_URL
+    - name: Run pre-build scripts
+      run: |
+        npm install
+        npm run prebuild
+        npm run build
+        npm run postbuild
 
     - name: Build docker image
       run: docker build -t $IMAGE_NAME .
+
+    - name: Login at docker/heroku
+      run: docker login --username=$HEROKU_EMAIL --password=$HEROKU_API_KEY $HEROKU_CONTAINER_URL
 
     - name: Release all dropspy bots
       run: |
@@ -39,15 +46,14 @@ jobs:
         }
 
         for i in $(seq $INITIAL_BOT 1 $FINAL_BOT); do
-          if (($i < 10)); then   
+          if (($i < 10)); then
             finalIndex="00$i"
           elif (($i < 100)); then
             finalIndex="0$i"
-          else    
+          else
             finalIndex="$i"
           fi
 
           releaseBot "$finalIndex"
-
+          echo ""
         done
-

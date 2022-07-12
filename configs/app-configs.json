@@ -2,7 +2,9 @@
 
   "project_configs": {
     "source_folder": "./src",
-    "dist_folder": "./dist"
+    "dist_folder": "./dist",
+    "scripts_folder": "./scripts",
+    "configs_folder": "./configs"
   },
 
   "alihunter_configs": {
@@ -12,7 +14,7 @@
 
   "server_configs": {
     "job_wait_seconds": 30,
-    "default_port": 3333
+    "default_port": 3000
   },
 
   "worker_configs": {
@@ -22,7 +24,7 @@
 
   "browser_configs": {
     "headless_mode": false,
-    "browser_width": 1366,
+    "browser_width": 1024,
     "browser_height": 768,
     "browser_extensions_zip_folder": "./src/spybot/assets",
     "browser_extensions_unziped_folder": "./extensions_unziped"
