@@ -1,0 +1,53 @@
+name: deploy-app-to-heroku
+
+on:
+  push:
+    branches: [ master ]
+    
+env:
+  IMAGE_NAME: dropspy
+  HEROKU_EMAIL: contato@instigaremidia.com
+  HEROKU_API_KEY: 449a0d94-99e8-433f-a27e-19339a2c862e
+  HEROKU_CONTAINER_URL: registry.heroku.com
+  HEROKU_CONTAINER_TYPE: web
+  INITIAL_BOT: 1
+  FINAL_BOT: 2
+
+jobs:
+  deploy:
+    name: Deploy to Heroku
+    runs-on: ubuntu-18.04
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Login at docker/heroku
+      run: docker login --username=$HEROKU_EMAIL --password=$HEROKU_API_KEY $HEROKU_CONTAINER_URL
+
+    - name: Build docker image
+      run: docker build -t $IMAGE_NAME .
+
+    - name: Release all dropspy bots
+      run: |
+        function releaseBot(){
+          curspybot="dropspy-$1"
+          echo "[$curspybot]"
+          docker tag $IMAGE_NAME $HEROKU_CONTAINER_URL/$curspybot/$HEROKU_CONTAINER_TYPE
+          docker push $HEROKU_CONTAINER_URL/$curspybot/$HEROKU_CONTAINER_TYPE
+          heroku container:release $HEROKU_CONTAINER_TYPE -a $curspybot
+        }
+
+        for i in $(seq $INITIAL_BOT 1 $FINAL_BOT); do
+          if (($i < 10)); then   
+            finalIndex="00$i"
+          elif (($i < 100)); then
+            finalIndex="0$i"
+          else    
+            finalIndex="$i"
+          fi
+
+          releaseBot "$finalIndex"
+
+        done
+

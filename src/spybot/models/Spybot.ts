@@ -54,23 +54,28 @@ export default class Spybot {
   }
 
   private async getBrowserInstance(): Promise<Browser> {
-
-    puppeteer.use(StealthPlugin())
-
-    const customArgs = [
-      '--no-sandbox',
-      `--disable-extensions-except=${BROWSER_EXTENSIONS}`,
-      `--load-extension=${BROWSER_EXTENSIONS}`,
-      `--window-size=${BROWSER_WIDTH},${BROWSER_HEIGHT}`,
-    ];
-
-    const pupOptions = {
-      headless: BROWSER_HEADLESS_MODE,
-      args: customArgs
-    }
-
+    
     try {
-      return await puppeteer.launch(pupOptions)
+
+      puppeteer.use(StealthPlugin())
+
+      const customArgs = [
+        '--no-sandbox',
+        `--disable-extensions-except=${BROWSER_EXTENSIONS}`,
+        `--load-extension=${BROWSER_EXTENSIONS}`,
+        `--window-size=${BROWSER_WIDTH},${BROWSER_HEIGHT}`,
+      ];
+
+      const pupOptions = {
+        headless: BROWSER_HEADLESS_MODE,
+        args: customArgs
+      }
+
+      const browserObject = await puppeteer.launch(pupOptions)
+      LOGGER(`Bot ${this.botIndex} - browser foi iniciado`, { from: 'SPYBOT', pid: true })
+
+      return browserObject
+
     } catch (e) {
       console.log(e.message)
     }
@@ -79,7 +84,7 @@ export default class Spybot {
 
   private setBrowserEvents(): void {
     this.botBrowser.on('disconnected', async () => {
-      LOGGER(`Bot ${this.botIndex} - o browser fechado`, { from: 'SPYBOT', pid: true })
+      LOGGER(`Bot ${this.botIndex} - o browser foi fechado`, { from: 'SPYBOT', pid: true })
     });
   }
 

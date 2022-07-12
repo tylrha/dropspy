@@ -4,9 +4,7 @@ import { updateBotInfo, ENUM_UPDATE_BOT_INFO } from './components/spy-sheets-api
 import initSpyLooping from "./init-spy-looping"
 import Spybot from './models/Spybot'
 
-export default async function initSpyBot(){
-
-  const spybot = new Spybot()
+export default async function initSpyBot(spybot: Spybot){
 
   try {
     console.log("")

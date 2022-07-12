@@ -114,6 +114,8 @@ async function updateBotInfo(infoToUpdate: ENUM_UPDATE_BOT_INFO): Promise<void>{
 
   let queryFinal;
 
+  const infoToUpdateStr = ENUM_UPDATE_BOT_INFO[ENUM_UPDATE_BOT_INFO[infoToUpdate]]
+
   if (infoToUpdate === ENUM_UPDATE_BOT_INFO.INITIAL_INFO){
     queryFinal = `botVersion=${VERSION}&botLoopInterval=${Number(SPYBOT_LOOP_INTERVAL)/60}`
   } else if (infoToUpdate === ENUM_UPDATE_BOT_INFO.LAST_RESTARTED_TIME){
@@ -127,7 +129,7 @@ async function updateBotInfo(infoToUpdate: ENUM_UPDATE_BOT_INFO): Promise<void>{
     return
   }
 
-  LOGGER(`Atualizando informações do bot na planilha - ${infoToUpdate}`, {from: "SPYBOT", pid: true})
+  LOGGER(`Atualizando informações do bot na planilha - ${infoToUpdateStr}`, {from: "SPYBOT", pid: true})
 
   const finalUrl = `${GSHEET_IM_SPY_API_URL}?method=updatebot&bot=${SPYBOT_APP_USER}&${queryFinal}`
   const response = await fetchJsonUrl(finalUrl)

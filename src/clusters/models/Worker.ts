@@ -68,7 +68,7 @@ export default class Worker {
         const commandStr = EMasterCommandsToWorkers[commandIndex]
         LOGGER(`Comando recebido do master: [${commandStr}]`, { from: 'WORKER', pid: true })
 
-        if (commandIndex === EMasterCommandsToWorkers.START_SPY) { await this.initSpybot() }
+        if (commandIndex === EMasterCommandsToWorkers.START_SPY) { await this.startSpybot() }
         if (commandIndex === EMasterCommandsToWorkers.QUIT_SPY) { await this.closeSpybot() }
         if (commandIndex === EMasterCommandsToWorkers.RESTART_SPY) { await this.restartSpybot() }
         if (commandIndex === EMasterCommandsToWorkers.GET_WORKER_INFO) { await this.getWorkerInfo() }
@@ -86,19 +86,33 @@ export default class Worker {
 
   // ===========================================================================
 
-  private async initSpybot(): Promise<void> {
+  private async startSpybot(): Promise<void> {
     LOGGER(`Inicia spybot`, { from: 'WORKER', pid: true })
 
-    this.spybotInstance = await initSpyBot()
+    const spybot = new Spybot()
+    this.spybotInstance = spybot
     this.isSpybotActive = true
+
+    await initSpyBot(spybot)
   }
 
   private async closeSpybot(): Promise<void> {
     LOGGER(`Fecha spybot`, { from: 'WORKER', pid: true })
-    this.spybotInstance.close()
 
-    this.spybotInstance = undefined
-    this.isSpybotActive = false
+    try{
+
+      if (this.spybotInstance){
+        await this.spybotInstance.close()
+        this.spybotInstance = undefined
+        this.isSpybotActive = false
+        LOGGER(`Spybot foi fechado com sucesso`, { from: 'WORKER', pid: true })
+      }
+
+      await this.quitWorker()
+
+    }catch(e){
+      LOGGER(`Erro ao fechar spybot: ${e.message}`, { from: 'WORKER', pid: true, isError: true })
+    }
   }
 
   private async restartSpybot(): Promise<void> {

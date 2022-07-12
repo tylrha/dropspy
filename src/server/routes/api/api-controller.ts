@@ -12,6 +12,8 @@ import { EMasterCommandsToWorkers } from '../../../clusters/interfaces/EMasterCo
 
 export default async function apieRoute(req: Request, res: Response) {
 
+  LOGGER(`/API`, {from: 'SERVER', pid: true})
+
   try{
     const masterCluster: Master = global['MASTER']?.masterCluster
     if (!masterCluster){throw new Error("Objeto MASTER ainda não foi definido")}
@@ -22,15 +24,22 @@ export default async function apieRoute(req: Request, res: Response) {
       workersProcessesArr
     } = masterCluster
 
-    const dataFromWorker = await masterCluster.getDataFromWorker()
-
-    const responseObj = {
+    let responseObj = {
       numberOfReadyWorkers,
       workersToCreate,
       workersProcessesArr,
-      dataFromWorker
     }
 
+    if (numberOfReadyWorkers > 0){
+
+      const dataFromWorker = await masterCluster.getDataFromWorker()
+      responseObj = {
+        ...responseObj,
+        ...dataFromWorker
+      }
+
+    }
+  
     res.json({ ...responseObj });
 
   }catch(e){
