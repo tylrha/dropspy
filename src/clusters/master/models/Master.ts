@@ -137,7 +137,7 @@ export default class Master {
 
     const objToSend: IMasterSharedInformation = {
       startedTime: this.startedTime,
-      spybotIndex: requesterWorkerObj.botIndex
+      workersArr: this.workersProcessesArr
     }
 
     this.sendCommandToWorkers(EMasterCommandsToWorkers.SEND_MASTER_INFO_TO_WORKER, objToSend, requesterWorkerObj.id)

@@ -25,17 +25,23 @@ export default class Worker {
 
   async init(): Promise<void> {
 
+    try {
+
     LOGGER(`Worker iniciado`, { from: 'WORKER', pid: true })
     this.setupWorkerEvents(this.workerProcess)
 
-    const dataFromMaster = await this.getDataFromMaster()
-    LOGGER(`Dados recebidos do master: ${JSON.stringify(dataFromMaster)}`, { from: 'WORKER', pid: true })
+    const spybotIndex = await this.getCurrentBotIndexFromMasterData()
+    if (!spybotIndex){throw new Error(`Erro ao inicar spybot, index não encontrado`)}
 
     this.sendCommandToMaster(EWorkerCommandsToMaster.SET_WORKER_AS_READY);
 
-    setTimeout(() => {
-      this.startSpybot(dataFromMaster.spybotIndex)
+    setTimeout(async () => {
+      await this.startSpybot(spybotIndex)
     }, 5000);
+
+    } catch (e) {
+      LOGGER(`Erro ao criar worker: ${e.message}`, { from: 'WORKER', pid: true, isError: true })
+    }
 
   }
 
@@ -74,7 +80,12 @@ export default class Worker {
   // ===========================================================================
 
   private async handleStartSpybotRequest(): Promise<void>{
-    await this.startSpybot(this.dataFromMaster.spybotIndex)
+    const spybotIndex = await this.getCurrentBotIndexFromMasterData()
+
+    if (!spybotIndex){
+      return
+    }
+      await this.startSpybot(spybotIndex)
   }
 
   private async handleCloseWorkerRequest(): Promise<void>{
@@ -176,6 +187,7 @@ export default class Worker {
 
       const checkPromiseConditions = () => {
         if (this.dataFromMaster !== undefined) {
+          LOGGER(`Dados recebidos do master: ${JSON.stringify(this.dataFromMaster)}`, { from: 'WORKER', pid: true })
           resolve(this.dataFromMaster)
         } else {
           setTimeout(checkPromiseConditions, 1000)
@@ -188,4 +200,16 @@ export default class Worker {
 
   }
 
+  private async getCurrentBotIndexFromMasterData(): Promise<string>{
+
+    const dataFromMaster = await this.getDataFromMaster()
+
+    const workerIndex = dataFromMaster.workersArr.findIndex(worker => worker.processPid === this.workerProcess.pid)
+
+    if (workerIndex > -1){
+      const spybotIndex = dataFromMaster.workersArr[workerIndex].botIndex
+      return spybotIndex
+    }
+
+  }
 }

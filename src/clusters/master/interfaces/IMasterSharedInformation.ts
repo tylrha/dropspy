@@ -1,6 +1,6 @@
 interface IMasterSharedInformation {
-  spybotIndex?: string,
   startedTime?: string,
+  workersArr?: any,
 }
 
 export {IMasterSharedInformation}
