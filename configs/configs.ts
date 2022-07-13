@@ -30,7 +30,7 @@ import {
 
 const CURRENT_DATETIME = (option?: 'date' | 'time') => {
 
-  let curDateObj;
+  let curDateObj: Date;
 
   if (NODE_ENV === "production"){
     const _heroku_difference_time_hours = -3
@@ -40,15 +40,11 @@ const CURRENT_DATETIME = (option?: 'date' | 'time') => {
   }
 
   const utcDate = converteDateToUTC(curDateObj)
-
   const isoDate = utcDate.toISOString()
-
   const dateInfoObj = getDateInfoObjFromIsoDate(isoDate)
   return convertDateInfoObjToStringDate(dateInfoObj, option)
 
 }
-
-
 
 /* GOOGLE =================================================================== */
 
@@ -94,8 +90,6 @@ const _browser_extensions_extracted_path = APP_CONFIGS['browser_configs'].browse
 const BROWSER_EXTENSIONS_UNZIPED_PATH = RUNING_TYPE === "development" ? _browser_extensions_extracted_path : join(DIST_FOLDER, _browser_extensions_extracted_path)
 
 const BROWSER_HEADLESS_MODE = APP_CONFIGS['browser_configs'].headless_mode
-const BROWSER_WIDTH = APP_CONFIGS['browser_configs'].browser_width
-const BROWSER_HEIGHT = APP_CONFIGS['browser_configs'].browser_height
 
 /* GENERAL ================================================================== */
 
@@ -146,8 +140,6 @@ export {
   BROWSER_EXTENSIONS_UNZIPED_PATH,
 
   BROWSER_HEADLESS_MODE,
-  BROWSER_WIDTH,
-  BROWSER_HEIGHT,
 
   VERSION,
   REDIS_URL,

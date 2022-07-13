@@ -24,8 +24,6 @@
 
   "browser_configs": {
     "headless_mode": false,
-    "browser_width": 1024,
-    "browser_height": 768,
     "browser_extensions_zip_folder": "./src/spybot/assets",
     "browser_extensions_unziped_folder": "./extensions_unziped"
   },

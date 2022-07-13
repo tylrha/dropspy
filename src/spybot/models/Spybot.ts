@@ -6,8 +6,6 @@ import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 import { Browser, Page } from "puppeteer"
 
 import {
-  BROWSER_WIDTH,
-  BROWSER_HEIGHT,
   BROWSER_HEADLESS_MODE,
   DELAY,
   ALIHUNTER_GMAIL_USERNAME,
@@ -95,12 +93,12 @@ export default class Spybot {
         '--no-sandbox',
         `--disable-extensions-except=${allExtensionsPathString}`,
         `--load-extension=${allExtensionsPathString}`,
-        `--window-size=${BROWSER_WIDTH},${BROWSER_HEIGHT}`,
       ];
 
       const pupOptions = {
         headless: BROWSER_HEADLESS_MODE,
-        args: customArgs
+        args: customArgs,
+        defaultViewport: null
       }
 
       const browserObject = await puppeteer.launch(pupOptions)
@@ -129,11 +127,8 @@ export default class Spybot {
       const isLoggedInGoogle = await this.checkGoogleLogin(googlePage)
       if (isLoggedInGoogle === false) { throw new Error("Erro ao logar no google") }
 
-      const [width, height] = await this.getPageScreenResolution(googlePage)
-      LOGGER(`Bot ${this.botIndex} - resolução atual: ${width} x ${height}`, { from: 'SPYBOT', pid: true })
-
       const alihunterPage = await this.setupAlihunterPage()
-      await this.loginAtAlihunterWithGoogle(alihunterPage, height)
+      await this.loginAtAlihunterWithGoogle(alihunterPage)
       const isLoggedInAlihunter = await this.checkAlihunterLogin(alihunterPage)
       if (!isLoggedInAlihunter) { throw new Error("Erro ao logar no alihunter") }
 
@@ -146,7 +141,6 @@ export default class Spybot {
 
   private async setupGooglePage(): Promise<Page> {
     const googlePage: Page = (await this.botBrowser.pages())[0];
-    await googlePage.setViewport({ width: BROWSER_WIDTH, height: BROWSER_HEIGHT });
     googlePage.setDefaultNavigationTimeout(0);
     return googlePage
   }
@@ -216,24 +210,13 @@ export default class Spybot {
 
   }
 
-  private async getPageScreenResolution(page: Page): Promise<number[]> {
-    const result = await page.evaluate(() => {
-      const width = window.screen.width
-      const height = window.screen.height
-      return [width, height]
-    })
-
-    return result
-  }
-
   private async setupAlihunterPage() {
     const aliHunterPage: Page = await this.botBrowser.newPage();
-    await aliHunterPage.setViewport({ width: BROWSER_WIDTH, height: BROWSER_HEIGHT });
     aliHunterPage.setDefaultNavigationTimeout(0);
     return aliHunterPage
   }
 
-  private async loginAtAlihunterWithGoogle(alihunterPage: Page, height: number): Promise<void> {
+  private async loginAtAlihunterWithGoogle(alihunterPage: Page): Promise<void> {
 
     try {
 
