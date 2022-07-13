@@ -20,7 +20,35 @@ const RUNING_TYPE = basename(dirname(__dirname)) === DIST_FOLDER ? "production" 
 import LOGGER from '../utils/functions/logger'
 import {delay as DELAY} from '../utils/libraries/utils'
 import {importFromRootPath as IMPORT_MODULE, getPathFromRoot as ROOT_PATH} from '../utils/libraries/globalPath'
-import {getCurrentDateTime as CURRENT_DATETIME} from '../utils/libraries/dates'
+import {
+  addTimeToDateObject,
+  getCurrentDateTimeString,
+  converteDateToUTC,
+  getDateInfoObjFromIsoDate,
+  convertDateInfoObjToStringDate
+} from '../utils/libraries/dates'
+
+const CURRENT_DATETIME = (option?: 'date' | 'time') => {
+
+  let curDateObj;
+
+  if (NODE_ENV === "production"){
+    const _heroku_difference_time_hours = -3
+    curDateObj = addTimeToDateObject(new Date(), _heroku_difference_time_hours)
+  } else {
+    curDateObj = new Date()
+  }
+
+  const utcDate = converteDateToUTC(curDateObj)
+
+  const isoDate = utcDate.toISOString()
+
+  const dateInfoObj = getDateInfoObjFromIsoDate(isoDate)
+  return convertDateInfoObjToStringDate(dateInfoObj, option)
+
+}
+
+
 
 /* GOOGLE =================================================================== */
 

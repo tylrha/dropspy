@@ -1,5 +1,5 @@
 import clc from 'cli-color'
-import { getCurrentDateTime } from '../libraries/dates'
+import { getCurrentDateTimeString } from '../libraries/dates'
 
 const FROM_ARR = [
   "MASTER",
@@ -140,7 +140,7 @@ function getDateTimePart(options){
     const { datetime } = options
     if (!datetime) { throw new Error("datetime não foi definido") }
 
-    const dateTimeRow = `${getCurrentDateTime('time')} ${DEFAULT_SEPARATOR} `
+    const dateTimeRow = `${getCurrentDateTimeString('time')} ${DEFAULT_SEPARATOR} `
     if (SHOULD_SKIP_COLLORED_LOGGER(options)){return dateTimeRow}
 
     const collorFunction = getCollorFunctionDependingOnChoices(options)

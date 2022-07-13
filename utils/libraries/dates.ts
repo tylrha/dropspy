@@ -11,7 +11,8 @@ export {
   getDateInfoObjFromStringDate,
   getDateInfoObjFromIsoDate,
 
-  getCurrentDateTime,
+  addTimeToDateObject,
+  getCurrentDateTimeString,
 
   getDateFromString,
   getIsoDateFromString,
@@ -72,10 +73,17 @@ function getDateInfoObjFromIsoDate(isoDate: string) {
 
 /* ########################################################################## */
 
-function getCurrentDateTime(option?: 'date' | 'time') {
+function addTimeToDateObject(dataObj: Date, hoursToAdd: number): Date{
 
-  const oldDate = new Date()
-  const utcDate = converteDateToUTC(oldDate)
+  const hoursToSubtract = (hoursToAdd * 60) * 60 * 1000
+  return new Date(dataObj.getTime() + hoursToSubtract)
+
+}
+
+function getCurrentDateTimeString(option?: 'date' | 'time') {
+
+  const currentDate = new Date()
+  const utcDate = converteDateToUTC(currentDate)
 
   const isoDate = utcDate.toISOString()
 
@@ -155,9 +163,9 @@ function converteDateToUTC(oldDateObj: Date): Date {
 /* ########################################################################## */
 
 /*
-  console.log(dates.getCurrentDateTime('date'))
-  console.log(dates.getCurrentDateTime('time'))
-  console.log(dates.getCurrentDateTime())
+  console.log(dates.getCurrentDateTimeString('date'))
+  console.log(dates.getCurrentDateTimeString('time'))
+  console.log(dates.getCurrentDateTimeString())
   console.log("\n\n")
 
   const dateStr = "03/07/2022 22:49:00"
