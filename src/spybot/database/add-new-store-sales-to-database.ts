@@ -83,6 +83,9 @@ export default async function addNewStoreSalesToDatabase(alihunterSalesArr: IAli
       totalRevenue: Number((curSoldProduct.totalRevenue).toFixed(2))
     }
 
+    currentTrackedSales += curSoldProduct.totalSales
+    currentTrackedRevenue = Number((currentTrackedRevenue  + curSoldProduct.totalRevenue).toFixed(2))
+
     LOGGER(`${saleIndex} - Adicionando o produto: ${saleObject.productName} aos bancos de dados`, { from: "SPYBOT", pid: true })
 
     await addSaleToProductsDatabase(saleObject)
