@@ -5,10 +5,9 @@ import {
   NODE_ENV
 } from '../../../../configs/configs'
 
-import Master from '../../../clusters/models/Master'
+import Master from '../../../clusters/master/models/Master'
 
 import {Request, Response} from 'express'
-import { EMasterCommandsToWorkers } from '../../../clusters/interfaces/EMasterCommandsToWorkers'
 
 export default async function apieRoute(req: Request, res: Response) {
 
@@ -17,7 +16,7 @@ export default async function apieRoute(req: Request, res: Response) {
   try{
     const masterCluster: Master = global['MASTER']?.masterCluster
     if (!masterCluster){throw new Error("Objeto MASTER ainda não foi definido")}
-    
+
     const {
       numberOfReadyWorkers,
       workersToCreate,
@@ -31,7 +30,7 @@ export default async function apieRoute(req: Request, res: Response) {
     }
 
     if (masterCluster.numberOfReadyWorkers > 0){
-      LOGGER(`GOT DATA FROM WORKERS!`, {from: "SERVER", pid: true})
+      LOGGER(`Esperando dados dos workers!`, {from: "SERVER", pid: true})
       masterCluster.workersProcessesArr = await masterCluster.getDataFromWorker()
     }
 

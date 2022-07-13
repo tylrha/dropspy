@@ -3,13 +3,13 @@ import {
   LOGGER,
   VERSION,
 } from '../../../../configs/configs'
-import Master from '../../../clusters/models/Master'
+import Master from '../../../clusters/master/models/Master'
 
 import {Request, Response} from 'express'
 
 export default async function(req: Request, res: Response){
 
-  
+
   LOGGER(`/`, {from: 'SERVER', pid: true})
 
   try{

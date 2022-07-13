@@ -3,7 +3,7 @@ import {IWorkerSharedInformation} from './IWorkerSharedInformation'
 
 interface IWorkerGlobals {
   workerCluster?: Worker;
-  workerInformation?: IWorkerSharedInformation
+  workerSharedInfo?: IWorkerSharedInformation;
 }
 
 export {IWorkerGlobals}

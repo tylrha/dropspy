@@ -3,11 +3,11 @@ import {
   LOGGER,
   NODE_ENV
 } from '../../../../configs/configs'
-import Master from '../../../clusters/models/Master'
+import Master from '../../../clusters/master/models/Master'
 
 import { Request, Response } from 'express'
 
-import { EMasterCommandsToWorkers } from '../../../clusters/interfaces/EMasterCommandsToWorkers'
+import { EMasterCommandsToWorkers } from '../../../clusters/master/interfaces/EMasterCommandsToWorkers'
 
 export default async function quiteRoute(req: Request, res: Response) {
 

@@ -1,3 +1,5 @@
+import mongoose from 'mongoose'
+
 import {
   LOGGER,
   CURRENT_DATETIME,
@@ -11,12 +13,10 @@ import { updateBotInfo, ENUM_UPDATE_BOT_INFO } from "./components/spy-sheets-api
 import updateDatabasePreSpy from './database/update-database-pre-spy'
 import Spybot from "./models/Spybot";
 
-import mongoose from 'mongoose'
-
 export default async function initSpyLooping(spybot: Spybot, initialDate?: string){
 
-  global.WORKER.workerInformation.workerInfo.lastCheckedTime = CURRENT_DATETIME()
-  global.WORKER.workerInformation.workerInfo.checkedTimes += 1
+  global.WORKER.workerSharedInfo.workerData.spyBotInfo.lastCheckedTime = CURRENT_DATETIME()
+  global.WORKER.workerSharedInfo.workerData.spyBotInfo.checkedCount += 1
   spybot.botCheckedTimes += 1;
 
   LOGGER(`Bot ${spybot.botIndex} - checagem de número [${spybot.botCheckedTimes}]`, {from: "SPYBOT", pid: true})
@@ -69,9 +69,8 @@ export default async function initSpyLooping(spybot: Spybot, initialDate?: strin
     loopAgainAfterTime(spybot)
 
   } catch(e){
-    global.WORKER.workerInformation.workerInfo.isSpybotActive = false
-    console.log("ERRO")
-    LOGGER(`${e.message}`, {from: "SPYBOT", pid: true, isError: true})
+    global.WORKER.workerSharedInfo.workerData.workerInfo.isSpybotActive = false
+    LOGGER(`ERRO: ${e.message}`, {from: "SPYBOT", pid: true, isError: true})
   }
 
 }

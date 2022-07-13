@@ -37,9 +37,11 @@ import {
   saveDateInDatabase
 } from "./date/date-database-methods";
 
-export default async function addNewSaleToDatabase(alihunterSalesArr: IAlihunterSale[], currentStoreObj: IStoreSheets): Promise<void> {
+import Spybot from "../models/Spybot";
 
-  if (!alihunterSalesArr) { return }
+export default async function addNewSaleToDatabase(alihunterSalesArr: IAlihunterSale[], storeIndex: number, spoBotInstance: Spybot): Promise<void> {
+
+  const currentStoreObj: IStoreSheets = spoBotInstance.botSpyedStoresArr[storeIndex]
 
   const {
     storeName,
@@ -79,17 +81,20 @@ export default async function addNewSaleToDatabase(alihunterSalesArr: IAlihunter
       lastSaleIso: currentIsoDateTime
     }
 
-    console.log("")
     LOGGER(`${saleIndex} - Adicionando o produto: ${saleObject.productName} aos bancos de dados`, { from: "SPYBOT", pid: true })
 
     await addSaleToProductsDatabase(saleObject)
     await addSaleToStoresDatabase(saleObject)
     await addSaleToDatesDatabase(saleObject)
 
-    global.WORKER.workerInformation.workerInfo.trackedSales = currentTrackedSales
-    global.WORKER.workerInformation.workerInfo.trackedRevenue = Number(currentTrackedRevenue.toFixed(2))
-  }
+    global.WORKER.workerSharedInfo.workerData.spyBotInfo.lastSaleTime = CURRENT_DATETIME()
+    global.WORKER.workerSharedInfo.workerData.spyBotInfo.salesCount += 1
+    global.WORKER.workerSharedInfo.workerData.spyBotInfo.salesRevenue = Number(productPrice.toFixed(2))
 
+    spoBotInstance.botSpyedStoresArr[storeIndex].salesCount += 1
+    spoBotInstance.botSpyedStoresArr[storeIndex].salesRevenue += Number(productPrice.toFixed(2))
+
+  }
 
 }
 

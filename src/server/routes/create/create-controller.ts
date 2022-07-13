@@ -7,13 +7,13 @@ import {
   SPYBOT_APP_USER
 } from '../../../../configs/configs'
 
-import Master from '../../../clusters/models/Master'
+import Master from '../../../clusters/master/models/Master'
 import { Request, Response } from 'express'
-import { EMasterCommandsToWorkers } from '../../../clusters/interfaces/EMasterCommandsToWorkers'
+import { EMasterCommandsToWorkers } from '../../../clusters/master/interfaces/EMasterCommandsToWorkers'
 
 export default async function createWorkerRoute(req: Request, res: Response) {
 
-  const index = req?.query?.index as string 
+  const index = req?.query?.index as string
 
   try {
     const masterCluster: Master = global['MASTER']?.masterCluster

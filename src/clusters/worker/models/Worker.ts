@@ -1,11 +1,11 @@
-import { CURRENT_DATETIME, LOGGER } from '../../../configs/configs'
-import initSpyBot from '../../spybot/init-spy-bot'
-import Spybot from '../../spybot/models/Spybot'
+import { CURRENT_DATETIME, LOGGER } from '../../../../configs/configs'
+import initSpyBot from '../../../spybot/init-spy-bot'
+import Spybot from '../../../spybot/models/Spybot'
 
-import { EMasterCommandsToWorkers } from '../interfaces/EMasterCommandsToWorkers'
+import { EMasterCommandsToWorkers } from '../../master/interfaces/EMasterCommandsToWorkers'
 import { EWorkerCommandsToMaster } from '../interfaces/EWorkerCommandsToMaster'
-import { IMessageBetweenClusters } from '../interfaces/IMessageBetweenClusters'
-import { IMasterSharedInformation } from '../interfaces/IMasterSharedInformation'
+import { IMessageBetweenClusters } from '../../interfaces/IMessageBetweenClusters'
+import { IMasterSharedInformation } from '../../master/interfaces/IMasterSharedInformation'
 
 export default class Worker {
 
@@ -29,6 +29,7 @@ export default class Worker {
     this.setupWorkerEvents(this.workerProcess)
 
     const dataFromMaster = await this.getDataFromMaster()
+    LOGGER(`Dados recebidos do master: ${JSON.stringify(dataFromMaster)}`, { from: 'WORKER', pid: true })
 
     this.sendCommandToMaster(EWorkerCommandsToMaster.SET_WORKER_AS_READY);
 
@@ -83,7 +84,7 @@ export default class Worker {
   private async handleRequestForWorkerInformation(): Promise<void> {
 
     LOGGER(`Obtem informações de espionagem`, { from: 'WORKER', pid: true })
-    const objToSend = global.WORKER?.workerInformation || {}
+    const objToSend = global.WORKER?.workerSharedInfo || {}
     this.sendCommandToMaster(EWorkerCommandsToMaster.SEND_WORKER_INFO_TO_MASTER, objToSend)
 
   }

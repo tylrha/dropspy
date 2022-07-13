@@ -32,19 +32,24 @@ import IAlihunterSale from '../interfaces/IAlihunterSale'
 import IStoreSheets from '../interfaces/IStoreSheets'
 import extractBrowserExtensions from "../components/extract-browser-extensions"
 
+interface ISharedStore extends IStoreSheets {
+  salesCount?: number,
+  salesRevenue?: number,
+}
+
 export default class Spybot {
 
   public botIndex: string
   public botCheckedTimes: number
+  public botSpyedStoresArr: Array<ISharedStore>
   public botBrowser: Browser
-  public botSpyedStoresArr: Array<IStoreSheets>
   public botInitialSpyDate: string
 
   constructor(index: string) {
     this.botIndex = index
     this.botCheckedTimes = 0
+    this.botSpyedStoresArr = []
     // this.botBrowser
-    // this.botSpyedStoresArr
     // this.botInitialSpyDate
   }
 
@@ -288,11 +293,42 @@ export default class Spybot {
 
     if (typeof tmpSpyedStores === "string") {
       LOGGER(`Bot ${this.botIndex} - ${tmpSpyedStores}`, { from: "SPYBOT", pid: true })
-      global.WORKER.workerInformation.workerInfo.spyedStores = []
+      global.WORKER.workerSharedInfo.workerData.spyBotInfo.spyedStores = []
     } else {
       LOGGER(`Bot ${this.botIndex} - Foram encontradas ${tmpSpyedStores.length} lojas a seram espionadas`, { from: "SPYBOT", pid: true })
-      this.botSpyedStoresArr = tmpSpyedStores
-      global.WORKER.workerInformation.workerInfo.spyedStores = tmpSpyedStores
+
+      const addpropertiesToStoreObj = (store) => {
+        const newStoreObj = {
+          ...store,
+          salesCount: 0,
+          salesRevenue: 0
+        }
+        return newStoreObj
+      }
+
+      // ISharedStore
+      if (this.botSpyedStoresArr.length === 0){
+
+        this.botSpyedStoresArr = tmpSpyedStores.map(store => addpropertiesToStoreObj(store))
+
+      } else {
+
+        // REMOVE NO LONGER SPYED STORES
+        this.botSpyedStoresArr = this.botSpyedStoresArr.filter(oldStore => {
+          const storeIndex = tmpSpyedStores.findIndex(newStore => newStore.storeLink === oldStore.storeLink)
+          return storeIndex > -1
+        })
+
+        // ADD NEW SPYED STORES TO THIS
+        tmpSpyedStores.map(newStore => {
+          const storeIndex = this.botSpyedStoresArr.findIndex(oldStore => oldStore.storeLink === newStore.storeLink)
+          if (storeIndex === -1){
+            this.botSpyedStoresArr.push(addpropertiesToStoreObj(newStore))
+          }
+        })
+
+      }
+      global.WORKER.workerSharedInfo.workerData.spyBotInfo.spyedStores = this.botSpyedStoresArr
     }
   }
 
@@ -320,7 +356,7 @@ export default class Spybot {
     if (currentSpyedStoresArr.length === 0) { return }
 
     for (let x = 0; x < currentSpyedStoresArr.length; x++) {
-      const curStore: IStoreSheets = currentSpyedStoresArr[x]
+      const curStore: ISharedStore = currentSpyedStoresArr[x]
 
       let page = (await this.botBrowser.pages())[0];
       if (x > 0) { page = await this.botBrowser.newPage() }
@@ -413,7 +449,7 @@ export default class Spybot {
         const newSalesArr = recentSalesArr.slice(0, getUpperSalesNumber);
         currentCheckSaleCount += Number(getUpperSalesNumber)
         LOGGER(`Bot ${this.botIndex} - A loja ${storeName} teve ${getUpperSalesNumber} novas vendas!`, { from: 'SPYBOT', pid: true })
-        await addNewSaleToDatabase(newSalesArr, this.botSpyedStoresArr[storeIndex])
+        await addNewSaleToDatabase(newSalesArr, storeIndex, this)
       } else {
         LOGGER(`Bot ${this.botIndex} - A loja ${storeName} não teve novas vendas!`, { from: 'SPYBOT', pid: true })
       }

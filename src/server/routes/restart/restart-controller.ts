@@ -6,9 +6,9 @@ import {
   SPYBOT_APP_USER
 } from '../../../../configs/configs'
 
-import Master from '../../../clusters/models/Master'
+import Master from '../../../clusters/master/models/Master'
 import {Request, Response} from 'express'
-import { EMasterCommandsToWorkers } from '../../../clusters/interfaces/EMasterCommandsToWorkers'
+import { EMasterCommandsToWorkers } from '../../../clusters/master/interfaces/EMasterCommandsToWorkers'
 
 export default async function restartWorkerRoute(req: Request, res: Response) {
 

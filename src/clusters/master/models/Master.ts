@@ -1,9 +1,9 @@
-import { CURRENT_DATETIME, DELAY, LOGGER, WORKER_MAX_INSTANCES } from '../../../configs/configs'
+import { CURRENT_DATETIME, DELAY, LOGGER, WORKER_MAX_INSTANCES } from '../../../../configs/configs'
 import cluster, { Worker } from 'cluster'
 import { EMasterCommandsToWorkers } from '../interfaces/EMasterCommandsToWorkers'
-import { EWorkerCommandsToMaster } from '../interfaces/EWorkerCommandsToMaster'
-import { IMessageBetweenClusters } from '../interfaces/IMessageBetweenClusters'
-import { IWorkerSharedInformation, IWorkerShortedInformation } from '../interfaces/IWorkerSharedInformation'
+import { EWorkerCommandsToMaster } from '../../worker/interfaces/EWorkerCommandsToMaster'
+import { IMessageBetweenClusters } from '../../interfaces/IMessageBetweenClusters'
+import { IWorkerSharedInformation, IWorkerShortedInformation } from '../../worker/interfaces/IWorkerSharedInformation'
 import { IMasterSharedInformation } from '../interfaces/IMasterSharedInformation'
 
 interface ImasterWorkersArr {
@@ -34,12 +34,12 @@ export default class Master {
   createWorkerInstance(botIndex?: string): boolean {
 
     const currentWorkerNumber = this.workersToCreate + this.numberOfReadyWorkers + 1
-    LOGGER(`Criando novo worker: [${currentWorkerNumber}] -> [${botIndex}]`, { from: 'MASTER', pid: true })      
+    LOGGER(`Criando novo worker: [${currentWorkerNumber}] -> [${botIndex}]`, { from: 'MASTER', pid: true })
 
     try{
       if (currentWorkerNumber > WORKER_MAX_INSTANCES){throw new Error(`Número de workers chegou ao limite de ${WORKER_MAX_INSTANCES}`)}
       this.workersToCreate += 1
-  
+
       const currentWorker: Worker = cluster.fork()
       const currentWorkerPid = currentWorker.process.pid
       const currentWorkerId = currentWorker.id
@@ -115,12 +115,13 @@ export default class Master {
 
     LOGGER(`Recebi informações do worker`, { from: 'MASTER', pid: true })
 
-    const workerInfo = newDataObject.workerInfo
-    const workerProcessPId = newDataObject.workerProcessPId
-
-    const workerIndex = this.workersProcessesArr.findIndex(worker => worker.processPid === workerProcessPId)
+    const workerProcessPid = newDataObject.workerProcessPid
+    const workerIndex = this.workersProcessesArr.findIndex(worker => worker.processPid === workerProcessPid)
 
     if (workerIndex > -1){
+
+      const workerInfo = newDataObject.workerData
+
       this.workersProcessesArr[workerIndex].dataFromWorker = {
         ...workerInfo
       }
@@ -207,26 +208,25 @@ export default class Master {
       const curWorkerIndex = this.workersProcessesArr.findIndex(worker => worker.processPid === curWorkerPid)
 
       LOGGER(`${x} - Obtendo dados do worker com pid = [${curWorkerPid}] e index = ${curWorkerIndex}`, { from: 'SERVER', pid: true })
-      
+
       this.workersProcessesArr[curWorkerIndex].dataFromWorker = {}
       this.sendCommandToWorkers(EMasterCommandsToWorkers.GET_WORKER_INFO, {}, curWorkerPid)
 
       await this.waitForGetWorkerInfo(curWorkerIndex)
     }
-    
+
     return this.workersProcessesArr
   }
 
   private async waitForGetWorkerInfo(workerIndex: number): Promise<void>{
 
     return new Promise((resolve, reject) => {
-  
+
       const checkPromiseConditions = () => {
 
         const currentWorkerInfoObj = this.workersProcessesArr[workerIndex].dataFromWorker
-        const hasUpdatedWOrkerInfo = currentWorkerInfoObj.hasOwnProperty('loopInterval')
-        
-        if (hasUpdatedWOrkerInfo) {
+
+        if (Object.keys(currentWorkerInfoObj).length > 0) {
           resolve()
         } else {
           setTimeout(checkPromiseConditions, 1000)
