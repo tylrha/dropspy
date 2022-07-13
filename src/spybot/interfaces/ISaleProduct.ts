@@ -7,4 +7,6 @@ export default interface ISaleProduct {
   productImage: string,
   lastSale: string,
   lastSaleIso: string,
+  totalSales: number,
+  totalRevenue: number
 }

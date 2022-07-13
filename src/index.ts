@@ -15,5 +15,3 @@ import initWorkerCluster from './clusters/worker/init-worker-cluster'
   }
 
 })()
-
-

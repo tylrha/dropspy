@@ -72,6 +72,8 @@ export default async function initSpyLooping(spybot: Spybot, initialDate?: strin
 
   } catch(e){
 
+    LOGGER(`Erro no looping do: ${e.message}`, {from: "SPYBOT", pid: true, isError: true})
+
     const closeMongooseResult = mongoose.connection.close()
     if (!closeMongooseResult){
       LOGGER(`Bot ${spybot.botIndex} - Erro ao fechar conexão com banco de dados`, {from: 'SPYBOT', pid: true})
@@ -81,7 +83,6 @@ export default async function initSpyLooping(spybot: Spybot, initialDate?: strin
 
     global.WORKER.workerSharedInfo.workerData.workerInfo.botStep = "Erro no looping -> Esperando loop delay para verificar novas vendas"
     global.WORKER.workerSharedInfo.workerData.workerInfo.isSpybotActive = false
-    LOGGER(`Erro no looping do: ${e.message}`, {from: "SPYBOT", pid: true, isError: true})
 
     loopAgainAfterTime(spybot)
 

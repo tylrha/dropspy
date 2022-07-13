@@ -7,6 +7,11 @@ import { IProductMongo } from './product/IProduct'
 import { IStoreMongo } from "./store/IStore";
 import { IDateMongo } from "./date/IDate";
 
+interface IAlihunterSaleExtended extends IAlihunterSale {
+  totalSales?: number,
+  totalRevenue?: number
+}
+
 import {
   getDateFromString,
   getIsoDateFromString,
@@ -39,7 +44,7 @@ import {
 
 import Spybot from "../models/Spybot";
 
-export default async function addNewSaleToDatabase(alihunterSalesArr: IAlihunterSale[], storeIndex: number, spoBotInstance: Spybot): Promise<void> {
+export default async function addNewStoreSalesToDatabase(alihunterSalesArr: IAlihunterSale[], storeIndex: number, spoBotInstance: Spybot): Promise<void> {
 
   const currentStoreObj: IStoreSheets = spoBotInstance.botSpyedStoresArr[storeIndex]
 
@@ -51,34 +56,31 @@ export default async function addNewSaleToDatabase(alihunterSalesArr: IAlihunter
   const currentDateTime = CURRENT_DATETIME()
   const currentIsoDateTime = getIsoDateFromString(currentDateTime)
 
-  let currentTrackedSales = 2
+  const salesGroupedByProductsArr = groupSalesByProductLink(alihunterSalesArr);
+  const salesArrTotalSales = Number(salesGroupedByProductsArr.map(product => product.totalSales).reduce((pSum, a) => pSum + a, 0).toFixed(2))
+  const salesArrTotalRevenue = Number(salesGroupedByProductsArr.map(product => product.totalRevenue).reduce((pSum, a) => pSum + a, 0).toFixed(2))
+
+  LOGGER(`Foram encontrados ${salesGroupedByProductsArr.length} produtos, ${salesArrTotalSales} vendas e R$ ${salesArrTotalRevenue} de valor`, { from: "SPYBOT", pid: true })
+
+  let currentTrackedSales = 0
   let currentTrackedRevenue = 0
 
-  for (let x = 0; x < alihunterSalesArr.length; x++) {
+  for(let x = 0; x < salesGroupedByProductsArr.length; x++){
 
-    const curSoldProduct: IAlihunterSale = alihunterSalesArr[x]
-    const saleIndex = Number(x + 1) + " / " + alihunterSalesArr.length
-
-    const {
-      productLink,
-      productName,
-      productPrice,
-      productTime,
-      productImage
-    } = curSoldProduct
-
-    currentTrackedSales += 1
-    currentTrackedRevenue += productPrice
+    const curSoldProduct: IAlihunterSaleExtended = salesGroupedByProductsArr[x]
+    const saleIndex = Number(x + 1) + " / " + salesGroupedByProductsArr.length
 
     const saleObject: ISaleProduct = {
       storeName,
       storeLink,
-      productLink,
-      productName,
-      productPrice,
-      productImage,
+      productName: curSoldProduct.productName,
+      productLink: curSoldProduct.productLink,
+      productPrice: curSoldProduct.productPrice,
+      productImage: curSoldProduct.productImage,
       lastSale: currentDateTime,
-      lastSaleIso: currentIsoDateTime
+      lastSaleIso: currentIsoDateTime,
+      totalSales: curSoldProduct.totalSales,
+      totalRevenue: Number((curSoldProduct.totalRevenue).toFixed(2))
     }
 
     LOGGER(`${saleIndex} - Adicionando o produto: ${saleObject.productName} aos bancos de dados`, { from: "SPYBOT", pid: true })
@@ -87,15 +89,49 @@ export default async function addNewSaleToDatabase(alihunterSalesArr: IAlihunter
     await addSaleToStoresDatabase(saleObject)
     await addSaleToDatesDatabase(saleObject)
 
-    global.WORKER.workerSharedInfo.workerData.spyBotInfo.lastSaleTime = CURRENT_DATETIME()
-    global.WORKER.workerSharedInfo.workerData.spyBotInfo.salesCount += 1
-    global.WORKER.workerSharedInfo.workerData.spyBotInfo.salesRevenue = Number((global.WORKER.workerSharedInfo.workerData.spyBotInfo.salesRevenue + productPrice).toFixed(2))
+    console.log("")
 
-    spoBotInstance.botSpyedStoresArr[storeIndex].salesCount += 1
-    spoBotInstance.botSpyedStoresArr[storeIndex].salesRevenue = Number((spoBotInstance.botSpyedStoresArr[storeIndex].salesRevenue + productPrice).toFixed(2))
+    global.WORKER.workerSharedInfo.workerData.spyBotInfo.lastSaleTime = CURRENT_DATETIME()
+    global.WORKER.workerSharedInfo.workerData.spyBotInfo.salesCount += currentTrackedSales
+    global.WORKER.workerSharedInfo.workerData.spyBotInfo.salesRevenue = Number((global.WORKER.workerSharedInfo.workerData.spyBotInfo.salesRevenue + currentTrackedRevenue).toFixed(2))
+
+    spoBotInstance.botSpyedStoresArr[storeIndex].salesCount += currentTrackedSales
+    spoBotInstance.botSpyedStoresArr[storeIndex].salesRevenue = Number((spoBotInstance.botSpyedStoresArr[storeIndex].salesRevenue + currentTrackedRevenue).toFixed(2))
 
   }
 
+}
+
+function groupSalesByProductLink(array: IAlihunterSale[]): IAlihunterSaleExtended[]{
+
+  const arrGroupedByKey = array.reduce((finalGroupedArr, currentSaleObj) => {
+
+    const currentProductLink = currentSaleObj.productLink
+
+    const curProductindex = finalGroupedArr.findIndex(prodObj => prodObj.productLink === currentProductLink)
+    const isProductAlreadyInFinalArray = curProductindex > -1 ? true : false
+
+    if (!isProductAlreadyInFinalArray){
+
+      const newProductObj: IAlihunterSaleExtended = {
+        ...currentSaleObj,
+        totalSales: 1,
+        totalRevenue: Number((currentSaleObj.productPrice).toFixed(2))
+      }
+
+      finalGroupedArr.push(newProductObj)
+
+    } else {
+
+      finalGroupedArr[curProductindex].totalSales += 1
+      finalGroupedArr[curProductindex].totalRevenue = Number((finalGroupedArr[curProductindex].totalRevenue + currentSaleObj.productPrice).toFixed(2))
+    }
+
+    return finalGroupedArr;
+
+  }, []);
+
+  return arrGroupedByKey
 }
 
 async function addSaleToProductsDatabase(newSaleObject: ISaleProduct): Promise<void> {

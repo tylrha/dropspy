@@ -122,32 +122,31 @@ async function addSaleToStoreObject(storeObj: IStoreMongo, saleObj: ISaleProduct
   let newStoreObj = storeObj
 
   const saleDate = getStringDateFromDate(getDateFromString(saleObj.lastSale), 'date')
-  const saleCount = Number(storeObj.totalSales) + 1
+  const saleCount = Number(storeObj.totalSales) + Number(saleObj.totalSales)
   const salePrice = storeObj.products.find(product => product.productLink === saleObj.productLink).productPrice
 
-  LOGGER(`Adicionando venda [${saleCount}] à loja [${storeObj.storeName}]`, {from: "SPYBOT", pid: true})
+  LOGGER(`Adicionando ${saleObj.totalSales} vendas às [${saleCount}] existentes da loja [${storeObj.storeName}]`, {from: "SPYBOT", pid: true})
 
   const oldDatesArr = [...storeObj.dates]
   const dateIndex = oldDatesArr.findIndex(date => date.date === saleDate)
   const saleDateObj = oldDatesArr[dateIndex]
-  saleDateObj.sales = Number(saleDateObj.sales + 1)
-  saleDateObj.revenue = Number((saleDateObj.revenue + salePrice).toFixed(2))
+  saleDateObj.sales = Number(saleDateObj.sales + saleObj.totalSales)
+  saleDateObj.revenue = Number((saleDateObj.revenue + saleObj.totalRevenue).toFixed(2))
   newStoreObj.dates[dateIndex] = saleDateObj
 
   const oldProductsArr = [...storeObj.products]
   const productIndex = oldProductsArr.findIndex(product => product.productLink === saleObj.productLink)
   const saleProductObj = oldProductsArr[productIndex]
-  saleProductObj.sales = Number(saleProductObj.sales + 1)
-  saleProductObj.revenue = Number((saleProductObj.revenue + salePrice).toFixed(2))
+  saleProductObj.sales = Number(saleProductObj.sales + saleObj.totalSales)
+  saleProductObj.revenue = Number((saleProductObj.revenue + saleObj.totalRevenue).toFixed(2))
   newStoreObj.products[productIndex] = saleProductObj
 
   newStoreObj.lastSale = saleObj.lastSale
   newStoreObj.lastSaleIso = saleObj.lastSaleIso
-
   newStoreObj.totalProducts = newStoreObj.products.length
   newStoreObj.totalDates = newStoreObj.dates.length
-  newStoreObj.totalSales = Number(storeObj.totalSales + 1)
-  newStoreObj.totalRevenue = Number((storeObj.totalRevenue + salePrice).toFixed(2))
+  newStoreObj.totalSales = Number(storeObj.totalSales + saleObj.totalSales)
+  newStoreObj.totalRevenue = Number((storeObj.totalRevenue + saleObj.totalRevenue).toFixed(2))
 
   return newStoreObj
 }

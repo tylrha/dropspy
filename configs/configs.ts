@@ -69,8 +69,8 @@ const GSHEET_IM_SPY_API_URL = APP_CONFIGS['google_sheets_configs'].im_spy_api_ur
 
 /* SPY ====================================================================== */
 
-const _min_minutes = NODE_ENV === DEFALT_NODE_ENV ? 1 : 2
-const _max_minutes = NODE_ENV === DEFALT_NODE_ENV ? 4 : 9
+const _min_minutes = NODE_ENV === DEFALT_NODE_ENV ? 1 : 4
+const _max_minutes = NODE_ENV === DEFALT_NODE_ENV ? 1 : 9
 const _randBetweenTwoNumbers = (min, max) => Math.floor(Math.random() * (max - min + 1) + min)
 
 if (!global.RANDOM_NUMBER){global.RANDOM_NUMBER = _randBetweenTwoNumbers(_min_minutes, _max_minutes)}

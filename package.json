@@ -1,6 +1,6 @@
 {
   "name": "dropspy",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "cloud based shopify stores spy system",
   "repository": {
     "type": "git",
@@ -35,8 +35,8 @@
     "build": "node ./node_modules/typescript/bin/tsc",
     "postbuild": "node ./scripts/build/post-build.js",
 
-    "docker_build": "docker build -t dropspy . ",
-    "docker_pre_run": "bash ./dist/scripts/clean-xbfb-files.sh",
+    "docker_build": "docker build -t dropspy .",
+    "docker_pre_run": "bash ./dist/scripts/run/clean-xbfb-files.sh",
 
     "start_prod": "node dist/src/index.js",
     "start_dev": "ts-node src/index.ts",

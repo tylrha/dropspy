@@ -68,7 +68,7 @@ function getSoldProductsList(onlyToday) {
         }
 
         const productRow = x + " | " + productName + " | " + fixedProductPrice + " | " + productTime + " | " + productLink
-        console.log(productRow)
+        // console.log(productRow)
 
         if (!onlyToday) {
           productsArr.push(productObj)
@@ -113,23 +113,4 @@ function getUpperSalesNumber() {
   }
 }
 
-// function pera(){
-//   <div class="_3CQ96D6HM-X1ppK2Q6gWAF _1NVk7IuQxy-04MTxnLio0t">
-//     <div class="_3MKTqZAzt9ZahG8uCIFoOb _18D1FLGR-CZ9ud5nEQFieK">
-//       <div class="_94ZmeYYiS8oR1zgGtS0xI">2 minutes ago</div>
-//       <a class="_1ppspMRy3xYkn0jLnZ7ghC" href="https://quierobr.myshopify.com/products/xo-frizz™" target="__blank">
-//         <div class="_79SyLYpovGcygTpVfZIPz">
-//           <div class="_1aBWBWzOfdrmQY1Z-mLwkO">
-//             <img src="https://cdn.shopify.com/s/files/1/0459/6829/4047/products/1_e145afea-0950-4f38-a8ba-c9eabc9ab7ab_70x70.jpg?v=1628659713" loading="lazy" alt="newSale-undefined"></div>
-//           <div class="_3K0_8-CusHqoCIjsYg4EMv">
-//             <div class="_1h0SwjHGr__FljITS6J2FA">Xô Frizz™</div>
-//             <div style="display: flex; gap: 8px;">
-//               <div class="_1jlBA3TjmrUfFXXCyWbfpV"> 89.9 BRL</div>
-//             </div>
-//           </div>
-//         </div>
-//         <div class="_2ByTXHK5eU5YdxJBPjkMlP _2q_66KqvNFFBZDkWNvw_gw PLhxH8_c7uWAETPFF6Ux-" data-ah-color="primary" data-ah-variant="outlined" data-ah-btn-disabled="false" data-ah-btn-loading="false" style="display: inline-flex;">Find Suppliers</div>
-//       </a>
-//     </div>
-//   </div>
-// }
+// getSoldProductsList()

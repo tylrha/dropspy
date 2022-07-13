@@ -20,7 +20,7 @@ export {
 async function getProductInDatabase(productLink: string): Promise<IProductMongo>{
 
   if (!productLink){return}
-  LOGGER(`Obtendo informação do banco de dados: produto [${productLink}]`, {from: "SPYBOT", pid: true})
+  LOGGER(`Obtendo informação do banco de dados: produto`, {from: "SPYBOT", pid: true}) //  [${productLink.substring(0, 15)}]
 
   const productObject = await Product.findOne({productLink})
   return productObject
@@ -95,19 +95,20 @@ async function addDateToProductObject(productObj: IProductMongo, dateToAdd: stri
 async function addSaleToProductObject(productObj: IProductMongo, saleObj: ISaleProduct): Promise<IProductMongo>{
 
   const saleDate = getStringDateFromDate(getDateFromString(saleObj.lastSale), 'date')
-  const saleCount = Number(productObj.totalSales) + 1
+  const saleCount = Number(productObj.totalSales) + saleObj.totalSales
 
-  LOGGER(`Adicionando venda [${saleCount}] ao produto [${productObj.productName}]`, {from: "SPYBOT", pid: true})
+  LOGGER(`Adicionando [${saleObj.totalSales}] vendas às [${saleCount}] existentes do produto [${productObj.productName}]`, {from: "SPYBOT", pid: true})
 
   const oldDatesArr = [...productObj.dates]
   const dateIndex = oldDatesArr.findIndex(date => date.date === saleDate)
   const saleDateObj = oldDatesArr[dateIndex]
   saleDateObj.sales = Number(saleDateObj.sales + 1)
-  saleDateObj.revenue = Number((saleDateObj.revenue + productObj.productPrice).toFixed(2))
-
+  saleDateObj.revenue = Number((saleDateObj.revenue + saleObj.totalRevenue).toFixed(2))
   productObj.dates[dateIndex] = saleDateObj
-  productObj.totalSales = Number(productObj.totalSales + 1)
-  productObj.totalRevenue = Number((productObj.totalRevenue + productObj.productPrice).toFixed(2))
+
+  productObj.totalDates = productObj.dates.length
+  productObj.totalSales = Number(productObj.totalSales + saleObj.totalSales)
+  productObj.totalRevenue = Number((productObj.totalRevenue + saleObj.totalRevenue).toFixed(2))
   productObj.lastSale = saleObj.lastSale
   productObj.lastSaleIso = saleObj.lastSaleIso
 

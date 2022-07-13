@@ -1,7 +1,7 @@
 {
   "ts-node": {
     // "require": ["tsconfig-paths/register"],
-    // "esm": true  
+    // "esm": true
   },
   "compilerOptions": {
     "target": "ES2017",
@@ -20,15 +20,15 @@
     "skipLibCheck": true
   },
   "exclude": [
-    "node_modules",
-    "tests",
-    "local",
-    "extensions",
+    "node_modules/",
+    "tests/",
+    "local/",
+    "extensions_unziped/",
     "jest.config.ts"
   ],
   "include": [
-    "configs",
-    "src",
-    "utils",
+    "configs/",
+    "src/",
+    "utils/",
   ]
 }

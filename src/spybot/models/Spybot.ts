@@ -24,7 +24,7 @@ import { runJsOnPage, waitTillHTMLRendered } from "../../../utils/libraries/pupp
 import { getSpyedStores, updateBotInfo, ENUM_UPDATE_BOT_INFO } from "../components/spy-sheets-api"
 
 import fetchJsonUrl from "../../../utils/functions/fetch-json-url"
-import addNewSaleToDatabase from "../database/add-new-sales-to-database"
+import addNewStoreSalesToDatabase from "../database/add-new-store-sales-to-database"
 
 import IAlihunterSale from '../interfaces/IAlihunterSale'
 import IStoreSheets from '../interfaces/IStoreSheets'
@@ -431,12 +431,16 @@ export default class Spybot {
       }
 
       if (getUpperSalesNumber > 0) {
+
         const recentSalesArr = await this.getStoreRecentSalesArray(page)
         const newSalesArr = recentSalesArr.slice(0, getUpperSalesNumber);
+
         currentCheckSaleCount += Number(getUpperSalesNumber)
+        console.log("")
         LOGGER(`Bot ${this.botIndex} - A loja ${storeName} teve ${getUpperSalesNumber} novas vendas!`, { from: 'SPYBOT', pid: true })
-        global.WORKER.workerSharedInfo.workerData.workerInfo.botStep = `Adicionando novas vendas na loja [${storeName}]`
-        await addNewSaleToDatabase(newSalesArr, storeIndex, this)
+        global.WORKER.workerSharedInfo.workerData.workerInfo.botStep = `Adicionando [${getUpperSalesNumber}] novas vendas na loja [${storeName}]`
+
+        await addNewStoreSalesToDatabase(newSalesArr, storeIndex, this)
       } else {
         LOGGER(`Bot ${this.botIndex} - A loja ${storeName} não teve novas vendas!`, { from: 'SPYBOT', pid: true })
       }

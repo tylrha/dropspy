@@ -96,21 +96,20 @@ async function addSaleToDateobject(dateObj: IDateMongo, saleObj: ISaleProduct): 
   const saleDate = getStringDateFromDate(getDateFromString(saleObj.lastSale), 'date')
   const saleCount = Number(dateObj.totalSales) + 1
 
-  LOGGER(`Adicionando venda [${saleCount}] à data [${saleDate}]`, {from: "SPYBOT", pid: true})
+  LOGGER(`Adicionando [${saleObj.totalSales}] vendas às [${saleCount}] existentes da data [${saleDate}]`, {from: "SPYBOT", pid: true})
 
   const oldProductsArr = [...dateObj.products]
   const productIndex = oldProductsArr.findIndex(product => product.productLink === saleObj.productLink)
   const saleProductObj = oldProductsArr[productIndex]
-  saleProductObj.sales = Number(saleProductObj.sales + 1)
-  saleProductObj.revenue = Number((saleProductObj.revenue + saleProductObj.productPrice).toFixed(2))
+  saleProductObj.sales = Number(saleProductObj.sales + saleObj.totalSales)
+  saleProductObj.revenue = Number((saleProductObj.revenue + saleObj.totalRevenue).toFixed(2))
   newDateObj.products[productIndex] = saleProductObj
 
   newDateObj.lastSale = saleObj.lastSale
   newDateObj.lastSaleIso = saleObj.lastSaleIso
-
   newDateObj.totalProducts = newDateObj.products.length
-  newDateObj.totalSales = Number(dateObj.totalSales + 1)
-  newDateObj.totalRevenue = Number((dateObj.totalRevenue + saleProductObj.productPrice).toFixed(2))
+  newDateObj.totalSales = Number(dateObj.totalSales + saleObj.totalSales)
+  newDateObj.totalRevenue = Number((dateObj.totalRevenue + saleObj.totalRevenue).toFixed(2))
 
   return newDateObj
 }
