@@ -4,7 +4,7 @@ import { updateBotInfo, ENUM_UPDATE_BOT_INFO } from './components/spy-sheets-api
 import initSpyLooping from "./init-spy-looping"
 import Spybot from './models/Spybot'
 
-export default async function initSpyBot(spybot: Spybot) {
+export default async function initSpyBot(spybot: Spybot): Promise<Spybot | string> {
 
   try {
     console.log("")
@@ -28,12 +28,23 @@ export default async function initSpyBot(spybot: Spybot) {
     LOGGER(`Bot ${spybot.botIndex} - iniciando espionagem - ${initialDate}\n`, { from: "SPYBOT", pid: true })
     global.WORKER.workerSharedInfo.workerData.workerInfo.isSpybotActive = true
     await initSpyLooping(spybot, initialDate)
+    return spybot
 
   } catch (e) {
-    LOGGER(`Erro: ${e.message}`, { from: 'SPYBOT', pid: true, isError: true })
+
+    LOGGER(`Erro ao iniciar spybot: ${e.message}`, { from: 'SPYBOT', pid: true, isError: true })
+
+    if (spybot.botBrowser){
+      LOGGER(`Fechando browser pra evitar múltiplas instâncias do mesmo bot`, { from: 'SPYBOT', pid: true, isError: true })
+      await spybot.botBrowser.close()
+    }
+
+    return e.message
+
   } finally {
+
     LOGGER(`Bot ${spybot.botIndex} - terminou de inciar\n`, { from: 'SPYBOT', pid: true })
-    return spybot
+
   }
 
 }

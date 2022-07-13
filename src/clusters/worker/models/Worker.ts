@@ -1,4 +1,4 @@
-import { CURRENT_DATETIME, LOGGER } from '../../../../configs/configs'
+import { CURRENT_DATETIME, LOGGER, SPYBOT_LOOP_INTERVAL } from '../../../../configs/configs'
 import initSpyBot from '../../../spybot/init-spy-bot'
 import Spybot from '../../../spybot/models/Spybot'
 
@@ -126,11 +126,23 @@ export default class Worker {
   private async startSpybot(botIndex: string): Promise<void> {
     LOGGER(`Inicia spybot com index = [${botIndex}]`, { from: 'WORKER', pid: true })
 
+    global.WORKER.workerSharedInfo.workerData.workerInfo.botStep = "Iniciando bot"
     const spybot = new Spybot(botIndex)
     this.spybotInstance = spybot
     this.isSpybotActive = true
 
-    await initSpyBot(spybot)
+    const spybotResult = await initSpyBot(spybot)
+    if (typeof spybotResult === "string"){
+
+      global.WORKER.workerSharedInfo.workerData.workerInfo.botStep = "Aguardando loop delay até tentar criar bot de novo"
+      LOGGER(`Erro ao criar bot: ${spybotResult}`, {from: "SPYBOT", pid: true, isError: true})
+      LOGGER(`Tentando novamente em ${SPYBOT_LOOP_INTERVAL}s`, {from: "SPYBOT", pid: true, isError: true})
+
+      setTimeout(async () => {
+        await this.startSpybot(botIndex)
+      }, SPYBOT_LOOP_INTERVAL * 1000)
+
+    }
   }
 
   private async closeWorker(): Promise<void> {

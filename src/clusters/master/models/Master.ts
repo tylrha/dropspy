@@ -16,7 +16,7 @@ interface ImasterWorkersArr {
 export default class Master {
 
   public startedTime: string
-  public numberOfReadyWorkers: number
+  public readyWorkers: number
   public workersToCreate: number
   public workersProcessesArr: ImasterWorkersArr[]
 
@@ -24,7 +24,7 @@ export default class Master {
     LOGGER(`Master foi iniciado com sucesso`, { from: 'MASTER', pid: true })
 
     this.startedTime = CURRENT_DATETIME()
-    this.numberOfReadyWorkers = 0
+    this.readyWorkers = 0
     this.workersToCreate = 0
     this.workersProcessesArr = []
   }
@@ -33,7 +33,7 @@ export default class Master {
 
   createWorkerInstance(botIndex?: string): boolean {
 
-    const currentWorkerNumber = this.workersToCreate + this.numberOfReadyWorkers + 1
+    const currentWorkerNumber = this.workersToCreate + this.readyWorkers + 1
     LOGGER(`Criando novo worker: [${currentWorkerNumber}] -> [${botIndex}]`, { from: 'MASTER', pid: true })
 
     try{
@@ -90,7 +90,7 @@ export default class Master {
     worker.on('exit', () => {
       const currentWorkerPid = worker.process.pid
       LOGGER(`Fechou o worker ${currentWorkerPid}`, { from: 'MASTER', pid: true })
-      this.numberOfReadyWorkers -= 1
+      this.readyWorkers -= 1
 
       const curWorkerIndex = this.workersProcessesArr.findIndex(el => el.processPid === currentWorkerPid)
       if (curWorkerIndex > -1) {
@@ -107,7 +107,7 @@ export default class Master {
 
     LOGGER(`Worker disse que está pronto!`, { from: 'MASTER', pid: true })
 
-    this.numberOfReadyWorkers += 1
+    this.readyWorkers += 1
 
   }
 
@@ -185,7 +185,7 @@ export default class Master {
 
       const checkPromiseConditions = () => {
 
-        if (this.numberOfReadyWorkers === this.workersToCreate) {
+        if (this.readyWorkers === this.workersToCreate) {
           this.workersToCreate -= 1
           resolve(true)
         } else {

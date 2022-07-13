@@ -20,7 +20,7 @@ export default async function restartWorkerRoute(req: Request, res: Response) {
 
     LOGGER(`/RESTART`, {from: 'SERVER', pid: true})
 
-    if (masterCluster.numberOfReadyWorkers > 0){
+    if (masterCluster.readyWorkers > 0){
       masterCluster.sendCommandToWorkers(EMasterCommandsToWorkers.CLOSE_WORKER, {})
       res.send(`WORKER WILL RESTART IN ${WORKER_RESTART_INTERVAL}s`)
     } else {

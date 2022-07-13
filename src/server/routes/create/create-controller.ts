@@ -21,7 +21,7 @@ export default async function createWorkerRoute(req: Request, res: Response) {
 
     LOGGER(`/CREATE`, { from: 'SERVER', pid: true })
 
-    if (masterCluster.numberOfReadyWorkers >= WORKER_MAX_INSTANCES) {
+    if (masterCluster.readyWorkers >= WORKER_MAX_INSTANCES) {
       res.send(`WORKERS HAVE REACHED THEIR MAX INSTANCE NUMBER!`)
       return
     }

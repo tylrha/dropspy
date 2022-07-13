@@ -115,6 +115,7 @@ export default class Spybot {
   private setBrowserEvents(): void {
     this.botBrowser.on('disconnected', async () => {
       LOGGER(`Bot ${this.botIndex} - o browser foi fechado`, { from: 'SPYBOT', pid: true })
+      this.botBrowser = undefined
     });
   }
 
@@ -401,6 +402,7 @@ export default class Spybot {
 
   async detectNewSalesInAllStores(): Promise<void> {
 
+
     const initialPages = 0
     const browserPages = (await this.botBrowser.pages()).length
     let currentCheckSaleCount = 0
@@ -419,6 +421,7 @@ export default class Spybot {
       const currentStoreObj = this.botSpyedStoresArr[storeIndex]
       const storeName = currentStoreObj.storeName
       await page.bringToFront();
+      global.WORKER.workerSharedInfo.workerData.workerInfo.botStep = `Detectando novas vendas na loja [${storeName}]`
 
       const getUpperSalesNumber = await runJsOnPage(page, "getUpperSalesNumber()");
 
@@ -432,6 +435,7 @@ export default class Spybot {
         const newSalesArr = recentSalesArr.slice(0, getUpperSalesNumber);
         currentCheckSaleCount += Number(getUpperSalesNumber)
         LOGGER(`Bot ${this.botIndex} - A loja ${storeName} teve ${getUpperSalesNumber} novas vendas!`, { from: 'SPYBOT', pid: true })
+        global.WORKER.workerSharedInfo.workerData.workerInfo.botStep = `Adicionando novas vendas na loja [${storeName}]`
         await addNewSaleToDatabase(newSalesArr, storeIndex, this)
       } else {
         LOGGER(`Bot ${this.botIndex} - A loja ${storeName} não teve novas vendas!`, { from: 'SPYBOT', pid: true })

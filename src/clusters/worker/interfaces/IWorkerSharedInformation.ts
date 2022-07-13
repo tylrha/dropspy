@@ -9,7 +9,8 @@ interface IWorkerShortedInformation {
   workerInfo?: {
     loopInterval?: number,
     startedTime?: string,
-    isSpybotActive?: boolean
+    isSpybotActive?: boolean,
+    botStep?: string
   },
   spyBotInfo?: {
     lastCheckedTime?: string,
