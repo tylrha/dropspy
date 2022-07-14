@@ -60,7 +60,7 @@ export default async function addNewStoreSalesToDatabase(alihunterSalesArr: IAli
   const salesArrTotalSales = Number(salesGroupedByProductsArr.map(product => product.totalSales).reduce((pSum, a) => pSum + a, 0).toFixed(2))
   const salesArrTotalRevenue = Number(salesGroupedByProductsArr.map(product => product.totalRevenue).reduce((pSum, a) => pSum + a, 0).toFixed(2))
 
-  LOGGER(`Foram encontrados ${salesGroupedByProductsArr.length} produtos, ${salesArrTotalSales} vendas e R$ ${salesArrTotalRevenue} de valor`, { from: "SPYBOT", pid: true })
+  LOGGER(`Foram encontrados ${salesGroupedByProductsArr.length} produtos, ${salesArrTotalSales} vendas e R$ ${salesArrTotalRevenue} de valor\n`, { from: "SPYBOT", pid: true })
 
   let currentTrackedSales = 0
   let currentTrackedRevenue = 0

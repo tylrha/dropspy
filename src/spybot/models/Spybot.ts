@@ -511,8 +511,55 @@ export default class Spybot {
   private async handleSpyListChanges(): Promise<void>{
 
     LOGGER(`Bot ${this.botIndex} - lidando com mudanças na lista de espionagem`, { from: 'SPYBOT', pid: true })
-    await this.closeAllPagesAndLetBlankPage()
-    await this.openSpyStores()
+
+    // fecha lojas nao mais espionadas
+    const browserPages = await this.botBrowser.pages()
+    for (let x = 0; x < browserPages.length; x++) {
+
+      const curPage = browserPages[x];
+      const isStoreInNewList = this.botSpyedStoresArr.findIndex(spyedStoreObj => curPage.url().search(spyedStoreObj.storeLink) > -1)
+      if (!isStoreInNewList){continue}
+
+      if ((await this.botBrowser.pages()).length === 1){
+        LOGGER(`Bot ${this.botIndex} - abrindo pagina em branco`, { from: 'SPYBOT', pid: true })
+        await curPage.goto("about:blank")
+      } else {
+        LOGGER(`Bot ${this.botIndex} - fechando aba ${curPage.url()}`, { from: 'SPYBOT', pid: true })
+        await curPage.close()
+      }
+
+    }
+
+    // abre lojas novas que nao tenham ainda
+    for (let x = 0; x < this.botSpyedStoresArr.length; x++) {
+
+      const curPage = this.botSpyedStoresArr[x];
+      const isStoreAlreadyOpen = (await this.botBrowser.pages()).findIndex(browserPage => browserPage.url().search(curPage.storeLink) > -1)
+      if (!isStoreAlreadyOpen){continue}
+
+      LOGGER(`Bot ${this.botIndex} - abrindo nova loja ${curPage.storeLink}`, { from: 'SPYBOT', pid: true })
+      const page = await this.botBrowser.newPage()
+      await this.openAndSetupSpyedStorePage(curPage.storeLink, page)
+
+    }
+
+    await DELAY(7000)
+
+    // cloose blank apge if exist
+    if ((await this.botBrowser.pages()).length > 1){
+      for (let x = 0; x < (await this.botBrowser.pages()).length; x++) {
+        const curPage = (await this.botBrowser.pages())[x]
+
+        if (curPage.url() === "about:blank"){
+          LOGGER(`Bot ${this.botIndex} - fechando página em branco`, { from: 'SPYBOT', pid: true })
+          await curPage.close()
+        }
+      }
+    }
+
+    // old way
+    // await this.closeAllPagesAndLetBlankPage()
+    // await this.openSpyStores()
 
   }
 
@@ -584,6 +631,7 @@ export default class Spybot {
       await DELAY(1000)
     }
 
+    console.log("")
     LOGGER(`Foram adicionadas um total de ${currentCheckSaleCount} vendas ao BD`, { from: 'SPYBOT', pid: true })
     if (currentCheckSaleCount > 0) { await updateBotInfo(ENUM_UPDATE_BOT_INFO.LAST_SALE_TIME, this.botIndex); console.log("")}
 
