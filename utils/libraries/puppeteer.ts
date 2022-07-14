@@ -1,4 +1,4 @@
-import {delay as DELAY} from './utils'
+import {delay} from './utils'
 
 export {
   waitTillHTMLRendered,
@@ -6,6 +6,8 @@ export {
   printPagePup,
   addScriptAndRunIntoPage
 }
+
+/* ########################################################################## */
 
 async function waitTillHTMLRendered(page, timeout = 30000){
 
@@ -37,7 +39,7 @@ async function waitTillHTMLRendered(page, timeout = 30000){
     }
 
     lastHTMLSize = currentHTMLSize;
-    await DELAY(checkDurationMsecs);
+    await delay(checkDurationMsecs);
   }
 };
 
@@ -73,3 +75,5 @@ async function addScriptAndRunIntoPage(pageToRun, functionToAdd, commandToRun){
 
   return fnResult
 }
+
+/* ########################################################################## */

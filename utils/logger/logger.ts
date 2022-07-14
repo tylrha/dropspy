@@ -1,6 +1,10 @@
 import clc from 'cli-color'
 import { getCurrentDateTimeString } from '../libraries/dates'
 
+import telegramLogger from './components/telegram-logger'
+import whatsappLogger from './components/whatsapp-logger'
+import mongodbLogger from './components/mongodb-logger'
+
 const FROM_ARR = [
   "MASTER",
   "SERVER",
@@ -23,7 +27,6 @@ const FROM_COLORS_ARR = [
 
 const LOGGER_ARR = [
   "mongodb",
-  "file",
   "telegram",
   "whatsapp"
 ] as const
@@ -50,7 +53,9 @@ const DEFAULT_SEPARATOR = "|"
 const NODE_ENV = process.env.NODE_ENV || "development"
 const SHOULD_SKIP_COLLORED_LOGGER = (opt) => NODE_ENV === "production" || (opt && opt.logger)
 
-export default function logger(message: any, options?: loggerOptions){
+/* ########################################################################## */
+
+export default async function logger(message: any, options?: loggerOptions){
 
   if (!message) { return }
 
@@ -64,7 +69,17 @@ export default function logger(message: any, options?: loggerOptions){
 
   // LOGS IN PRODUCTION ENVIRONMENTS ===================
   if (options && options.logger){
-    console.log("OUTRO LOGGER: " + finalMessage)
+
+    if (options.logger === 'whatsapp'){
+      await whatsappLogger(message)
+    } else if (options.logger === 'telegram'){
+      await telegramLogger(message)
+    } else if (options.logger === 'mongodb'){
+      await mongodbLogger(message)
+    } else {
+      console.log(`${options.logger}: ` + finalMessage)
+    }
+
   } else {
     console.log(finalMessage)
   }

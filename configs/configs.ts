@@ -16,7 +16,7 @@ const RUNING_TYPE = basename(dirname(__dirname)) === DIST_FOLDER ? "production" 
 
 /* FUNCTIONS ================================================================ */
 
-import LOGGER from '../utils/functions/logger'
+import LOGGER from '../utils/logger/logger'
 import {delay as DELAY} from '../utils/libraries/utils'
 import {importFromRootPath as IMPORT_MODULE, getPathFromRoot as ROOT_PATH} from '../utils/libraries/globalPath'
 import {

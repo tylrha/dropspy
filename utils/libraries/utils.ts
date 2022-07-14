@@ -1,5 +1,4 @@
 import { existsSync, readFileSync } from "fs";
-import { resolve } from 'path'
 import {getPathFromRoot} from './globalPath'
 
 export {
@@ -7,6 +6,8 @@ export {
   readJson,
   doesFileExists
 }
+
+/* ########################################################################## */
 
 function delay(time: number): Promise<void> {
   return new Promise(function (resolve) {
@@ -31,3 +32,5 @@ function readJson(jsonPath: string): object {
 function doesFileExists(filePath: string) {
   return existsSync(filePath)
 }
+
+/* ########################################################################## */

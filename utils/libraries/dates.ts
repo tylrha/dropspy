@@ -1,12 +1,3 @@
-const DATETIME_SEPARATOR = " "
-const DATE_SEPARATOR = "/"
-const TIME_SEPARATOR = ":"
-
-const ISODATE_DATETIME_SEPARATOR = "T"
-const ISODATE_DATE_SEPARATOR = "-"
-const ISODATE_TIME_SEPARATOR = ":"
-const ISODATE_SECONDS_SEPARATOR = "."
-
 export {
   getDateInfoObjFromStringDate,
   getDateInfoObjFromIsoDate,
@@ -21,6 +12,17 @@ export {
   convertDateInfoObjToStringDate,
   converteDateToUTC
 }
+
+/* ########################################################################## */
+
+const DATETIME_SEPARATOR = " "
+const DATE_SEPARATOR = "/"
+const TIME_SEPARATOR = ":"
+
+const ISODATE_DATETIME_SEPARATOR = "T"
+const ISODATE_DATE_SEPARATOR = "-"
+const ISODATE_TIME_SEPARATOR = ":"
+const ISODATE_SECONDS_SEPARATOR = "."
 
 /* ########################################################################## */
 

@@ -1,13 +1,17 @@
 import { join, relative } from 'path'
 
-const CURRENT_PATH = __dirname
-const BASE_PATH = join(CURRENT_PATH, "../../")
-
 export {
   getPathFromRoot,
   getRelativePath,
   importFromRootPath
 }
+
+/* ########################################################################## */
+
+const CURRENT_PATH = __dirname
+const BASE_PATH = join(CURRENT_PATH, "../../")
+
+/* ########################################################################## */
 
 function getPathFromRoot(relativePath: string): string {
   const rootPath = join(BASE_PATH, relativePath)
@@ -34,3 +38,4 @@ async function importFromRootPath(globalPath: string): Promise<any>{
 
 }
 
+/* ########################################################################## */
