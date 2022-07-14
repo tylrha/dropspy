@@ -1,6 +1,7 @@
 {
 
   "project_configs": {
+    "appname": "dropspy",
     "source_folder": "./src",
     "dist_folder": "./dist",
     "scripts_folder": "./scripts",
@@ -8,7 +9,7 @@
   },
 
   "alihunter_configs": {
-    "gmail_username": "instigaremidia.spybot7@gmail.com",
+    "gmail_username": "instigaremidia.spybot8@gmail.com",
     "gmail_password": "Insti1010!"
   },
 

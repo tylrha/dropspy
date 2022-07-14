@@ -24,7 +24,7 @@ export default async function initMasterCluster(){
   masterInstance.createWorkerInstance(SPYBOT_APP_USER)
 
   masterInstance.runWhenWorkersAreReady().then(async (RES) => {
-    LOGGER('Todos os worker foram iniciados', { from: 'MASTER', pid: true })
+    LOGGER('Todos os worker foram iniciados\n', { from: 'MASTER', pid: true })
 
     global.MASTER = {
       masterCluster: masterInstance,

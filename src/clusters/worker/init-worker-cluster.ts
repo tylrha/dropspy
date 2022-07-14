@@ -15,7 +15,11 @@ declare global {
 export default async function initWorkerCluster(){
 
   const newWorker = new Worker(process)
-  await newWorker.init()
+  await newWorker.initWorker()
+
+  setTimeout(async () => {
+    await newWorker.startSpybot()
+  }, 5000);
 
   global.WORKER = {
     workerCluster: newWorker,

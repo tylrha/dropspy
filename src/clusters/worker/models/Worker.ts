@@ -1,5 +1,4 @@
 import { CURRENT_DATETIME, LOGGER, SPYBOT_LOOP_INTERVAL } from '../../../../configs/configs'
-import initSpyBot from '../../../spybot/init-spy-bot'
 import Spybot from '../../../spybot/models/Spybot'
 
 import { EMasterCommandsToWorkers } from '../../master/interfaces/EMasterCommandsToWorkers'
@@ -12,6 +11,7 @@ export default class Worker {
   public workerProcess: NodeJS.Process
   public isSpybotActive: boolean
   public spybotInstance: Spybot
+  public spybotIndex: string
   public dataFromMaster: IMasterSharedInformation
 
   constructor(proc: NodeJS.Process) {
@@ -23,21 +23,13 @@ export default class Worker {
 
   // ===========================================================================
 
-  async init(): Promise<void> {
+  async initWorker(): Promise<void> {
 
     try {
 
     LOGGER(`Worker iniciado`, { from: 'WORKER', pid: true })
     this.setupWorkerEvents(this.workerProcess)
-
-    const spybotIndex = await this.getCurrentBotIndexFromMasterData()
-    if (!spybotIndex){throw new Error(`Erro ao inicar spybot, index não encontrado`)}
-
     this.sendCommandToMaster(EWorkerCommandsToMaster.SET_WORKER_AS_READY);
-
-    setTimeout(async () => {
-      await this.startSpybot(spybotIndex)
-    }, 5000);
 
     } catch (e) {
       LOGGER(`Erro ao criar worker: ${e.message}`, { from: 'WORKER', pid: true, isError: true })
@@ -45,7 +37,7 @@ export default class Worker {
 
   }
 
-  setupWorkerEvents(proc: NodeJS.Process): void {
+  private setupWorkerEvents(proc: NodeJS.Process): void {
 
     proc.on('message', async (msgObj: IMessageBetweenClusters) => {
 
@@ -80,12 +72,7 @@ export default class Worker {
   // ===========================================================================
 
   private async handleStartSpybotRequest(): Promise<void>{
-    const spybotIndex = await this.getCurrentBotIndexFromMasterData()
-
-    if (!spybotIndex){
-      return
-    }
-      await this.startSpybot(spybotIndex)
+    await this.startSpybot()
   }
 
   private async handleCloseWorkerRequest(): Promise<void>{
@@ -134,49 +121,7 @@ export default class Worker {
 
   // ===========================================================================
 
-  private async startSpybot(botIndex: string): Promise<void> {
-    LOGGER(`Inicia spybot com index = [${botIndex}]`, { from: 'WORKER', pid: true })
-
-    global.WORKER.workerSharedInfo.workerData.workerInfo.botStep = "Iniciando bot"
-    const spybot = new Spybot(botIndex)
-    this.spybotInstance = spybot
-    this.isSpybotActive = true
-
-    const spybotResult = await initSpyBot(spybot)
-    if (typeof spybotResult === "string"){
-
-      global.WORKER.workerSharedInfo.workerData.workerInfo.botStep = "Aguardando loop delay até tentar criar bot de novo"
-      LOGGER(`Erro ao criar bot: ${spybotResult}`, {from: "SPYBOT", pid: true, isError: true})
-      LOGGER(`Tentando novamente em ${SPYBOT_LOOP_INTERVAL}s`, {from: "SPYBOT", pid: true, isError: true})
-
-      setTimeout(async () => {
-        await this.startSpybot(botIndex)
-      }, SPYBOT_LOOP_INTERVAL * 1000)
-
-    }
-  }
-
-  private async closeWorker(): Promise<void> {
-    LOGGER(`Fecha spybot`, { from: 'WORKER', pid: true })
-
-    try{
-
-      if (this.spybotInstance){
-        await this.spybotInstance.close()
-        this.spybotInstance = undefined
-        this.isSpybotActive = false
-        LOGGER(`Spybot foi fechado com sucesso`, { from: 'WORKER', pid: true })
-      }
-
-      LOGGER(`Fechar worker`, { from: 'WORKER', pid: true })
-      this.workerProcess.exit()
-
-    }catch(e){
-      LOGGER(`Erro ao fechar spybot: ${e.message}`, { from: 'WORKER', pid: true, isError: true })
-    }
-  }
-
-  async getDataFromMaster(): Promise<IMasterSharedInformation> {
+  private async getDataFromMaster(): Promise<IMasterSharedInformation> {
 
     LOGGER(`Obtendo dados do master`, { from: 'WORKER', pid: true })
 
@@ -212,4 +157,75 @@ export default class Worker {
     }
 
   }
+
+  // ===========================================================================
+
+  async startSpybot(): Promise<void> {
+
+    try{
+
+      this.spybotIndex = await this.getCurrentBotIndexFromMasterData()
+      if (!this.spybotIndex){throw new Error(`Erro ao inicar spybot, index não encontrado`)}
+
+      console.log("")
+      LOGGER(`Inicia spybot com index = [${this.spybotIndex}]`, { from: 'WORKER', pid: true })
+      global.WORKER.workerSharedInfo.workerData.workerInfo.botStep = "Iniciando bot"
+      const spybot = new Spybot(this.spybotIndex)
+      this.spybotInstance = spybot
+      this.isSpybotActive = true
+
+      const spybotResult = await spybot.initSpyBot()
+      if (typeof spybotResult === "string"){
+
+        global.WORKER.workerSharedInfo.workerData.workerInfo.botStep = "Aguardando loop delay até tentar criar bot de novo"
+        LOGGER(`Erro ao criar bot: ${spybotResult}`, {from: "SPYBOT", pid: true, isError: true})
+        LOGGER(`Tentando novamente em ${SPYBOT_LOOP_INTERVAL}s`, {from: "SPYBOT", pid: true, isError: true})
+
+        setTimeout(async () => {
+          await this.startSpybot()
+        }, SPYBOT_LOOP_INTERVAL * 1000)
+
+      }
+
+    }catch(e){
+
+      LOGGER(`Erro ao iniciar spybot no worker: ${e.message}`, { from: 'WORKER', pid: true, isError: true })
+
+    }
+  }
+
+  async closeSpybot(){
+
+    LOGGER(`Fechando spybot do worker`, {from: "SPYBOT", pid: true})
+
+    if (this.spybotInstance){
+      await this.spybotInstance.close()
+    }
+
+  }
+
+  // ===========================================================================
+
+  async closeWorker(): Promise<void> {
+    LOGGER(`Fecha spybot`, { from: 'WORKER', pid: true })
+
+    try{
+
+      if (this.spybotInstance){
+        await this.spybotInstance.close()
+        this.spybotInstance = undefined
+        this.isSpybotActive = false
+        LOGGER(`Spybot foi fechado com sucesso`, { from: 'WORKER', pid: true })
+      }
+
+      LOGGER(`Fechar worker`, { from: 'WORKER', pid: true })
+      this.workerProcess.exit()
+
+    }catch(e){
+      LOGGER(`Erro ao fechar spybot: ${e.message}`, { from: 'WORKER', pid: true, isError: true })
+    }
+  }
+
+  // ===========================================================================
+
 }

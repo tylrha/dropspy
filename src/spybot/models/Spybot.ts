@@ -17,8 +17,14 @@ import {
   BROWSER_EXTENSIONS_PATH,
   BROWSER_EXTENSIONS_UNZIPED_PATH,
   ROOT_PATH,
-  DIST_FOLDER
+  DIST_FOLDER,
+  CURRENT_DATETIME,
+  SPYBOT_LOOP_INTERVAL,
+  DATABASE_LOGIN_URL,
+  DATABASE_DATABASE_SPY
 } from "../../../configs/configs"
+
+import { checkIfBotIsAllowedToSpy } from '../components/check-spy-conditions'
 
 import { runJsOnPage, waitTillHTMLRendered } from "../../../utils/libraries/puppeteer"
 import { getSpyedStores, updateBotInfo, ENUM_UPDATE_BOT_INFO } from "../components/spy-sheets-api"
@@ -29,6 +35,8 @@ import addNewStoreSalesToDatabase from "../database/add-new-store-sales-to-datab
 import IAlihunterSale from '../interfaces/IAlihunterSale'
 import IStoreSheets from '../interfaces/IStoreSheets'
 import extractBrowserExtensions from "../components/extract-browser-extensions"
+
+import updateDatabasePreSpy from '../database/update-database-pre-spy'
 
 interface ISharedStore extends IStoreSheets {
   salesCount?: number,
@@ -53,15 +61,55 @@ export default class Spybot {
 
   // ==== INIT METHODS =========================================================
 
-  async init_browser(): Promise<void> {
+  async initSpyBot(): Promise<Spybot | string> {
+
     try {
+      LOGGER(`Bot ${this.botIndex} - foi iniciado`, { from: 'SPYBOT', pid: true })
+
+      await updateBotInfo(ENUM_UPDATE_BOT_INFO.INITIAL_INFO, this.botIndex)
+
+      const isBotAllowedToSpy = await checkIfBotIsAllowedToSpy(this.botIndex)
+      if (isBotAllowedToSpy !== true) { throw new Error(`Erro nas condições de espionagem: ${isBotAllowedToSpy}`) }
+      LOGGER(`Bot ${this.botIndex} - pode espionar`, { from: 'SPYBOT', pid: true })
+
       this.botBrowser = await this.getBrowserInstance()
       if (!this.botBrowser) { throw new Error("Browser não foi iniciado corretamente") }
       this.setBrowserEvents()
+      LOGGER(`Bot ${this.botIndex} - browser foi iniciado corretamente`, { from: 'SPYBOT', pid: true })
+
+      const spybotSetupResult = await this.setup_spybot()
+      if (spybotSetupResult !== true) { throw new Error(`Erro ao preparar browser para espionagem: ${spybotSetupResult}`) }
+      LOGGER(`Bot ${this.botIndex} - está pronto para espionar`, { from: 'SPYBOT', pid: true })
+
+      await updateBotInfo(ENUM_UPDATE_BOT_INFO.LAST_RESTARTED_TIME, this.botIndex)
+
+      const initialDate = CURRENT_DATETIME('date')
+      console.log("")
+      LOGGER(`Bot ${this.botIndex} - iniciando espionagem - ${initialDate}\n`, { from: "SPYBOT", pid: true })
+      global.WORKER.workerSharedInfo.workerData.workerInfo.isSpybotActive = true
+      await this.initSpyLooping(initialDate)
+      return this
+
     } catch (e) {
+
+      LOGGER(`Erro ao iniciar spybot: ${e.message}`, { from: 'SPYBOT', pid: true, isError: true })
+
+      if (this.botBrowser){
+        LOGGER(`Fechando browser pra evitar múltiplas instâncias do mesmo bot`, { from: 'SPYBOT', pid: true, isError: true })
+        await this.botBrowser.close()
+      }
+
       return e.message
+
+    } finally {
+
+      LOGGER(`Bot ${this.botIndex} - terminou de inciar\n`, { from: 'SPYBOT', pid: true })
+
     }
+
   }
+
+  // ==== BROWSER METHODS ======================================================
 
   private async getBrowserInstance(): Promise<Browser> {
 
@@ -121,7 +169,7 @@ export default class Spybot {
 
   // ==== SETUP SPY METHODS ====================================================
 
-  async setup_spybot(): Promise<true | string> {
+  private async setup_spybot(): Promise<true | string> {
     try {
       const googlePage = await this.setupGooglePage()
       await this.loginAtGoogle(googlePage)
@@ -268,9 +316,97 @@ export default class Spybot {
     return loginResult
   }
 
+  // ===== DETECT SALES METHODS ================================================
+
+  private async initSpyLooping(initialDate?: string){
+
+    global.WORKER.workerSharedInfo.workerData.spyBotInfo.lastCheckedTime = CURRENT_DATETIME()
+    global.WORKER.workerSharedInfo.workerData.spyBotInfo.checkedCount += 1
+    this.botCheckedTimes += 1;
+
+    LOGGER(`Bot ${this.botIndex} - checagem de número [${this.botCheckedTimes}]`, {from: "SPYBOT", pid: true})
+    global.WORKER.workerSharedInfo.workerData.workerInfo.botStep = `Verificando novas vendas pela [${this.botCheckedTimes}]a vez`
+
+    const isFirstInit = this.botCheckedTimes === 1 ? true : false
+    const currentDate = isFirstInit ? initialDate : CURRENT_DATETIME('date')
+    const hasChangedSpyDate = isFirstInit ? false : this.botInitialSpyDate !== currentDate
+    if (isFirstInit || hasChangedSpyDate){this.botInitialSpyDate = initialDate}
+    let hasChangedStoreList = false
+
+    try{
+      await this.pingBotServer()
+
+      await updateBotInfo(ENUM_UPDATE_BOT_INFO.CHECKED_INFO, this.botIndex)
+
+      if (!isFirstInit){
+        const isBotAllowedToSpy = await checkIfBotIsAllowedToSpy(this.botIndex)
+        if (isBotAllowedToSpy !== true){
+          await this.closeAllPagesAndLetBlankPage()
+          throw new Error(`Bot ${this.botIndex} - bot não pode espionar [${isBotAllowedToSpy}]`)
+        }
+        LOGGER(`Bot ${this.botIndex} - pode espionar`, {from: 'SPYBOT', pid: true})
+      }
+
+      global.WORKER.workerSharedInfo.workerData.workerInfo.isSpybotActive = true
+      await this.updateBotSpyedStores()
+
+      if (!isFirstInit){
+        hasChangedStoreList = await this.hasChangeInSpyedStoresList()
+        if (hasChangedStoreList){await this.handleSpyListChanges()}
+      }
+
+      const databaseConnectionResult = await mongoose.connect(`${DATABASE_LOGIN_URL}/${DATABASE_DATABASE_SPY}`)
+      if (!databaseConnectionResult){throw new Error(`Erro ao abrir conexão com banco de dados`)}
+      LOGGER(`Bot ${this.botIndex} - conexão estabelecida com banco de dados`, {from: 'SPYBOT', pid: true})
+
+      if (isFirstInit || hasChangedSpyDate || hasChangedStoreList){
+        await updateDatabasePreSpy(this.botSpyedStoresArr, currentDate)
+      }
+
+      if (isFirstInit){await this.openSpyStores()}
+
+      await this.detectNewSalesInAllStores()
+
+      const closeMongooseResult = mongoose.connection.close()
+      if (!closeMongooseResult){throw new Error(`Erro ao fechar conexão com banco de dados`)}
+      LOGGER(`Bot ${this.botIndex} - conexão fechada com banco de dados`, {from: 'SPYBOT', pid: true})
+
+      global.WORKER.workerSharedInfo.workerData.workerInfo.botStep = "Esperando loop delay para verificar novas vendas"
+
+      this.loopAgainAfterTime()
+
+    } catch(e){
+
+      LOGGER(`Erro no looping do: ${e.message}`, {from: "SPYBOT", pid: true, isError: true})
+
+      const closeMongooseResult = mongoose.connection.close()
+      if (!closeMongooseResult){
+        LOGGER(`Bot ${this.botIndex} - Erro ao fechar conexão com banco de dados`, {from: 'SPYBOT', pid: true})
+      } else {
+        LOGGER(`Bot ${this.botIndex} - conexão fechada com banco de dados`, {from: 'SPYBOT', pid: true})
+      }
+
+      global.WORKER.workerSharedInfo.workerData.workerInfo.botStep = "Erro no looping -> Esperando loop delay para verificar novas vendas"
+      global.WORKER.workerSharedInfo.workerData.workerInfo.isSpybotActive = false
+
+      this.loopAgainAfterTime()
+
+    }
+
+  }
+
+  private loopAgainAfterTime() {
+
+    LOGGER(`Bot ${this.botIndex} - checando dnv em ${SPYBOT_LOOP_INTERVAL / 60}min\n`, {from: "SPYBOT", pid: true, isError: true})
+    setTimeout(async () => {
+      await this.initSpyLooping()
+    }, SPYBOT_LOOP_INTERVAL * 1000)
+
+  }
+
   // ==== GET UPDATE SPYED STORES ==============================================
 
-  async updateBotSpyedStores(): Promise<void> {
+  private async updateBotSpyedStores(): Promise<void> {
 
     LOGGER(`Bot ${this.botIndex} - Atualizando lista de lojas espionadas`, { from: "SPYBOT", pid: true })
     const tmpSpyedStores = await getSpyedStores(this.botIndex)
@@ -316,7 +452,7 @@ export default class Spybot {
     }
   }
 
-  async hasChangeInSpyedStoresList(): Promise<boolean> {
+  private async hasChangeInSpyedStoresList(): Promise<boolean> {
 
     LOGGER(`Bot ${this.botIndex} - verifica se houve mudança nas lojas espionadas`, { from: 'SPYBOT', pid: true })
 
@@ -334,7 +470,7 @@ export default class Spybot {
 
   // ==== STORE PAGES METHODS ==================================================
 
-  async openSpyStores(): Promise<void> {
+  private async openSpyStores(): Promise<void> {
 
     const currentSpyedStoresArr = this.botSpyedStoresArr
     if (currentSpyedStoresArr.length === 0) { return }
@@ -372,7 +508,7 @@ export default class Spybot {
 
   }
 
-  async handleSpyListChanges(): Promise<void>{
+  private async handleSpyListChanges(): Promise<void>{
 
     LOGGER(`Bot ${this.botIndex} - lidando com mudanças na lista de espionagem`, { from: 'SPYBOT', pid: true })
     await this.closeAllPagesAndLetBlankPage()
@@ -380,7 +516,7 @@ export default class Spybot {
 
   }
 
-  async closeAllPagesAndLetBlankPage(): Promise<void>{
+  private async closeAllPagesAndLetBlankPage(): Promise<void>{
 
     const browserPages = await this.botBrowser.pages()
 
@@ -400,7 +536,7 @@ export default class Spybot {
 
   // ===== DETECT SALES METHODS ================================================
 
-  async detectNewSalesInAllStores(): Promise<void> {
+  private async detectNewSalesInAllStores(): Promise<void> {
 
 
     const initialPages = 0
@@ -462,7 +598,7 @@ export default class Spybot {
 
   // ===== UTILS METHODS =======================================================
 
-  async pingBotServer(): Promise<void> {
+  private async pingBotServer(): Promise<void> {
 
     LOGGER(`Bot ${this.botIndex} - pingando servidor para evitar idle`, { from: 'SPYBOT', pid: true })
     await fetchJsonUrl(SERVER_BASE)

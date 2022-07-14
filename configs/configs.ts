@@ -2,7 +2,6 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 import {join, basename, dirname} from 'path'
-import {readdirSync, statSync, existsSync} from 'fs'
 
 /* FILES ==================================================================== */
 import {readJson} from '../utils/libraries/utils'
@@ -22,7 +21,6 @@ import {delay as DELAY} from '../utils/libraries/utils'
 import {importFromRootPath as IMPORT_MODULE, getPathFromRoot as ROOT_PATH} from '../utils/libraries/globalPath'
 import {
   addTimeToDateObject,
-  getCurrentDateTimeString,
   converteDateToUTC,
   getDateInfoObjFromIsoDate,
   convertDateInfoObjToStringDate
@@ -97,10 +95,10 @@ const VERSION = process.env.npm_package_version || "#"
 const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
 
 /* SERVER =================================================================== */
-
+const _appname = APP_CONFIGS['project_configs'].appname
 const SERVER_PORT = process.env.PORT || APP_CONFIGS['server_configs'].default_port
 const SERVER_TOKEN = process.env.SERVER_TOKEN || ''
-const SERVER_BASE = NODE_ENV === DEFALT_NODE_ENV ? `http://localhost:${SERVER_PORT}` : `https://dropspy-${SPYBOT_APP_USER.replace("p", "")}.herokuapp.com`
+const SERVER_BASE = NODE_ENV === DEFALT_NODE_ENV ? `http://localhost:${SERVER_PORT}` : `https://${_appname}-${SPYBOT_APP_USER.replace("p", "")}.herokuapp.com`
 
 /* EXPORT =================================================================== */
 
