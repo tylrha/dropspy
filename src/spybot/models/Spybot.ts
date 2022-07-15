@@ -95,7 +95,7 @@ export default class Spybot {
       LOGGER(`Erro ao iniciar spybot: ${e.message}`, { from: 'SPYBOT', pid: true, isError: true })
 
       if (this.botBrowser){
-        LOGGER(`Fechando browser pra evitar múltiplas instâncias do mesmo bot`, { from: 'SPYBOT', pid: true, isError: true })
+        LOGGER(`Fechando browser pra evitar múltiplas instâncias do mesmo bot`, { from: 'SPYBOT', pid: true })
         await this.botBrowser.close()
       }
 
@@ -324,7 +324,7 @@ export default class Spybot {
     global.WORKER.workerSharedInfo.workerData.spyBotInfo.checkedCount += 1
     this.botCheckedTimes += 1;
 
-    LOGGER(`Bot ${this.botIndex} - checagem de número [${this.botCheckedTimes}]`, {from: "SPYBOT", pid: true})
+    LOGGER(`Bot ${this.botIndex} - checagem de número [${this.botCheckedTimes}] às ${CURRENT_DATETIME()} ---------------------`, {from: "SPYBOT", pid: true})
     global.WORKER.workerSharedInfo.workerData.workerInfo.botStep = `Verificando novas vendas pela [${this.botCheckedTimes}]a vez`
 
     const isFirstInit = this.botCheckedTimes === 1 ? true : false
@@ -334,6 +334,9 @@ export default class Spybot {
     let hasChangedStoreList = false
 
     try{
+
+      if (this.botBrowser === undefined){throw new Error("O browser foi fechado, não tem como espionar")}
+
       await this.pingBotServer()
 
       await updateBotInfo(ENUM_UPDATE_BOT_INFO.CHECKED_INFO, this.botIndex)
@@ -377,16 +380,14 @@ export default class Spybot {
 
     } catch(e){
 
-      LOGGER(`Erro no looping do: ${e.message}`, {from: "SPYBOT", pid: true, isError: true})
+      LOGGER(`Erro no looping: ${e.message}`, {from: "SPYBOT", pid: true, isError: true})
 
-      const closeMongooseResult = mongoose.connection.close()
-      if (!closeMongooseResult){
-        LOGGER(`Bot ${this.botIndex} - Erro ao fechar conexão com banco de dados`, {from: 'SPYBOT', pid: true})
-      } else {
+      if (mongoose.STATES[mongoose.connection.readyState] === "connected"){
+        await mongoose.connection.close()
         LOGGER(`Bot ${this.botIndex} - conexão fechada com banco de dados`, {from: 'SPYBOT', pid: true})
       }
 
-      global.WORKER.workerSharedInfo.workerData.workerInfo.botStep = "Erro no looping -> Esperando loop delay para verificar novas vendas"
+      global.WORKER.workerSharedInfo.workerData.workerInfo.botStep = `Erro no looping, esperando delay -> ${e.message}`
       global.WORKER.workerSharedInfo.workerData.workerInfo.isSpybotActive = false
 
       this.loopAgainAfterTime()
@@ -397,7 +398,7 @@ export default class Spybot {
 
   private loopAgainAfterTime() {
 
-    LOGGER(`Bot ${this.botIndex} - checando dnv em ${SPYBOT_LOOP_INTERVAL / 60}min\n`, {from: "SPYBOT", pid: true, isError: true})
+    LOGGER(`Bot ${this.botIndex} - checando dnv em ${SPYBOT_LOOP_INTERVAL / 60}min\n`, {from: "SPYBOT", pid: true})
     setTimeout(async () => {
       await this.initSpyLooping()
     }, SPYBOT_LOOP_INTERVAL * 1000)
@@ -662,7 +663,7 @@ export default class Spybot {
     }
 
     if (mongoose.STATES[mongoose.connection.readyState] === "connected"){
-      mongoose.connection.close()
+      await mongoose.connection.close()
       LOGGER(`Bot ${this.botIndex} - fechando conexão com banco de dados`, { from: 'SPYBOT', pid: true })
     }
 

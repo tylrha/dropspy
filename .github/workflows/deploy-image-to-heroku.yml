@@ -11,7 +11,7 @@ env:
   HEROKU_CONTAINER_URL: registry.heroku.com
   HEROKU_CONTAINER_TYPE: web
   INITIAL_BOT: 1
-  FINAL_BOT: 203
+  FINAL_BOT: 1
 
 jobs:
   deploy:

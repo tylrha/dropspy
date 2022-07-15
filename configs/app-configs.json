@@ -34,10 +34,10 @@
     "database_username": "imsuperuser",
     "database_password": "imsuperpass",
 
-    "database_spy": "TESTANDO",
-    "collection_spy_dates": "test_dates",
-    "collection_spy_stores": "test_stores",
-    "collection_spy_products": "test_products"
+    "database_spy": "DROPSPY",
+    "collection_spy_dates": "dates",
+    "collection_spy_stores": "stores",
+    "collection_spy_products": "products"
   },
 
   "google_sheets_configs": {

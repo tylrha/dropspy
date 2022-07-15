@@ -175,28 +175,24 @@ export default class Worker {
       this.isSpybotActive = true
 
       const spybotResult = await spybot.initSpyBot()
-      if (typeof spybotResult === "string"){
-
-        global.WORKER.workerSharedInfo.workerData.workerInfo.botStep = "Aguardando loop delay até tentar criar bot de novo"
-        LOGGER(`Erro ao criar bot: ${spybotResult}`, {from: "SPYBOT", pid: true, isError: true})
-        LOGGER(`Tentando novamente em ${SPYBOT_LOOP_INTERVAL}s`, {from: "SPYBOT", pid: true, isError: true})
-
-        setTimeout(async () => {
-          await this.startSpybot()
-        }, SPYBOT_LOOP_INTERVAL * 1000)
-
-      }
+      if (typeof spybotResult === "string"){throw new Error(spybotResult)}
 
     }catch(e){
 
       LOGGER(`Erro ao iniciar spybot no worker: ${e.message}`, { from: 'WORKER', pid: true, isError: true })
+      global.WORKER.workerSharedInfo.workerData.workerInfo.botStep = `Erro ao iniciar spybot no worker, esperando delay: ${e.message}`
+
+      LOGGER(`Tentando novamente em ${SPYBOT_LOOP_INTERVAL}s\n`, {from: "WORKER", pid: true})
+      setTimeout(async () => {
+        await this.startSpybot()
+      }, SPYBOT_LOOP_INTERVAL * 1000)
 
     }
   }
 
   async closeSpybot(){
 
-    LOGGER(`Fechando spybot do worker`, {from: "SPYBOT", pid: true})
+    LOGGER(`Fechando spybot do worker`, {from: "WORKER", pid: true})
 
     if (this.spybotInstance){
       await this.spybotInstance.close()
