@@ -31,7 +31,6 @@ const LoggerModel = mongoose.model<ILoggerMongo>(LOGGER_COLLECTION, loggerSchema
 
 export default async function mongodbLogger(message: string) {
 
-  console.log(DATABASE_MONGOOSE)
   await mongoose.connect(DATABASE_MONGOOSE)
 
   let oldLoggerMongoObj = await LoggerModel.findOne(LOGGER_DOCUMENT)

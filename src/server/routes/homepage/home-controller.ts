@@ -9,8 +9,9 @@ import {Request, Response} from 'express'
 
 export default async function(req: Request, res: Response){
 
+  const shouldSkiApi = req.query.skip_api
 
-  LOGGER(`/`, {from: 'SERVER', pid: true})
+  LOGGER(`/${shouldSkiApi ? "?skipApi=" + shouldSkiApi : ""}`, {from: 'SERVER', pid: true})
 
   try{
     const masterCluster: Master = global['MASTER']?.masterCluster

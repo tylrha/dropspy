@@ -177,9 +177,18 @@ async function addSaleToDatesDatabase(newSaleObject: ISaleProduct): Promise<void
 
   const storeIndex = dateObjectInDatabase.stores.findIndex(store => store.storeLink === newSaleObject.storeLink)
   const isStoreMissing = storeIndex === -1
-  const isProductMissing = isStoreMissing ? true : Array.from(dateObjectInDatabase.stores[storeIndex].productsArr).findIndex(product => product.productLink === newSaleObject.productLink) === -1
-  if (isStoreMissing || isProductMissing) { dateObjectInDatabase = await addProductToDateObject(dateObjectInDatabase, newSaleObject) }
 
-  dateObjectInDatabase = await addSaleToDateobject(dateObjectInDatabase, newSaleObject)
-  await saveDateInDatabase(dateObjectInDatabase)
+  if (!isStoreMissing){
+
+    const curStoreArr = Array.from(dateObjectInDatabase.stores[storeIndex].productsArr)
+    const isProductMissing = curStoreArr?.findIndex(product => product.productLink === newSaleObject.productLink) === -1
+    if (isProductMissing) { dateObjectInDatabase = await addProductToDateObject(dateObjectInDatabase, newSaleObject) }
+
+    dateObjectInDatabase = await addSaleToDateobject(dateObjectInDatabase, newSaleObject)
+    await saveDateInDatabase(dateObjectInDatabase)
+
+  } else {
+    LOGGER(`Deu algum erro ao encontrar a loja do produto`, {from: "SPYBOT", pid: true, isError: true})
+    LOGGER(`Deu algum erro ao encontrar a loja do produto`, {from: "SPYBOT", pid: true, isError: true, logger: "mongodb"})
+  }
 }

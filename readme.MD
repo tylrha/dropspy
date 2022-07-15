@@ -11,7 +11,7 @@
   </a>
 </p>
 
-> É um programa feito para os estabelecimentos parceiros enviarem mensagens de aviso para os clientes sobre os pedidos destes.
+> Aplicação feita para espionar lojas da shopify por meio de instâncias hospedados no Heroku.
 
 ## SUMÁRIO
  - <a href="#page_with_curl-descrição"> :page_with_curl: Descrição</a>
@@ -63,7 +63,7 @@ O projeto foi estruturado da seguinde forma:
 ./dropspy
 |-- src        # Pasta onde fica o código
 |-- utils      # Funções e bibliotecas reutilizáveis de código
-|-- scripts    # Scripts auxiliares para build do projeto  
+|-- scripts    # Scripts auxiliares para build do projeto
 |-- extensions # Extensões que o chrome irá carregar
 |-- tests      # Testes para garantir que a aplicação está funcionando corretamente
 

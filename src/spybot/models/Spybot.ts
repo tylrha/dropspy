@@ -202,21 +202,15 @@ export default class Spybot {
 
       await googlePage.goto('https://accounts.google.com/')
       await waitTillHTMLRendered(googlePage)
+      await DELAY(10000)
 
-      await googlePage.evaluate((emailToType) => {
-        const elEmail: HTMLInputElement = document.querySelector('input[type="email"]')
-        if (elEmail) { elEmail.value = emailToType }
-      }, ALIHUNTER_GMAIL_USERNAME)
+      await googlePage.type('input[type="email"]', ALIHUNTER_GMAIL_USERNAME)
 
       await googlePage.keyboard.press('Enter')
       await waitTillHTMLRendered(googlePage)
-      await DELAY(4000)
+      await DELAY(10000)
 
-      await googlePage.evaluate((passwordToType) => {
-        const elPassword: HTMLInputElement = document.querySelector('input[type="password"]')
-        if (elPassword) { elPassword.value = passwordToType }
-      }, ALIHUNTER_GMAIL_PASSWORD)
-
+      await googlePage.type('input[type="password"]', ALIHUNTER_GMAIL_PASSWORD)
       await googlePage.keyboard.press('Enter')
       await DELAY(10000)
 
@@ -275,6 +269,7 @@ export default class Spybot {
 
       await alihunterPage.goto(URL_ALIHUNTER_LOGIN)
       await waitTillHTMLRendered(alihunterPage)
+      await DELAY(5000)
 
       await alihunterPage.evaluate(async () => {
 
@@ -285,12 +280,13 @@ export default class Spybot {
 
         if (elGoogleLogin){
           elGoogleLogin.click()
+          return elGoogleLogin.innerText
         }
 
       })
 
       await waitTillHTMLRendered(alihunterPage)
-      await DELAY(10000)
+      await DELAY(15000)
 
     } catch (err) {
       LOGGER(err.message, { from: 'SPYBOT', pid: true, isError: true })
@@ -301,6 +297,7 @@ export default class Spybot {
 
     LOGGER(`Bot ${this.botIndex} - verifica login no Alihunter`, { from: 'SPYBOT', pid: true })
     await waitTillHTMLRendered(alihunterPage)
+    await DELAY(5000)
 
     const loginResult = await alihunterPage.evaluate(async () => {
       const el: HTMLElement = document.querySelector('span.msui-text-truncate')
@@ -375,6 +372,8 @@ export default class Spybot {
 
     } catch(e){
 
+      console.log(e)
+      LOGGER(`Bot ${this.botIndex} - Erro no looping: ${e.message}`, {from: "SPYBOT", pid: true, isError: true, logger: "mongodb"})
       LOGGER(`Erro no looping: ${e.message}`, {from: "SPYBOT", pid: true, isError: true})
 
       global.WORKER.workerSharedInfo.workerData.workerInfo.botStep = `Erro no looping, esperando delay -> ${e.message}`
@@ -647,7 +646,7 @@ export default class Spybot {
   private async pingBotServer(): Promise<void> {
 
     LOGGER(`Bot ${this.botIndex} - pingando servidor para evitar idle`, { from: 'SPYBOT', pid: true })
-    await fetchJsonUrl(SERVER_BASE)
+    await fetchJsonUrl(`${SERVER_BASE}/?skip_api=true`)
 
   }
 

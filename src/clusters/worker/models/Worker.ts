@@ -179,6 +179,8 @@ export default class Worker {
 
     }catch(e){
 
+      LOGGER(`Bot ${this.spybotIndex} - Erro ao iniciar spybot no worker: ${e.message}`, {from: "WORKER", pid: true, isError: true, logger: "mongodb"})
+
       LOGGER(`Erro ao iniciar spybot no worker: ${e.message}`, { from: 'WORKER', pid: true, isError: true })
       global.WORKER.workerSharedInfo.workerData.workerInfo.botStep = `Erro ao iniciar spybot no worker, esperando delay: ${e.message}`
 
