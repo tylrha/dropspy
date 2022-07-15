@@ -98,8 +98,8 @@ export default async function addNewStoreSalesToDatabase(alihunterSalesArr: IAli
     spoBotInstance.botSpyedStoresArr[storeIndex].salesRevenue = Number((spoBotInstance.botSpyedStoresArr[storeIndex].salesRevenue + curSoldProduct.totalRevenue).toFixed(2))
 
     global.WORKER.workerSharedInfo.workerData.spyBotInfo.lastSaleTime = CURRENT_DATETIME()
-    global.WORKER.workerSharedInfo.workerData.spyBotInfo.salesCount += spoBotInstance.botSpyedStoresArr[storeIndex].salesCount
-    global.WORKER.workerSharedInfo.workerData.spyBotInfo.salesRevenue = Number((global.WORKER.workerSharedInfo.workerData.spyBotInfo.salesRevenue + spoBotInstance.botSpyedStoresArr[storeIndex].salesRevenue).toFixed(2))
+    global.WORKER.workerSharedInfo.workerData.spyBotInfo.salesCount += curSoldProduct.totalSales
+    global.WORKER.workerSharedInfo.workerData.spyBotInfo.salesRevenue = Number((global.WORKER.workerSharedInfo.workerData.spyBotInfo.salesRevenue + curSoldProduct.totalRevenue).toFixed(2))
 
   }
 

@@ -91,7 +91,8 @@ async function getSpyedStores(botName: string): Promise<string | IStoreSheets[]>
     const storeName = row[2]
     const storeLink = row[3]
     const storeCategory = row[4]
-    const storeError = row[5]
+    const storeNonBr = row[5]
+    const storeError = row[6]
 
     if (storeStatus !== "Ativo") { continue }
     if (spyUser !== botName) { continue }
