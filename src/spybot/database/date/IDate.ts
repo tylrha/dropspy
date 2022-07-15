@@ -32,10 +32,36 @@ const dateProductSchema: Schema = new Schema(
 
 /* ########################################################################## */
 
-interface IDateMongo extends Document {
+interface IDateStore {
+  storeLink: string,
+  storeName: string,
+  sales: number,
+  revenue: number,
+  products: number,
+  productsArr: IDateProduct[]
+}
+
+const dateStoreSchema: Schema = new Schema(
+  {
+    storeLink: String,
+    storeName: String,
+    sales: Number,
+    revenue: Number,
+    products: Number,
+    productsArr: [dateProductSchema]
+  },
+  {
+    _id: false,
+    versionKey: false
+  }
+)
+
+/* ########################################################################## */
+
+interface IDate {
   date: string,
   isoDate: string,
-  month: Number,
+  month: String,
 
   lastSale: string,
   lastSaleIso: string,
@@ -43,11 +69,15 @@ interface IDateMongo extends Document {
   totalSales: number,
   totalRevenue: number,
   totalProducts: number,
-
-  products: IDateProduct[]
+  totalStores: number,
+  stores: IDateStore[]
 }
 
-type IDate = Omit<IDateMongo, '_id' | '__v'>
+interface IDateMongo extends Document, IDate {
+
+}
+
+// type IDate = Omit<IDateMongo, '_id' | '__v'>
 
 type IDateUnion = IDate | IDateMongo
 
@@ -63,8 +93,8 @@ const dateSchema: Schema = new Schema(
     totalSales: Number,
     totalRevenue: Number,
     totalProducts: Number,
-
-    products: [dateProductSchema],
+    totalStores: Number,
+    stores: [dateStoreSchema]
   },
   {
     versionKey: false
@@ -79,5 +109,7 @@ export {
   IDate,
   IDateMongo,
   IDateUnion,
-  dateSchema
+  dateSchema,
+  IDateStore,
+  dateStoreSchema
 }

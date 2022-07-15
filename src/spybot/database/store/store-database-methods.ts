@@ -8,6 +8,7 @@ import {IStore, IStoreDate, IStoreProduct, IStoreMongo, IStoreUnion} from './ISt
 import Store from "./Store";
 import IStoreSheets from '../../interfaces/IStoreSheets'
 import ISaleProduct from '../../interfaces/ISaleProduct'
+import { sortArrayByColumn } from "../../../../utils/libraries/utils";
 
 export {
   generateNewStore,
@@ -140,6 +141,7 @@ async function addSaleToStoreObject(storeObj: IStoreMongo, saleObj: ISaleProduct
   saleProductObj.sales = Number(saleProductObj.sales + saleObj.totalSales)
   saleProductObj.revenue = Number((saleProductObj.revenue + saleObj.totalRevenue).toFixed(2))
   newStoreObj.products[productIndex] = saleProductObj
+  newStoreObj.products = sortArrayByColumn(newStoreObj.products, "revenue").reverse()
 
   newStoreObj.lastSale = saleObj.lastSale
   newStoreObj.lastSaleIso = saleObj.lastSaleIso

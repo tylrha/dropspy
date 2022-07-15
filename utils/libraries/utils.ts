@@ -1,10 +1,11 @@
 import { existsSync, readFileSync } from "fs";
-import {getPathFromRoot} from './globalPath'
+import { getPathFromRoot } from './globalPath'
 
 export {
   delay,
   readJson,
-  doesFileExists
+  doesFileExists,
+  sortArrayByColumn
 }
 
 /* ########################################################################## */
@@ -31,6 +32,24 @@ function readJson(jsonPath: string): object {
 
 function doesFileExists(filePath: string) {
   return existsSync(filePath)
+}
+
+function sortArrayByColumn(arrToSort: any[], keyToSort: string): any[] {
+
+  if (!arrToSort || !keyToSort) { return }
+  let newArr = [...arrToSort]
+
+  newArr = newArr.sort(sortFunction);
+
+  function sortFunction(a, b) {
+    if (a[keyToSort] === b[keyToSort]) {
+      return 0;
+    } else {
+      return (a[keyToSort] < b[keyToSort]) ? -1 : 1;
+    }
+  }
+
+  return newArr;
 }
 
 /* ########################################################################## */

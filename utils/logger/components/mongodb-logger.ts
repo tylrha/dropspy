@@ -8,7 +8,7 @@ const _database_password = APP_CONFIGS['database_configs'].database_password
 const DATABASE_LOGIN_URL = `mongodb+srv://${_database_username}:${_database_password}@${_database_base_url}`
 const LOGGER_DATABASE = "DROPSPY"
 const DATABASE_MONGOOSE = `${DATABASE_LOGIN_URL}/${LOGGER_DATABASE}`
-const LOGGER_COLLECTION = "logger"
+const LOGGER_COLLECTION = "_logger"
 const LOGGER_DOCUMENT = { file: "dropspy" }
 
 interface ILoggerMongo extends Document {

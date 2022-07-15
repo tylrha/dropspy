@@ -94,12 +94,12 @@ export default async function addNewStoreSalesToDatabase(alihunterSalesArr: IAli
 
     console.log("")
 
-    global.WORKER.workerSharedInfo.workerData.spyBotInfo.lastSaleTime = CURRENT_DATETIME()
-    global.WORKER.workerSharedInfo.workerData.spyBotInfo.salesCount += currentTrackedSales
-    global.WORKER.workerSharedInfo.workerData.spyBotInfo.salesRevenue = Number((global.WORKER.workerSharedInfo.workerData.spyBotInfo.salesRevenue + currentTrackedRevenue).toFixed(2))
+    spoBotInstance.botSpyedStoresArr[storeIndex].salesCount += curSoldProduct.totalSales
+    spoBotInstance.botSpyedStoresArr[storeIndex].salesRevenue = Number((spoBotInstance.botSpyedStoresArr[storeIndex].salesRevenue + curSoldProduct.totalRevenue).toFixed(2))
 
-    spoBotInstance.botSpyedStoresArr[storeIndex].salesCount += currentTrackedSales
-    spoBotInstance.botSpyedStoresArr[storeIndex].salesRevenue = Number((spoBotInstance.botSpyedStoresArr[storeIndex].salesRevenue + currentTrackedRevenue).toFixed(2))
+    global.WORKER.workerSharedInfo.workerData.spyBotInfo.lastSaleTime = CURRENT_DATETIME()
+    global.WORKER.workerSharedInfo.workerData.spyBotInfo.salesCount += spoBotInstance.botSpyedStoresArr[storeIndex].salesCount
+    global.WORKER.workerSharedInfo.workerData.spyBotInfo.salesRevenue = Number((global.WORKER.workerSharedInfo.workerData.spyBotInfo.salesRevenue + spoBotInstance.botSpyedStoresArr[storeIndex].salesRevenue).toFixed(2))
 
   }
 
@@ -168,14 +168,17 @@ async function addSaleToStoresDatabase(newSaleObject: ISaleProduct): Promise<voi
   await saveStoreInDatabase(storeObjectInDatabase)
 }
 
+
 async function addSaleToDatesDatabase(newSaleObject: ISaleProduct): Promise<void> {
 
   const currentDate = getStringDateFromDate(getDateFromString(newSaleObject.lastSale), 'date')
 
   let dateObjectInDatabase: IDateMongo = await getDateInDatabase(currentDate)
 
-  const isProductMissing = Array.from(dateObjectInDatabase.products).findIndex(product => product.productLink === newSaleObject.productLink) === -1
-  if (isProductMissing) { dateObjectInDatabase = await addProductToDateObject(dateObjectInDatabase, newSaleObject) }
+  const storeIndex = dateObjectInDatabase.stores.findIndex(store => store.storeLink === newSaleObject.storeLink)
+  const isStoreMissing = storeIndex === -1
+  const isProductMissing = isStoreMissing ? true : Array.from(dateObjectInDatabase.stores[storeIndex].productsArr).findIndex(product => product.productLink === newSaleObject.productLink) === -1
+  if (isStoreMissing || isProductMissing) { dateObjectInDatabase = await addProductToDateObject(dateObjectInDatabase, newSaleObject) }
 
   dateObjectInDatabase = await addSaleToDateobject(dateObjectInDatabase, newSaleObject)
   await saveDateInDatabase(dateObjectInDatabase)
