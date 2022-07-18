@@ -53,20 +53,16 @@ async function generateNewProduct(saleProductObj: ISaleProduct, currentDate: str
     productLink,
     productImage,
     productPrice,
-
     storeName,
     storeLink,
-
     initialDate: currentDate,
     lastSale,
     lastSaleIso,
-
-    labels: [],
-    totalLabels: 0,
-
     totalSales: 0,
     totalRevenue: 0,
+    totalLabels: 0,
     totalDates: 0,
+    labels: [],
     dates: []
   }
 

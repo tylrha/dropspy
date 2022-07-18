@@ -62,10 +62,8 @@ interface IDate {
   date: string,
   isoDate: string,
   month: String,
-
   lastSale: string,
   lastSaleIso: string,
-
   totalSales: number,
   totalRevenue: number,
   totalProducts: number,
@@ -86,10 +84,8 @@ const dateSchema: Schema = new Schema(
     date: String,
     isoDate: String,
     month: String,
-
     lastSale: String,
     lastSaleIso: String,
-
     totalSales: Number,
     totalRevenue: Number,
     totalProducts: Number,

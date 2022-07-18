@@ -4,14 +4,10 @@ import {
 
 import { getAllBotsArr, getBotsOption } from "./spy-sheets-api";
 
-export {
-  getBotIndex,
-  checkIfBotIsInList,
-  checkIfBotIsAllowedToSpy,
-  checkIfCurrentBotIsActive
-}
+export default async function checkIfBotIsAllowedToSpy(botname: string){
 
-async function checkIfBotIsAllowedToSpy(botname: string){
+  LOGGER(`Checando condições de espionagem`, { from: 'SPYBOT', pid: true })
+
   const allBotsArr = await getAllBotsArr()
   if (!allBotsArr){return "Erro na lista de bots"}
 
@@ -52,7 +48,7 @@ function checkIfCurrentBotIsActive(botsArr, botname: string) {
   if (shouldCurrentBotRun === true) {
     return true
   } else {
-    return `O bot atual ${botname} está desativado`
+    return `O bot está desativado`
   }
 
 }

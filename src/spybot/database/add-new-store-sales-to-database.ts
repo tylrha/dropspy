@@ -182,20 +182,31 @@ async function addSaleToDatesDatabase(newSaleObject: ISaleProduct): Promise<void
 
   let dateObjectInDatabase: IDateMongo = await getDateInDatabase(currentDate)
 
-  const storeIndex = dateObjectInDatabase.stores.findIndex(store => store.storeLink === newSaleObject.storeLink)
+  let storeIndex = dateObjectInDatabase.stores.findIndex(store => store.storeLink === newSaleObject.storeLink)
   const isStoreMissing = storeIndex === -1
 
-  if (!isStoreMissing){
+  if (isStoreMissing){
 
-    const curStoreArr = Array.from(dateObjectInDatabase.stores[storeIndex].productsArr)
-    const isProductMissing = curStoreArr.findIndex(product => (product && product.productLink === newSaleObject.productLink)) === -1
-    if (isProductMissing) { dateObjectInDatabase = await addProductToDateObject(dateObjectInDatabase, newSaleObject) }
+    LOGGER(`Adicionando primeira venda da loja ao objeto da data`, {from: "SPYBOT", pid: true})
 
-    dateObjectInDatabase = await addSaleToDateobject(dateObjectInDatabase, newSaleObject)
-    await saveDateInDatabase(dateObjectInDatabase)
+    const newStoreDate = {
+      storeLink: newSaleObject.storeLink,
+      storeName: newSaleObject.storeName,
+      sales: 0,
+      revenue: 0,
+      products: 0,
+      productsArr: []
+    }
 
-  } else {
-    LOGGER(`Deu algum erro ao encontrar a loja do produto`, {from: "SPYBOT", pid: true, isError: true})
-    LOGGER(`Deu algum erro ao encontrar a loja do produto`, {from: "SPYBOT", pid: true, isError: true, logger: "mongodb"})
+    dateObjectInDatabase.stores.push(newStoreDate)
+    storeIndex = dateObjectInDatabase.stores.length - 1
   }
+
+  const curStoreArr = Array.from(dateObjectInDatabase.stores[storeIndex].productsArr)
+  const isProductMissing = curStoreArr.findIndex(product => (product && product.productLink === newSaleObject.productLink)) === -1
+  if (isProductMissing) { dateObjectInDatabase = await addProductToDateObject(dateObjectInDatabase, newSaleObject) }
+
+  dateObjectInDatabase = await addSaleToDateobject(dateObjectInDatabase, newSaleObject)
+  await saveDateInDatabase(dateObjectInDatabase)
+
 }

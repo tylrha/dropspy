@@ -24,7 +24,7 @@ import {
   DATABASE_DATABASE_SPY
 } from "../../../configs/configs"
 
-import { checkIfBotIsAllowedToSpy } from '../components/check-spy-conditions'
+import checkIfBotIsAllowedToSpy from '../components/check-spy-conditions'
 
 import { runJsOnPage, waitTillHTMLRendered } from "../../../utils/libraries/puppeteer"
 import { getSpyedStores, updateBotInfo, ENUM_UPDATE_BOT_INFO } from "../components/spy-sheets-api"
@@ -37,6 +37,7 @@ import IStoreSheets from '../interfaces/IStoreSheets'
 import extractBrowserExtensions from "../components/extract-browser-extensions"
 
 import updateDatabasePreSpy from '../database/update-database-pre-spy'
+import Worker from '../../clusters/worker/models/Worker'
 
 interface ISharedStore extends IStoreSheets {
   salesCount?: number,
@@ -50,18 +51,20 @@ export default class Spybot {
   public botSpyedStoresArr: Array<ISharedStore>
   public botBrowser: Browser
   public botInitialSpyDate: string
+  public botWorker: Worker
 
-  constructor(index: string) {
+  constructor(index: string, worker: Worker) {
     this.botIndex = index
     this.botCheckedTimes = 0
     this.botSpyedStoresArr = []
     // this.botBrowser
     // this.botInitialSpyDate
+    this.botWorker = worker
   }
 
   // ==== INIT METHODS =========================================================
 
-  async initSpyBot(): Promise<Spybot | string> {
+  async initSpyBot(): Promise<Spybot | string | boolean> {
 
     try {
       LOGGER(`Bot ${this.botIndex} - foi iniciado`, { from: 'SPYBOT', pid: true })
@@ -69,7 +72,7 @@ export default class Spybot {
       await updateBotInfo(ENUM_UPDATE_BOT_INFO.INITIAL_INFO, this.botIndex)
 
       const isBotAllowedToSpy = await checkIfBotIsAllowedToSpy(this.botIndex)
-      if (isBotAllowedToSpy !== true) { throw new Error(`Erro nas condições de espionagem: ${isBotAllowedToSpy}`) }
+      if (isBotAllowedToSpy !== true) { throw new Error(isBotAllowedToSpy) }
       LOGGER(`Bot ${this.botIndex} - pode espionar`, { from: 'SPYBOT', pid: true })
 
       this.botBrowser = await this.getBrowserInstance()
@@ -92,14 +95,23 @@ export default class Spybot {
 
     } catch (e) {
 
-      LOGGER(`Erro ao iniciar spybot: ${e.message}`, { from: 'SPYBOT', pid: true, isError: true })
+      LOGGER(`${e.message}`, { from: 'SPYBOT', pid: true, isError: true })
 
-      if (this.botBrowser){
-        LOGGER(`Fechando browser pra evitar múltiplas instâncias do mesmo bot`, { from: 'SPYBOT', pid: true })
-        await this.botBrowser.close()
+      if (e.message === `O bot está desativado` || e.message === `Os bots foram desligados`){
+        LOGGER(`Bot ${this.botIndex} - Finalizando spybot`, { from: 'SPYBOT', pid: true })
+        await this.close()
+        return false
+
+      } else {
+
+        if (this.botBrowser){
+          LOGGER(`Fechando browser pra evitar múltiplas instâncias do mesmo bot`, { from: 'SPYBOT', pid: true })
+          await this.botBrowser.close()
+        }
+
+        return e.message
+
       }
-
-      return e.message
 
     } finally {
 
@@ -135,7 +147,7 @@ export default class Spybot {
 
       const allExtensionsPathString = _getBrowserExtensionsString()
 
-      if (allExtensionsPathString === ""){throw new Error("Nãh há extensões para o browser")}
+      if (allExtensionsPathString === ""){throw new Error("Não há extensões para o browser")}
 
       const customArgs = [
         '--no-sandbox',
@@ -341,7 +353,7 @@ export default class Spybot {
         if (isBotAllowedToSpy !== true){
           this.botSpyedStoresArr = []
           await this.closeAllPagesAndLetBlankPage()
-          throw new Error(`Bot ${this.botIndex} - bot não pode espionar [${isBotAllowedToSpy}]`)
+          throw new Error(isBotAllowedToSpy)
         }
         LOGGER(`Bot ${this.botIndex} - pode espionar`, {from: 'SPYBOT', pid: true})
       }
@@ -370,23 +382,40 @@ export default class Spybot {
 
       await this.pingBotServer()
 
-    } catch(e){
-
-      console.log(e)
-      LOGGER(`Bot ${this.botIndex} - Erro no looping: ${e.message}`, {from: "SPYBOT", pid: true, isError: true, logger: "mongodb"})
-      LOGGER(`Erro no looping: ${e.message}`, {from: "SPYBOT", pid: true, isError: true})
-
-      global.WORKER.workerSharedInfo.workerData.workerInfo.botStep = `Erro no looping, esperando delay -> ${e.message}`
-      global.WORKER.workerSharedInfo.workerData.workerInfo.isSpybotActive = false
-
-    } finally {
-
       if (mongoose.STATES[mongoose.connection.readyState] === "connected"){
         await mongoose.connection.close()
         LOGGER(`Bot ${this.botIndex} - conexão fechada com banco de dados`, {from: 'SPYBOT', pid: true})
       }
 
       this.loopAgainAfterTime()
+
+    } catch(e){
+
+
+      LOGGER(e.message, { from: 'SPYBOT', pid: true, isError: true })
+
+      global.WORKER.workerSharedInfo.workerData.workerInfo.botStep = `Erro no looping, esperando delay -> ${e.message}`
+      global.WORKER.workerSharedInfo.workerData.workerInfo.isSpybotActive = false
+
+      if (mongoose.STATES[mongoose.connection.readyState] === "connected"){
+        await mongoose.connection.close()
+        LOGGER(`Bot ${this.botIndex} - conexão fechada com banco de dados`, {from: 'SPYBOT', pid: true})
+      }
+
+      if (e.message === `O bot está desativado` || e.message === `Os bots foram desligados`){
+
+        LOGGER(`Bot ${this.botIndex} - Finalizando spybot`, { from: 'SPYBOT', pid: true})
+        await this.close()
+        await this.botWorker.closeWorker()
+
+      } else {
+
+        LOGGER(`Bot ${this.botIndex} - Erro no looping: ${e.message}`, {from: "SPYBOT", pid: true, isError: true, logger: "mongodb"})
+        LOGGER(`${e.message}`, {from: "SPYBOT", pid: true, isError: true})
+
+        this.loopAgainAfterTime()
+
+      }
 
     }
 

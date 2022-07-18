@@ -1,10 +1,11 @@
 import dotenv from 'dotenv'
+import {join, basename, dirname} from 'path'
+import {readJson} from '../utils/libraries/utils'
+const _randBetweenTwoNumbers = (min, max) => Math.floor(Math.random() * (max - min + 1) + min)
+
 dotenv.config()
 
-import {join, basename, dirname} from 'path'
-
 /* FILES ==================================================================== */
-import {readJson} from '../utils/libraries/utils'
 const APP_CONFIGS = readJson('/configs/app-configs.json')
 
 /* ENVIRONMENT ============================================================== */
@@ -25,7 +26,6 @@ import {
   getDateInfoObjFromIsoDate,
   convertDateInfoObjToStringDate
 } from '../utils/libraries/dates'
-const _randBetweenTwoNumbers = (min, max) => Math.floor(Math.random() * (max - min + 1) + min)
 
 const CURRENT_DATETIME = (option?: 'date' | 'time') => {
 

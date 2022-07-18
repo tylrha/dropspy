@@ -54,21 +54,17 @@ interface IStoreMongo extends Document {
   storeName: string,
   storeLink: string,
   storeCategory: string,
-
   initialDate: string,
   lastSale: string,
   lastSaleIso: string,
-
-  labels: [],
-  totalLabels: number,
-
   totalSales: number,
   totalRevenue: number,
+  totalLabels: number,
   totalDates: number,
   totalProducts: number,
-
+  labels: [],
+  dates: IStoreDate[],
   products: IStoreProduct[],
-  dates: IStoreDate[]
 }
 
 type IStore = Omit<IStoreMongo, '_id' | '__v'>
@@ -80,21 +76,17 @@ const storeSchema: Schema = new Schema(
   storeName: String,
   storeLink: String,
   storeCategory: String,
-
   initialDate: String,
   lastSale: String,
   lastSaleIso: String,
-
-  labels: [],
-  totalLabels: Number,
-
   totalSales: Number,
   totalRevenue: Number,
+  totalLabels: Number,
   totalDates: Number,
   totalProducts: Number,
-
-  products: [storeProductSchema],
-  dates: [storeDateSchema]
+  labels: [],
+  dates: [storeDateSchema],
+  products: [storeProductSchema]
   },
   {
     versionKey: false

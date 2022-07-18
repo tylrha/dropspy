@@ -49,19 +49,17 @@ async function generateNewStore(sheetStoreObj: IStoreSheets, currentDate: string
     storeName,
     storeLink,
     storeCategory,
+    initialDate: currentDate,
     lastSale: "#",
     lastSaleIso: "#",
-    initialDate: currentDate,
-
-    labels: [],
-    totalLabels: 0,
-
     totalSales: 0,
     totalRevenue: 0,
+    totalLabels: 0,
     totalDates: 0,
     totalProducts: 0,
-    products: [],
-    dates: []
+    labels: [],
+    dates: [],
+    products: []
   }
 
   const storeObj = new Store(tmpStoreObj)

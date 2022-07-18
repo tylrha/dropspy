@@ -170,12 +170,16 @@ export default class Worker {
       console.log("")
       LOGGER(`Inicia spybot com index = [${this.spybotIndex}]`, { from: 'WORKER', pid: true })
       global.WORKER.workerSharedInfo.workerData.workerInfo.botStep = "Iniciando bot"
-      const spybot = new Spybot(this.spybotIndex)
+      const spybot = new Spybot(this.spybotIndex, this)
       this.spybotInstance = spybot
       this.isSpybotActive = true
 
       const spybotResult = await spybot.initSpyBot()
       if (typeof spybotResult === "string"){throw new Error(spybotResult)}
+      if (typeof spybotResult === "boolean"){
+        LOGGER(`Fechando worker porque o spybot não pode espionar`, { from: 'WORKER', pid: true })
+        await this.closeWorker()
+      }
 
     }catch(e){
 

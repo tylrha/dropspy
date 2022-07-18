@@ -25,25 +25,20 @@ const productDateSchema: Schema = new Schema(
 /* ########################################################################## */
 
 interface IProductMongo extends Document{
-  storeName: string,
-  storeLink: string,
-
   productName: string,
   productLink: string,
   productImage: string,
   productPrice: number,
-
+  storeName: string,
+  storeLink: string,
   initialDate: string,
   lastSale: string,
   lastSaleIso: string,
-
-  labels: [],
-  totalLabels: number,
-
   totalSales: number,
   totalRevenue: number,
+  totalLabels: number,
   totalDates: number,
-
+  labels: [],
   dates: IProductDate[]
 }
 
@@ -57,21 +52,16 @@ const productSchema: Schema = new Schema(
     productLink: String,
     productImage: String,
     productPrice: Number,
-
     storeName: String,
     storeLink: String,
-
     initialDate: String,
     lastSale: String,
     lastSaleIso: String,
-
-    labels: [],
-    totalLabels: Number,
-
     totalSales: Number,
     totalRevenue: Number,
+    totalLabels: Number,
     totalDates: Number,
-
+    labels: [],
     dates: [productDateSchema]
   },
   {
