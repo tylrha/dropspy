@@ -59,6 +59,9 @@ interface IStoreMongo extends Document {
   lastSale: string,
   lastSaleIso: string,
 
+  labels: [],
+  totalLabels: number,
+
   totalSales: number,
   totalRevenue: number,
   totalDates: number,
@@ -81,6 +84,9 @@ const storeSchema: Schema = new Schema(
   initialDate: String,
   lastSale: String,
   lastSaleIso: String,
+
+  labels: [],
+  totalLabels: Number,
 
   totalSales: Number,
   totalRevenue: Number,

@@ -37,6 +37,9 @@ interface IProductMongo extends Document{
   lastSale: string,
   lastSaleIso: string,
 
+  labels: [],
+  totalLabels: number,
+
   totalSales: number,
   totalRevenue: number,
   totalDates: number,
@@ -50,17 +53,20 @@ type IProductUnion = IProduct | IProductMongo
 
 const productSchema: Schema = new Schema(
   {
-    storeName: String,
-    storeLink: String,
-
     productName: String,
     productLink: String,
     productImage: String,
     productPrice: Number,
 
+    storeName: String,
+    storeLink: String,
+
     initialDate: String,
     lastSale: String,
     lastSaleIso: String,
+
+    labels: [],
+    totalLabels: Number,
 
     totalSales: Number,
     totalRevenue: Number,

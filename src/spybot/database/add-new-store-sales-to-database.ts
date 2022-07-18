@@ -88,9 +88,16 @@ export default async function addNewStoreSalesToDatabase(alihunterSalesArr: IAli
 
     LOGGER(`${saleIndex} - Adicionando o produto: ${saleObject.productName} aos bancos de dados`, { from: "SPYBOT", pid: true })
 
-    await addSaleToProductsDatabase(saleObject)
-    await addSaleToStoresDatabase(saleObject)
-    await addSaleToDatesDatabase(saleObject)
+    try{
+
+      await addSaleToProductsDatabase(saleObject)
+      await addSaleToStoresDatabase(saleObject)
+      await addSaleToDatesDatabase(saleObject)
+
+    } catch(e){
+      LOGGER(`${saleIndex} - Erro ao adicionar o produto: ${saleObject.productName} aos bancos de dados`, { from: "SPYBOT", pid: true })
+      console.log(e)
+    }
 
     console.log("")
 
@@ -181,7 +188,7 @@ async function addSaleToDatesDatabase(newSaleObject: ISaleProduct): Promise<void
   if (!isStoreMissing){
 
     const curStoreArr = Array.from(dateObjectInDatabase.stores[storeIndex].productsArr)
-    const isProductMissing = curStoreArr?.findIndex(product => product.productLink === newSaleObject.productLink) === -1
+    const isProductMissing = curStoreArr.findIndex(product => (product && product.productLink === newSaleObject.productLink)) === -1
     if (isProductMissing) { dateObjectInDatabase = await addProductToDateObject(dateObjectInDatabase, newSaleObject) }
 
     dateObjectInDatabase = await addSaleToDateobject(dateObjectInDatabase, newSaleObject)

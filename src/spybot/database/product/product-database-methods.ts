@@ -49,16 +49,20 @@ async function generateNewProduct(saleProductObj: ISaleProduct, currentDate: str
   LOGGER(`Gerando objeto do produto [${productName}]`, {from: "SPYBOT", pid: true})
 
   const tmpProductObj = {
-    storeName,
-    storeLink,
     productName,
     productLink,
     productImage,
     productPrice,
 
+    storeName,
+    storeLink,
+
+    initialDate: currentDate,
     lastSale,
     lastSaleIso,
-    initialDate: currentDate,
+
+    labels: [],
+    totalLabels: 0,
 
     totalSales: 0,
     totalRevenue: 0,

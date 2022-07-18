@@ -52,6 +52,10 @@ async function generateNewStore(sheetStoreObj: IStoreSheets, currentDate: string
     lastSale: "#",
     lastSaleIso: "#",
     initialDate: currentDate,
+
+    labels: [],
+    totalLabels: 0,
+
     totalSales: 0,
     totalRevenue: 0,
     totalDates: 0,
