@@ -8,11 +8,6 @@
     "configs_folder": "./configs"
   },
 
-  "alihunter_configs": {
-    "gmail_username": "instigaremidia.spybot9@gmail.com",
-    "gmail_password": "Insti1010!"
-  },
-
   "server_configs": {
     "job_wait_seconds": 30,
     "default_port": 3000

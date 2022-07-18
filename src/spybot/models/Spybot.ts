@@ -198,7 +198,7 @@ export default class Spybot {
 
     try {
 
-      LOGGER(`Bot ${this.botIndex} - logando no Google`, { from: 'SPYBOT', pid: true })
+      LOGGER(`Bot ${this.botIndex} - logando no Google [${ALIHUNTER_GMAIL_USERNAME}]`, { from: 'SPYBOT', pid: true })
 
       await googlePage.goto('https://accounts.google.com/')
       await waitTillHTMLRendered(googlePage)

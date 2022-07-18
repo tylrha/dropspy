@@ -25,6 +25,7 @@ import {
   getDateInfoObjFromIsoDate,
   convertDateInfoObjToStringDate
 } from '../utils/libraries/dates'
+const _randBetweenTwoNumbers = (min, max) => Math.floor(Math.random() * (max - min + 1) + min)
 
 const CURRENT_DATETIME = (option?: 'date' | 'time') => {
 
@@ -45,9 +46,12 @@ const CURRENT_DATETIME = (option?: 'date' | 'time') => {
 }
 
 /* GOOGLE =================================================================== */
-
-const ALIHUNTER_GMAIL_USERNAME = APP_CONFIGS['alihunter_configs'].gmail_username
-const ALIHUNTER_GMAIL_PASSWORD = APP_CONFIGS['alihunter_configs'].gmail_password
+const EMAILS_JSON = readJson('/configs/alihunter-emails.json') as []
+const _max_emails = Array.from(EMAILS_JSON).length - 1 || 1
+const _email_index = _randBetweenTwoNumbers(1, _max_emails)
+const _selected_email = EMAILS_JSON[_email_index]
+const ALIHUNTER_GMAIL_USERNAME = _selected_email['email']
+const ALIHUNTER_GMAIL_PASSWORD = _selected_email['password']
 
 /* DATABASE ================================================================= */
 
@@ -66,10 +70,8 @@ const DATABASE_COLLECTION_PRODUCTS = APP_CONFIGS['database_configs'].collection_
 const GSHEET_IM_SPY_API_URL = APP_CONFIGS['google_sheets_configs'].im_spy_api_url
 
 /* SPY ====================================================================== */
-
 const _min_minutes = NODE_ENV === DEFALT_NODE_ENV ? 1 : 4
 const _max_minutes = NODE_ENV === DEFALT_NODE_ENV ? 1 : 9
-const _randBetweenTwoNumbers = (min, max) => Math.floor(Math.random() * (max - min + 1) + min)
 
 if (!global.RANDOM_NUMBER){global.RANDOM_NUMBER = _randBetweenTwoNumbers(_min_minutes, _max_minutes)}
 const SPYBOT_LOOP_INTERVAL = Number(global.RANDOM_NUMBER * 60)
