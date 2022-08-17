@@ -4,9 +4,10 @@
 node_modules/
 dist/
 local/
+session/
+extensions_unziped/
 .git/
 .husky/
-extensions_unziped/
 
 
 #FILES =========================================================================

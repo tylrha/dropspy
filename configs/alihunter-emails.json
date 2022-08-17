@@ -1,42 +1,47 @@
 [
   {
-    "email": "instigaremidia.spybot9@gmail.com",
-    "password": "Insti1010!"
-  },
-  {
-    "email": "instigaremidia.spybot10@gmail.com",
-    "password": "Insti1010!"
-  },
-  {
-    "email": "botggl001@gmail.com",
-    "password": "Insti1010!"
-  },
-  {
-    "email": "botggl002@gmail.com",
-    "password": "Insti1010!"
-  },
-  {
-    "email": "botggl003@gmail.com",
-    "password": "Insti1010!"
-  },
-  {
     "email": "botggl004@gmail.com",
-    "password": "Insti1010!"
+    "password": "Insti1010!",
+    "type": "gmail"
   },
   {
-    "email": "botggl006@gmail.com",
-    "password": "Insti1010!"
+    "email": "edi.menezes2023@gmail.com",
+    "password": "Insti1010!",
+    "type": "facebook"
   },
   {
-    "email": "botggl007@gmail.com",
-    "password": "Insti1010!"
+    "email": "raimundo.pires2023@gmail.com",
+    "password": "Insti1010!",
+    "type": "facebook"
   },
   {
-    "email": "botggl008@gmail.com",
-    "password": "Insti1010!"
+    "email": "namoradeiragarca@gmail.com",
+    "password": "Insti1010!",
+    "type": "gmail"
   },
   {
-    "email": "botggl009@gmail.com",
-    "password": "Insti1010!"
+    "email": "p001@instigaremidia.com",
+    "password": "Insti1010!",
+    "type": "facebook"
+  },
+  {
+    "email": "p002@instigaremidia.com",
+    "password": "Insti1010!",
+    "type": "facebook"
+  },
+  {
+    "email": "p003@instigaremidia.com",
+    "password": "Insti1010!",
+    "type": "facebook"
+  },
+  {
+    "email": "p004@instigaremidia.com",
+    "password": "Insti1010!",
+    "type": "facebook"
+  },
+  {
+    "email": "p006@instigaremidia.com",
+    "password": "Insti1010!",
+    "type": "facebook"
   }
 ]

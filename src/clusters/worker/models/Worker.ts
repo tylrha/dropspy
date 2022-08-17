@@ -1,10 +1,11 @@
 import { CURRENT_DATETIME, LOGGER, SPYBOT_LOOP_INTERVAL } from '../../../../configs/configs'
-import Spybot from '../../../spybot/models/Spybot'
+import Spybot from '../../../spybot/Spybot'
 
 import { EMasterCommandsToWorkers } from '../../master/interfaces/EMasterCommandsToWorkers'
 import { EWorkerCommandsToMaster } from '../interfaces/EWorkerCommandsToMaster'
 import { IMessageBetweenClusters } from '../../interfaces/IMessageBetweenClusters'
 import { IMasterSharedInformation } from '../../master/interfaces/IMasterSharedInformation'
+import { getActivePage } from '../../../../utils/libraries/puppeteer'
 
 export default class Worker {
 
@@ -58,6 +59,7 @@ export default class Worker {
         if (commandIndex === EMasterCommandsToWorkers.CLOSE_WORKER) { await this.handleCloseWorkerRequest() }
         if (commandIndex === EMasterCommandsToWorkers.GET_WORKER_INFO) { await this.handleRequestForWorkerInformation() }
         if (commandIndex === EMasterCommandsToWorkers.SEND_MASTER_INFO_TO_WORKER) { await this.handleUpdateOnMasterInformation(data) }
+        // if (commandIndex === EMasterCommandsToWorkers.GET_WORKER_SCREENSHOT) { await this.handleGetWorkerScreenShot() }
 
       }
 
@@ -88,11 +90,26 @@ export default class Worker {
   }
 
   private async handleUpdateOnMasterInformation(masterInformation: IMasterSharedInformation){
-
     LOGGER(`Recebi informações do master`, { from: 'WORKER', pid: true })
     this.dataFromMaster = masterInformation
-
   }
+
+  // private async handleGetWorkerScreenShot(): Promise<void> {
+
+  //   try{
+  //     const browser = this.spybotInstance?.botBrowser
+  //     if (browser){
+  //       const currentPage = await getActivePage(browser, 3000)
+  //       const hasSavedScreenShot = await saveScreenShot(currentPage)
+  //       LOGGER(`${hasSavedScreenShot ? "Salvei o screenShot" : "Erro ao salvar screenshot"}`, { from: 'WORKER', pid: true })
+  //     } else {
+  //       LOGGER(`Como o browser ainda nao foi definido nao pude tirar print`, { from: 'WORKER', pid: true })
+  //     }
+  //   } catch(e){
+  //     LOGGER(e.message, { from: 'WORKER', pid: true, isError: true })
+  //   }
+
+  // }
 
   // ===========================================================================
 
@@ -176,14 +193,14 @@ export default class Worker {
 
       const spybotResult = await spybot.initSpyBot()
       if (typeof spybotResult === "string"){throw new Error(spybotResult)}
-      if (typeof spybotResult === "boolean"){
+      if (spybotResult === false){
         LOGGER(`Fechando worker porque o spybot não pode espionar`, { from: 'WORKER', pid: true })
         await this.closeWorker()
       }
 
     }catch(e){
 
-      LOGGER(`Bot ${this.spybotIndex} - Erro ao iniciar spybot no worker: ${e.message}`, {from: "WORKER", pid: true, isError: true, logger: "mongodb"})
+      LOGGER(`Bot ${this.spybotIndex} - Erro ao iniciar spybot no worker: ${e.message}`, {from: "WORKER", pid: true, isError: true})
 
       LOGGER(`Erro ao iniciar spybot no worker: ${e.message}`, { from: 'WORKER', pid: true, isError: true })
       global.WORKER.workerSharedInfo.workerData.workerInfo.botStep = `Erro ao iniciar spybot no worker, esperando delay: ${e.message}`

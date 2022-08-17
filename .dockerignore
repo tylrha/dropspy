@@ -4,20 +4,20 @@
 .git/
 local/
 node_modules/
+extensions_unziped/
+# dist/
 
 #DEV ========================
-src/
-tests/
-extensions_unziped/
-configs/
-scripts/
-utils/
+# src/
+# configs/
+# scripts/
+# utils/
 
-#FILES ======================
+# #FILES ======================
 .editorconfig
 .env.example
-.gitignore
-commitlint.config.js
 jest.config.ts
+commitlint.config.js
 readme.MD
-tsconfig.json
+# .gitignore
+# tsconfig.json

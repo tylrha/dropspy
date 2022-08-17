@@ -21,7 +21,9 @@
   "browser_configs": {
     "headless_mode": false,
     "browser_extensions_zip_folder": "./src/spybot/assets",
-    "browser_extensions_unziped_folder": "./extensions_unziped"
+    "browser_extensions_unziped_folder": "./extensions_unziped",
+    "browser_session_folder": "./src/spybot/assets/sessions",
+    "browser_session_unziped_folder": "./session"
   },
 
   "database_configs": {
@@ -30,12 +32,12 @@
     "database_password": "imsuperpass",
 
     "database_spy": "DROPSPY",
-    "collection_spy_dates": "dates",
+    "collection_spy_products": "products",
+    "collection_store_dates": "stores-by-date",
     "collection_spy_stores": "stores",
-    "collection_spy_products": "products"
-  },
-
-  "google_sheets_configs": {
-    "im_spy_api_url": "https://script.google.com/macros/s/AKfycbzk7RfDk6Y1NQ1654TnYuYODKdI_6dtDKuvmKDlj7TMauRpSSrZkH27QNy85Iy2GB9Zcg/exec"
+    "collection_spy_dates": "dates",
+    "collection_labels": "labels",
+    "collection_admin": "admin",
+    "collection_bots": "bots"
   }
 }

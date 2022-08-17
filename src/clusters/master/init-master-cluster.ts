@@ -9,6 +9,7 @@ import initServer from '../../server/server';
 import Master from './models/Master'
 
 import { IMasterGlobals } from './interfaces/IMasterGlobals'
+import connectDatabase from '../../connectDatabase';
 
 declare global {
   var MASTER: IMasterGlobals
@@ -23,11 +24,12 @@ export default async function initMasterCluster(){
   const masterInstance = new Master()
   masterInstance.createWorkerInstance(SPYBOT_APP_USER)
 
+
   masterInstance.runWhenWorkersAreReady().then(async (RES) => {
     LOGGER('Todos os worker foram iniciados\n', { from: 'MASTER', pid: true })
 
     global.MASTER = {
-      masterCluster: masterInstance,
+      masterCluster: masterInstance
     }
 
   })

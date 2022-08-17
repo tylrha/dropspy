@@ -1,6 +1,6 @@
 {
   "name": "dropspy",
-  "version": "1.0.9",
+  "version": "1.1.5",
   "description": "cloud based shopify stores spy system",
   "repository": {
     "type": "git",
@@ -17,7 +17,8 @@
     "alihunter",
     "shopify",
     "ecommerce",
-    "cloud computing"
+    "cloud computing",
+    "cluster"
   ],
   "config": {
     "commitizen": {
@@ -27,7 +28,8 @@
   },
   "main": "src/index.ts",
   "scripts": {
-    "dev": "ts-node-dev --transpile-only --respawn --ignore-watch node_modules src/index.ts",
+    "dev": "ts-node src/index.ts",
+    "start": "npm run dev",
     "test": "jest",
     "commit": "git-cz",
 
@@ -37,10 +39,7 @@
 
     "docker_build": "docker build -t dropspy .",
     "docker_pre_run": "bash ./dist/scripts/run/clean-xbfb-files.sh",
-
-    "start_prod": "node dist/src/index.js",
-    "start_dev": "ts-node src/index.ts",
-    "start": "npm run start_dev"
+    "docker_run": "node ./dist/src/index.js"
   },
   "dependencies": {
     "axios": "^0.27.2",
@@ -49,6 +48,7 @@
     "dotenv": "^16.0.1",
     "ejs": "^3.1.8",
     "express": "^4.18.1",
+    "mongodb": "^4.8.1",
     "mongoose": "^6.4.3",
     "node-os-utils": "^1.3.7",
     "puppeteer-extra": "^3.3.4",
@@ -69,7 +69,6 @@
     "jest": "^28.1.2",
     "ts-jest": "^28.0.5",
     "ts-node": "^10.8.2",
-    "ts-node-dev": "^2.0.0",
     "typescript": "^4.7.4"
   }
 }

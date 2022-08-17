@@ -1,7 +1,7 @@
 import Master from "../models/Master";
 
 interface IMasterGlobals {
-  masterCluster: Master;
+  masterCluster: Master,
 }
 
 export {IMasterGlobals}

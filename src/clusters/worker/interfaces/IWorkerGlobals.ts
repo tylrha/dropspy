@@ -1,3 +1,5 @@
+import { MongoClient } from "mongodb";
+
 import Worker from "../models/Worker";
 import {IWorkerSharedInformation} from './IWorkerSharedInformation'
 

@@ -1,9 +1,9 @@
 import clc from 'cli-color'
 import { getCurrentDateTimeString } from '../libraries/dates'
 
-import telegramLogger from './components/telegram-logger'
-import whatsappLogger from './components/whatsapp-logger'
-import mongodbLogger from './components/mongodb-logger'
+// import telegramLogger from './components/telegram-logger'
+// import whatsappLogger from './components/whatsapp-logger'
+// import mongodbLogger from './components/mongodb-logger'
 
 const TEXT_COLORS_ARR = [
   ['DEFAULT', clc.bgBlue.bold, clc.blue],
@@ -73,15 +73,16 @@ export default async function logger(message: any, options?: loggerOptions) {
   // LOGS IN PRODUCTION ENVIRONMENTS ===================
   if (options && options.logger) {
 
-    if (options.logger === 'whatsapp') {
-      await whatsappLogger(message)
-    } else if (options.logger === 'telegram') {
-      await telegramLogger(message)
-    } else if (options.logger === 'mongodb') {
-      await mongodbLogger(message)
-    } else {
-      console.log(`${options.logger}: ` + finalMessage)
-    }
+    // if (options.logger === 'whatsapp') {
+    //   await whatsappLogger(message)
+    // } else if (options.logger === 'telegram') {
+    //   await telegramLogger(message)
+    // } else if (options.logger === 'mongodb') {
+    //   await mongodbLogger(message)
+    // } else {
+    // }
+
+    console.log(`${options.logger}: ` + finalMessage)
 
   } else {
     console.log(finalMessage)
