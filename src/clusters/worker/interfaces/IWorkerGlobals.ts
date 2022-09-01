@@ -1,11 +1,9 @@
-import { MongoClient } from "mongodb";
-
-import Worker from "../models/Worker";
-import {IWorkerSharedInformation} from './IWorkerSharedInformation'
+import Worker from '../models/Worker';
+import { IWorkerSharedInformation } from './IWorkerSharedInformation';
 
 interface IWorkerGlobals {
   workerCluster?: Worker;
   workerSharedInfo?: IWorkerSharedInformation;
 }
 
-export {IWorkerGlobals}
+export { IWorkerGlobals };

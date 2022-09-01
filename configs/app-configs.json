@@ -1,43 +1,22 @@
 {
-
   "project_configs": {
     "appname": "dropspy",
-    "source_folder": "./src",
     "dist_folder": "./dist",
-    "scripts_folder": "./scripts",
-    "configs_folder": "./configs"
+    "use_saved_alihunter_sessions": false
   },
-
   "server_configs": {
     "job_wait_seconds": 30,
     "default_port": 3000
   },
-
   "worker_configs": {
     "max_instances": 2,
     "restart_interval": 20
   },
-
   "browser_configs": {
     "headless_mode": false,
-    "browser_extensions_zip_folder": "./src/spybot/assets",
+    "browser_extensions_zip_folder": "./assets/extensions",
     "browser_extensions_unziped_folder": "./extensions_unziped",
-    "browser_session_folder": "./src/spybot/assets/sessions",
+    "browser_session_folder": "./assets/sessions",
     "browser_session_unziped_folder": "./session"
-  },
-
-  "database_configs": {
-    "database_baseurl": "cluster0.tc8lz.mongodb.net",
-    "database_username": "imsuperuser",
-    "database_password": "imsuperpass",
-
-    "database_spy": "DROPSPY",
-    "collection_spy_products": "products",
-    "collection_store_dates": "stores-by-date",
-    "collection_spy_stores": "stores",
-    "collection_spy_dates": "dates",
-    "collection_labels": "labels",
-    "collection_admin": "admin",
-    "collection_bots": "bots"
   }
 }

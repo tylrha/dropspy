@@ -5,19 +5,19 @@
 local/
 node_modules/
 extensions_unziped/
-# dist/
-
-#DEV ========================
-# src/
-# configs/
-# scripts/
-# utils/
+session/
+utils/
+src/
+configs/
+scripts/
+assets/
 
 # #FILES ======================
 .editorconfig
 .env.example
-jest.config.ts
 commitlint.config.js
-readme.MD
-# .gitignore
-# tsconfig.json
+README.MD
+package-lock.json
+tsconfig.json
+pnpm-lock.yaml
+Dockerfile

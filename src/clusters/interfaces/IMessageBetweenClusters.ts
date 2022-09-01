@@ -1,7 +1,7 @@
 interface IMessageBetweenClusters {
-  message?: string,
-  command?: string,
-  data?: any
+  message?: string;
+  command?: string;
+  data?: any;
 }
 
-export {IMessageBetweenClusters}
+export { IMessageBetweenClusters };

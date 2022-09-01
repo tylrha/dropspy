@@ -1,44 +1,36 @@
 {
   "name": "dropspy",
-  "version": "1.1.5",
-  "description": "cloud based shopify stores spy system",
+  "version": "1.0.0",
+  "description": "This is a bot for spying sales on shopify stores, using alihunter chrome extension and saving the results in a MongoDB database for latter consultation.",
+  "license": "MIT",
+  "homepage": "https://github.com/lucasvtiradentes/dropspy",
   "repository": {
     "type": "git",
-    "url": "https://github.com/instigaremidia/dropspy-typescript.git"
+    "url": "https://github.com/lucasvtiradentes/dropspy.git"
   },
   "author": {
     "name": "Lucas Vieira",
-    "email": "lucasvtiradentes@gmail.com"
+    "email": "lucasvtiradentes@gmail.com",
+    "url": "https://www.linkedin.com/in/lucasvtiradentes"
   },
-  "keywords": [
-    "dropspy",
-    "typescript",
-    "pupeteer",
-    "alihunter",
-    "shopify",
-    "ecommerce",
-    "cloud computing",
-    "cluster"
-  ],
+  "bugs": {
+    "url": "https://github.com/lucasvtiradentes/dropspy/issues"
+  },
+  "main": "src/index.ts",
   "config": {
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
-    },
-    "configfile": "./configs/app-configs.json"
+    }
   },
-  "main": "src/index.ts",
   "scripts": {
     "dev": "ts-node src/index.ts",
-    "start": "npm run dev",
-    "test": "jest",
+    "start": "npm run docker_run",
     "commit": "git-cz",
-
-    "prebuild": "node ./scripts/build/pre-build.js",
+    "prebuild": "ts-node ./scripts/pre-build.ts",
     "build": "node ./node_modules/typescript/bin/tsc",
-    "postbuild": "node ./scripts/build/post-build.js",
-
+    "postbuild": "ts-node ./scripts/post-build.ts",
     "docker_build": "docker build -t dropspy .",
-    "docker_pre_run": "bash ./dist/scripts/run/clean-xbfb-files.sh",
+    "docker_pre_run": "bash ./dist/scripts/docker-pre-run.sh",
     "docker_run": "node ./dist/src/index.js"
   },
   "dependencies": {
@@ -46,28 +38,28 @@
     "cli-color": "^2.0.3",
     "cluster": "^0.7.7",
     "dotenv": "^16.0.1",
-    "ejs": "^3.1.8",
     "express": "^4.18.1",
     "mongodb": "^4.8.1",
     "mongoose": "^6.4.3",
     "node-os-utils": "^1.3.7",
+    "puppeteer": "^19.2.2",
     "puppeteer-extra": "^3.3.4",
-    "puppeteer-extra-plugin-stealth": "^2.11.0",
+    "puppeteer-extra-plugin-stealth": "^2.11.1",
     "unzipper": "^0.10.11"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.0.3",
     "@commitlint/config-conventional": "^17.0.3",
-    "@types/axios": "^0.14.0",
     "@types/cli-color": "^2.0.2",
     "@types/express": "^4.17.13",
-    "@types/jest": "^28.1.4",
-    "@types/mongoose": "^5.11.97",
+    "@types/node": "^18.11.9",
+    "@types/node-os-utils": "^1.3.0",
     "@types/puppeteer": "^5.4.6",
+    "@types/unzipper": "^0.10.5",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
     "commitizen": "^4.2.4",
-    "husky": "^8.0.1",
-    "jest": "^28.1.2",
-    "ts-jest": "^28.0.5",
+    "eslint": "^8.28.0",
     "ts-node": "^10.8.2",
     "typescript": "^4.7.4"
   }

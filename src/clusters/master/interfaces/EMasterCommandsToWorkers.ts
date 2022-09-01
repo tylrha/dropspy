@@ -7,4 +7,4 @@ enum EMasterCommandsToWorkers {
   GET_WORKER_SCREENSHOT
 }
 
-export {EMasterCommandsToWorkers}
+export { EMasterCommandsToWorkers };

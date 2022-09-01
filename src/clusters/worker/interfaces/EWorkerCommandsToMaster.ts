@@ -4,4 +4,4 @@ enum EWorkerCommandsToMaster {
   GET_MASTER_INFO
 }
 
-export {EWorkerCommandsToMaster}
+export { EWorkerCommandsToMaster };

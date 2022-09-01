@@ -3,4 +3,4 @@ interface IMasterSharedInformation {
   workersArr?: any,
 }
 
-export {IMasterSharedInformation}
+export { IMasterSharedInformation };

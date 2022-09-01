@@ -12,3 +12,5 @@ extensions_unziped/
 
 #FILES =========================================================================
 .env
+pnpm-lock.yaml
+package-lock.json

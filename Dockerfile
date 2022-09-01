@@ -19,20 +19,10 @@ RUN dpkg --install libindicator7_0.5.0-4_amd64.deb
 RUN curl -p --insecure "http://ftp.br.debian.org/debian/pool/main/liba/libappindicator/libappindicator1_0.4.92-7_amd64.deb" --output libappindicator1_0.4.92-7_amd64.deb
 RUN dpkg --install libappindicator1_0.4.92-7_amd64.deb
 
-RUN ls
-
 WORKDIR /app/
 
 COPY package*.json ./
-
-ARG NODE_ENV
-
-RUN if [ "$NODE_ENV" = "development" ]; \
-      then npm install; \
-      else npm install --only=production; \
-    fi
-
-RUN ls
+RUN npm install
 
 COPY . .
 

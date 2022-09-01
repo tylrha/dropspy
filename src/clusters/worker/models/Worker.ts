@@ -1,23 +1,22 @@
-import { CURRENT_DATETIME, LOGGER, SPYBOT_LOOP_INTERVAL } from '../../../../configs/configs'
-import Spybot from '../../../spybot/Spybot'
+import { LOGGER, SPYBOT_LOOP_INTERVAL } from '../../../../configs/configs';
+import Spybot from '../../../spybot/Spybot';
 
-import { EMasterCommandsToWorkers } from '../../master/interfaces/EMasterCommandsToWorkers'
-import { EWorkerCommandsToMaster } from '../interfaces/EWorkerCommandsToMaster'
-import { IMessageBetweenClusters } from '../../interfaces/IMessageBetweenClusters'
-import { IMasterSharedInformation } from '../../master/interfaces/IMasterSharedInformation'
-import { getActivePage } from '../../../../utils/libraries/puppeteer'
+import { EMasterCommandsToWorkers } from '../../master/interfaces/EMasterCommandsToWorkers';
+import { EWorkerCommandsToMaster } from '../interfaces/EWorkerCommandsToMaster';
+import { IMessageBetweenClusters } from '../../interfaces/IMessageBetweenClusters';
+import { IMasterSharedInformation } from '../../master/interfaces/IMasterSharedInformation';
 
 export default class Worker {
 
-  public workerProcess: NodeJS.Process
-  public isSpybotActive: boolean
-  public spybotInstance: Spybot
-  public spybotIndex: string
-  public dataFromMaster: IMasterSharedInformation
+  public workerProcess: NodeJS.Process;
+  public isSpybotActive: boolean;
+  public spybotInstance: Spybot;
+  public spybotIndex: string;
+  public dataFromMaster: IMasterSharedInformation;
 
   constructor(proc: NodeJS.Process) {
-    this.workerProcess = proc
-    this.isSpybotActive = false
+    this.workerProcess = proc;
+    this.isSpybotActive = false;
     // this.spybotInstance
     // this.dataFromMaster
   }
@@ -28,12 +27,12 @@ export default class Worker {
 
     try {
 
-    LOGGER(`Worker iniciado`, { from: 'WORKER', pid: true })
-    this.setupWorkerEvents(this.workerProcess)
-    this.sendCommandToMaster(EWorkerCommandsToMaster.SET_WORKER_AS_READY);
+      LOGGER('Worker iniciado', { from: 'WORKER', pid: true });
+      this.setupWorkerEvents(this.workerProcess);
+      this.sendCommandToMaster(EWorkerCommandsToMaster.SET_WORKER_AS_READY);
 
     } catch (e) {
-      LOGGER(`Erro ao criar worker: ${e.message}`, { from: 'WORKER', pid: true, isError: true })
+      LOGGER(`Erro ao criar worker: ${e.message}`, { from: 'WORKER', pid: true, isError: true });
     }
 
   }
@@ -42,23 +41,23 @@ export default class Worker {
 
     proc.on('message', async (msgObj: IMessageBetweenClusters) => {
 
-      const {command, data, message} = msgObj
+      const { command, data, message } = msgObj;
 
-      if (message){
-        LOGGER(`Msg do master pro worker: ${message}`, { from: 'WORKER', pid: true })
-        return
+      if (message) {
+        LOGGER(`Msg do master pro worker: ${message}`, { from: 'WORKER', pid: true });
+        return;
       }
 
-      if(command){
+      if (command) {
 
-        const commandIndex = EMasterCommandsToWorkers[command]
-        const commandStr = EMasterCommandsToWorkers[commandIndex]
-        LOGGER(`Comando recebido do master: [${commandStr}]`, { from: 'WORKER', pid: true })
+        const commandIndex = EMasterCommandsToWorkers[command];
+        const commandStr = EMasterCommandsToWorkers[commandIndex];
+        LOGGER(`Comando recebido do master: [${commandStr}]`, { from: 'WORKER', pid: true });
 
-        if (commandIndex === EMasterCommandsToWorkers.START_SPY) { await this.handleStartSpybotRequest() }
-        if (commandIndex === EMasterCommandsToWorkers.CLOSE_WORKER) { await this.handleCloseWorkerRequest() }
-        if (commandIndex === EMasterCommandsToWorkers.GET_WORKER_INFO) { await this.handleRequestForWorkerInformation() }
-        if (commandIndex === EMasterCommandsToWorkers.SEND_MASTER_INFO_TO_WORKER) { await this.handleUpdateOnMasterInformation(data) }
+        if (commandIndex === EMasterCommandsToWorkers.START_SPY) { await this.handleStartSpybotRequest(); }
+        if (commandIndex === EMasterCommandsToWorkers.CLOSE_WORKER) { await this.handleCloseWorkerRequest(); }
+        if (commandIndex === EMasterCommandsToWorkers.GET_WORKER_INFO) { await this.handleRequestForWorkerInformation(); }
+        if (commandIndex === EMasterCommandsToWorkers.SEND_MASTER_INFO_TO_WORKER) { await this.handleUpdateOnMasterInformation(data); }
         // if (commandIndex === EMasterCommandsToWorkers.GET_WORKER_SCREENSHOT) { await this.handleGetWorkerScreenShot() }
 
       }
@@ -66,32 +65,32 @@ export default class Worker {
     });
 
     proc.on('exit', async () => {
-      LOGGER(`Worker foi finalizado com PID = ${proc.pid}`, { from: 'WORKER', pid: true })
+      LOGGER(`Worker foi finalizado com PID = ${proc.pid}`, { from: 'WORKER', pid: true });
     });
 
   }
 
   // ===========================================================================
 
-  private async handleStartSpybotRequest(): Promise<void>{
-    await this.startSpybot()
+  private async handleStartSpybotRequest(): Promise<void> {
+    await this.startSpybot();
   }
 
-  private async handleCloseWorkerRequest(): Promise<void>{
-    await this.closeWorker()
+  private async handleCloseWorkerRequest(): Promise<void> {
+    await this.closeWorker();
   }
 
   private async handleRequestForWorkerInformation(): Promise<void> {
 
-    LOGGER(`Obtem informações de espionagem`, { from: 'WORKER', pid: true })
-    const objToSend = global.WORKER?.workerSharedInfo || {}
-    this.sendCommandToMaster(EWorkerCommandsToMaster.SEND_WORKER_INFO_TO_MASTER, objToSend)
+    LOGGER('Obtem informações de espionagem', { from: 'WORKER', pid: true });
+    const objToSend = global.WORKER?.workerSharedInfo || {};
+    this.sendCommandToMaster(EWorkerCommandsToMaster.SEND_WORKER_INFO_TO_MASTER, objToSend);
 
   }
 
-  private async handleUpdateOnMasterInformation(masterInformation: IMasterSharedInformation){
-    LOGGER(`Recebi informações do master`, { from: 'WORKER', pid: true })
-    this.dataFromMaster = masterInformation
+  private async handleUpdateOnMasterInformation(masterInformation: IMasterSharedInformation) {
+    LOGGER('Recebi informações do master', { from: 'WORKER', pid: true });
+    this.dataFromMaster = masterInformation;
   }
 
   // private async handleGetWorkerScreenShot(): Promise<void> {
@@ -114,24 +113,24 @@ export default class Worker {
   // ===========================================================================
 
   sendMessageToMaster(msg: string): void {
-    LOGGER(`Enviando mensagem para o master: [${msg}]`, { from: 'WORKER', pid: true })
+    LOGGER(`Enviando mensagem para o master: [${msg}]`, { from: 'WORKER', pid: true });
 
     const messageBetweenClusters: IMessageBetweenClusters = {
       message: msg
-    }
+    };
 
     this.workerProcess.send(messageBetweenClusters);
   }
 
   sendCommandToMaster(cmd: EWorkerCommandsToMaster, data?: object): void {
-    const commandStr = EWorkerCommandsToMaster[cmd]
-    LOGGER(`Enviando comando para o master: [${commandStr}]`, { from: 'WORKER', pid: true })
+    const commandStr = EWorkerCommandsToMaster[cmd];
+    LOGGER(`Enviando comando para o master: [${commandStr}]`, { from: 'WORKER', pid: true });
 
-    let messageBetweenClusters: IMessageBetweenClusters = {
+    const messageBetweenClusters: IMessageBetweenClusters = {
       command: commandStr
-    }
+    };
 
-    if (data) { messageBetweenClusters.data = data }
+    if (data) { messageBetweenClusters.data = data; }
 
     this.workerProcess.send(messageBetweenClusters);
   }
@@ -140,37 +139,37 @@ export default class Worker {
 
   private async getDataFromMaster(): Promise<IMasterSharedInformation> {
 
-    LOGGER(`Obtendo dados do master`, { from: 'WORKER', pid: true })
+    LOGGER('Obtendo dados do master', { from: 'WORKER', pid: true });
 
-    this.dataFromMaster = undefined
-    this.sendCommandToMaster(EWorkerCommandsToMaster.GET_MASTER_INFO, {worker: this.workerProcess.pid})
+    this.dataFromMaster = undefined;
+    this.sendCommandToMaster(EWorkerCommandsToMaster.GET_MASTER_INFO, { worker: this.workerProcess.pid });
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
 
       const checkPromiseConditions = () => {
         if (this.dataFromMaster !== undefined) {
-          LOGGER(`Dados recebidos do master: ${JSON.stringify(this.dataFromMaster)}`, { from: 'WORKER', pid: true })
-          resolve(this.dataFromMaster)
+          LOGGER(`Dados recebidos do master: ${JSON.stringify(this.dataFromMaster)}`, { from: 'WORKER', pid: true });
+          resolve(this.dataFromMaster);
         } else {
-          setTimeout(checkPromiseConditions, 1000)
+          setTimeout(checkPromiseConditions, 1000);
         }
-      }
+      };
 
-      checkPromiseConditions()
+      checkPromiseConditions();
 
-    })
+    });
 
   }
 
-  private async getCurrentBotIndexFromMasterData(): Promise<string>{
+  private async getCurrentBotIndexFromMasterData(): Promise<string> {
 
-    const dataFromMaster = await this.getDataFromMaster()
+    const dataFromMaster = await this.getDataFromMaster();
 
-    const workerIndex = dataFromMaster.workersArr.findIndex(worker => worker.processPid === this.workerProcess.pid)
+    const workerIndex = dataFromMaster.workersArr.findIndex(worker => worker.processPid === this.workerProcess.pid);
 
-    if (workerIndex > -1){
-      const spybotIndex = dataFromMaster.workersArr[workerIndex].botIndex
-      return spybotIndex
+    if (workerIndex > -1) {
+      const spybotIndex = dataFromMaster.workersArr[workerIndex].botIndex;
+      return spybotIndex;
     }
 
   }
@@ -179,46 +178,46 @@ export default class Worker {
 
   async startSpybot(): Promise<void> {
 
-    try{
+    try {
 
-      this.spybotIndex = await this.getCurrentBotIndexFromMasterData()
-      if (!this.spybotIndex){throw new Error(`Erro ao inicar spybot, index não encontrado`)}
+      this.spybotIndex = await this.getCurrentBotIndexFromMasterData();
+      if (!this.spybotIndex) { throw new Error('Erro ao inicar spybot, index não encontrado'); }
 
-      console.log("")
-      LOGGER(`Inicia spybot com index = [${this.spybotIndex}]`, { from: 'WORKER', pid: true })
-      global.WORKER.workerSharedInfo.workerData.workerInfo.botStep = "Iniciando bot"
-      const spybot = new Spybot(this.spybotIndex, this)
-      this.spybotInstance = spybot
-      this.isSpybotActive = true
+      console.log('');
+      LOGGER(`Inicia spybot com index = [${this.spybotIndex}]`, { from: 'WORKER', pid: true });
+      global.WORKER.workerSharedInfo.workerData.workerInfo.botStep = 'Iniciando bot';
+      const spybot = new Spybot(this.spybotIndex, this);
+      this.spybotInstance = spybot;
+      this.isSpybotActive = true;
 
-      const spybotResult = await spybot.initSpyBot()
-      if (typeof spybotResult === "string"){throw new Error(spybotResult)}
-      if (spybotResult === false){
-        LOGGER(`Fechando worker porque o spybot não pode espionar`, { from: 'WORKER', pid: true })
-        await this.closeWorker()
+      const spybotResult = await spybot.initSpyBot();
+      if (typeof spybotResult === 'string') { throw new Error(spybotResult); }
+      if (spybotResult === false) {
+        LOGGER('Fechando worker porque o spybot não pode espionar', { from: 'WORKER', pid: true });
+        await this.closeWorker();
       }
 
-    }catch(e){
+    } catch (e) {
 
-      LOGGER(`Bot ${this.spybotIndex} - Erro ao iniciar spybot no worker: ${e.message}`, {from: "WORKER", pid: true, isError: true})
+      LOGGER(`Bot ${this.spybotIndex} - Erro ao iniciar spybot no worker: ${e.message}`, { from: 'WORKER', pid: true, isError: true });
 
-      LOGGER(`Erro ao iniciar spybot no worker: ${e.message}`, { from: 'WORKER', pid: true, isError: true })
-      global.WORKER.workerSharedInfo.workerData.workerInfo.botStep = `Erro ao iniciar spybot no worker, esperando delay: ${e.message}`
+      LOGGER(`Erro ao iniciar spybot no worker: ${e.message}`, { from: 'WORKER', pid: true, isError: true });
+      global.WORKER.workerSharedInfo.workerData.workerInfo.botStep = `Erro ao iniciar spybot no worker, esperando delay: ${e.message}`;
 
-      LOGGER(`Tentando novamente em ${SPYBOT_LOOP_INTERVAL}s\n`, {from: "WORKER", pid: true})
+      LOGGER(`Tentando novamente em ${SPYBOT_LOOP_INTERVAL}s\n`, { from: 'WORKER', pid: true });
       setTimeout(async () => {
-        await this.startSpybot()
-      }, SPYBOT_LOOP_INTERVAL * 1000)
+        await this.startSpybot();
+      }, SPYBOT_LOOP_INTERVAL * 1000);
 
     }
   }
 
-  async closeSpybot(){
+  async closeSpybot() {
 
-    LOGGER(`Fechando spybot do worker`, {from: "WORKER", pid: true})
+    LOGGER('Fechando spybot do worker', { from: 'WORKER', pid: true });
 
-    if (this.spybotInstance){
-      await this.spybotInstance.close()
+    if (this.spybotInstance) {
+      await this.spybotInstance.close();
     }
 
   }
@@ -226,22 +225,22 @@ export default class Worker {
   // ===========================================================================
 
   async closeWorker(): Promise<void> {
-    LOGGER(`Fecha spybot`, { from: 'WORKER', pid: true })
+    LOGGER('Fecha spybot', { from: 'WORKER', pid: true });
 
-    try{
+    try {
 
-      if (this.spybotInstance){
-        await this.spybotInstance.close()
-        this.spybotInstance = undefined
-        this.isSpybotActive = false
-        LOGGER(`Spybot foi fechado com sucesso`, { from: 'WORKER', pid: true })
+      if (this.spybotInstance) {
+        await this.spybotInstance.close();
+        this.spybotInstance = undefined;
+        this.isSpybotActive = false;
+        LOGGER('Spybot foi fechado com sucesso', { from: 'WORKER', pid: true });
       }
 
-      LOGGER(`Fechar worker`, { from: 'WORKER', pid: true })
-      this.workerProcess.exit()
+      LOGGER('Fechar worker', { from: 'WORKER', pid: true });
+      this.workerProcess.exit();
 
-    }catch(e){
-      LOGGER(`Erro ao fechar spybot: ${e.message}`, { from: 'WORKER', pid: true, isError: true })
+    } catch (e) {
+      LOGGER(`Erro ao fechar spybot: ${e.message}`, { from: 'WORKER', pid: true, isError: true });
     }
   }
 

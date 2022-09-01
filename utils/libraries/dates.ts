@@ -11,38 +11,38 @@ export {
 
   convertDateInfoObjToStringDate,
   converteDateToUTC
-}
+};
 
 /* ########################################################################## */
 
-const DATETIME_SEPARATOR = " "
-const DATE_SEPARATOR = "/"
-const TIME_SEPARATOR = ":"
+const DATETIME_SEPARATOR = ' ';
+const DATE_SEPARATOR = '/';
+const TIME_SEPARATOR = ':';
 
-const ISODATE_DATETIME_SEPARATOR = "T"
-const ISODATE_DATE_SEPARATOR = "-"
-const ISODATE_TIME_SEPARATOR = ":"
-const ISODATE_SECONDS_SEPARATOR = "."
+const ISODATE_DATETIME_SEPARATOR = 'T';
+const ISODATE_DATE_SEPARATOR = '-';
+const ISODATE_TIME_SEPARATOR = ':';
+const ISODATE_SECONDS_SEPARATOR = '.';
 
 /* ########################################################################## */
 
 function getDateInfoObjFromStringDate(dateString: string) {
 
-  const dateStringArr: Array<string> = dateString.split(DATETIME_SEPARATOR)
+  const dateStringArr: Array<string> = dateString.split(DATETIME_SEPARATOR);
 
-  const dateArr = dateStringArr[0].split(DATE_SEPARATOR)
-  const day: number = Number(dateArr[0])
-  const month: number = Number(dateArr[1]) - 1
-  const year: number = Number(dateArr[2])
+  const dateArr = dateStringArr[0].split(DATE_SEPARATOR);
+  const day = Number(dateArr[0]);
+  const month: number = Number(dateArr[1]) - 1;
+  const year = Number(dateArr[2]);
 
-  let timeArr: Array<Number> = [0, 0];
+  let timeArr: Array<number> = [0, 0];
   if (dateStringArr.length > 1) {
-    timeArr = dateStringArr[1].split(TIME_SEPARATOR).map(str => Number(str))
+    timeArr = dateStringArr[1].split(TIME_SEPARATOR).map(str => Number(str));
   }
 
-  const hour: number = Number(timeArr[0])
-  const minutes: number = Number(timeArr[1])
-  const seconds: string = "00"
+  const hour = Number(timeArr[0]);
+  const minutes = Number(timeArr[1]);
+  const seconds = '00';
 
   return {
     day: Number(day) < 10 ? `0${day}` : day,
@@ -51,17 +51,17 @@ function getDateInfoObjFromStringDate(dateString: string) {
     hour,
     minutes,
     seconds
-  }
+  };
 }
 
 function getDateInfoObjFromIsoDate(isoDate: string) {
 
-  const dateObjArr = isoDate.split(ISODATE_DATETIME_SEPARATOR)
-  const dateArr = dateObjArr[0]
-  const [year, month, day] = dateArr.split(ISODATE_DATE_SEPARATOR)
+  const dateObjArr = isoDate.split(ISODATE_DATETIME_SEPARATOR);
+  const dateArr = dateObjArr[0];
+  const [year, month, day] = dateArr.split(ISODATE_DATE_SEPARATOR);
 
-  const timeArr = dateObjArr[1]
-  const [hour, minutes, seconds] = timeArr.split(ISODATE_TIME_SEPARATOR)
+  const timeArr = dateObjArr[1];
+  const [hour, minutes, seconds] = timeArr.split(ISODATE_TIME_SEPARATOR);
 
   return {
     day,
@@ -70,33 +70,33 @@ function getDateInfoObjFromIsoDate(isoDate: string) {
     hour,
     minutes,
     seconds: seconds.split(ISODATE_SECONDS_SEPARATOR)[0]
-  }
+  };
 }
 
 /* ########################################################################## */
 
-function addTimeToDateObject(dataObj: Date, hoursToAdd: number): Date{
+function addTimeToDateObject(dataObj: Date, hoursToAdd: number): Date {
 
-  const hoursToSubtract = (hoursToAdd * 60) * 60 * 1000
-  return new Date(dataObj.getTime() + hoursToSubtract)
+  const hoursToSubtract = (hoursToAdd * 60) * 60 * 1000;
+  return new Date(dataObj.getTime() + hoursToSubtract);
 
 }
 
 function getCurrentDateTimeString(option?: 'date' | 'time') {
 
-  const currentDate = new Date()
-  const utcDate = converteDateToUTC(currentDate)
+  const currentDate = new Date();
+  const utcDate = converteDateToUTC(currentDate);
 
-  const isoDate = utcDate.toISOString()
+  const isoDate = utcDate.toISOString();
 
-  const dateInfoObj = getDateInfoObjFromIsoDate(isoDate)
-  return convertDateInfoObjToStringDate(dateInfoObj, option)
+  const dateInfoObj = getDateInfoObjFromIsoDate(isoDate);
+  return convertDateInfoObjToStringDate(dateInfoObj, option);
 
 }
 
 function getDateFromString(dateString: string): Date {
 
-  const dateInfoObj = getDateInfoObjFromStringDate(dateString)
+  const dateInfoObj = getDateInfoObjFromStringDate(dateString);
   const {
     day,
     month,
@@ -104,16 +104,16 @@ function getDateFromString(dateString: string): Date {
     hour,
     minutes,
     seconds
-  } = dateInfoObj
+  } = dateInfoObj;
 
-  const oldDateObj = new Date(year, Number(month) - 1, Number(day), hour, minutes, Number(seconds))
+  const oldDateObj = new Date(year, Number(month) - 1, Number(day), hour, minutes, Number(seconds));
   const dateObj = converteDateToUTC(oldDateObj);
-  return dateObj
+  return dateObj;
 }
 
 function getIsoDateFromString(dateString: string) {
 
-  const dateInfoObj = getDateInfoObjFromStringDate(dateString)
+  const dateInfoObj = getDateInfoObjFromStringDate(dateString);
   const {
     day,
     month,
@@ -121,23 +121,23 @@ function getIsoDateFromString(dateString: string) {
     hour,
     minutes,
     seconds
-  } = dateInfoObj
+  } = dateInfoObj;
 
-  const fixedHour = Number(hour) < 10 ? `0${hour}` : hour
-  const fixedMinutes = Number(minutes) < 10 ? `0${minutes}` : minutes
-  const fixedSeconds = Number(seconds) < 10 ? `0${seconds}` : seconds
+  const fixedHour = Number(hour) < 10 ? `0${hour}` : hour;
+  const fixedMinutes = Number(minutes) < 10 ? `0${minutes}` : minutes;
+  const fixedSeconds = Number(seconds) < 10 ? `0${seconds}` : seconds;
 
-  const isoDate = `${year}${ISODATE_DATE_SEPARATOR}${month}${ISODATE_DATE_SEPARATOR}${day}`
-  const isoTime = `${fixedHour}${ISODATE_TIME_SEPARATOR}${fixedMinutes}${ISODATE_TIME_SEPARATOR}${fixedSeconds}${ISODATE_SECONDS_SEPARATOR}000Z`
+  const isoDate = `${year}${ISODATE_DATE_SEPARATOR}${month}${ISODATE_DATE_SEPARATOR}${day}`;
+  const isoTime = `${fixedHour}${ISODATE_TIME_SEPARATOR}${fixedMinutes}${ISODATE_TIME_SEPARATOR}${fixedSeconds}${ISODATE_SECONDS_SEPARATOR}000Z`;
 
-  const isoDateString = `${isoDate}${ISODATE_DATETIME_SEPARATOR}${isoTime}`
-  return isoDateString
+  const isoDateString = `${isoDate}${ISODATE_DATETIME_SEPARATOR}${isoTime}`;
+  return isoDateString;
 }
 
 function getStringDateFromDate(oldDate: Date, option?: 'date' | 'time') {
 
-  const dateInfoObj = getDateInfoObjFromIsoDate(oldDate.toISOString())
-  return convertDateInfoObjToStringDate(dateInfoObj, option)
+  const dateInfoObj = getDateInfoObjFromIsoDate(oldDate.toISOString());
+  return convertDateInfoObjToStringDate(dateInfoObj, option);
 
 }
 
@@ -145,15 +145,15 @@ function getStringDateFromDate(oldDate: Date, option?: 'date' | 'time') {
 
 function convertDateInfoObjToStringDate(dateInfoObj: object, option?: 'date' | 'time'): string {
 
-  const currentDate = `${dateInfoObj['day']}${DATE_SEPARATOR}${dateInfoObj['month']}${DATE_SEPARATOR}${dateInfoObj['year']}`
-  const currentTime = `${dateInfoObj['hour']}${TIME_SEPARATOR}${dateInfoObj['minutes']}${TIME_SEPARATOR}${dateInfoObj['seconds']}`
+  const currentDate = `${dateInfoObj['day']}${DATE_SEPARATOR}${dateInfoObj['month']}${DATE_SEPARATOR}${dateInfoObj['year']}`;
+  const currentTime = `${dateInfoObj['hour']}${TIME_SEPARATOR}${dateInfoObj['minutes']}${TIME_SEPARATOR}${dateInfoObj['seconds']}`;
 
-  if (option === "date") {
-    return currentDate
-  } else if (option === "time") {
-    return currentTime
+  if (option === 'date') {
+    return currentDate;
+  } else if (option === 'time') {
+    return currentTime;
   } else {
-    return currentDate + DATETIME_SEPARATOR + currentTime
+    return currentDate + DATETIME_SEPARATOR + currentTime;
   }
 
 }

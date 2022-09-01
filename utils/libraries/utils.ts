@@ -1,28 +1,28 @@
-import { existsSync, readFileSync } from "fs";
-import { getPathFromRoot } from './globalPath'
+import { existsSync, readFileSync } from 'fs';
+import { getPathFromRoot } from './globalPath';
 
 export {
   delay,
   readJson,
   doesFileExists,
   sortArrayByColumn
-}
+};
 
 /* ########################################################################## */
 
 function delay(time: number): Promise<void> {
   return new Promise(function (resolve) {
-    setTimeout(resolve, time)
+    setTimeout(resolve, time);
   });
 }
 
 function readJson(jsonPath: string): object {
 
-  const finalPath = getPathFromRoot(jsonPath)
+  const finalPath = getPathFromRoot(jsonPath);
 
   if (!existsSync(finalPath)) {
-    console.log(`Json ${finalPath} não foi encontrado!`)
-    return {}
+    console.log(`Json ${finalPath} não foi encontrado!`);
+    return {};
   }
 
   const rawdata = readFileSync(finalPath);
@@ -31,13 +31,13 @@ function readJson(jsonPath: string): object {
 }
 
 function doesFileExists(filePath: string) {
-  return existsSync(filePath)
+  return existsSync(filePath);
 }
 
 function sortArrayByColumn(arrToSort: any[], keyToSort: string): any[] {
 
-  if (!arrToSort || !keyToSort) { return }
-  let newArr = [...arrToSort]
+  if (!arrToSort || !keyToSort) { return; }
+  let newArr = [...arrToSort];
 
   newArr = newArr.sort(sortFunction);
 
